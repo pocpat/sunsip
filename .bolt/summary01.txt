@@ -1,0 +1,8 @@
+We've been discussing the development of "SunSip," an AI application that generates city images based on real-time weather and time, paired with mood-matching cocktail images and recipes.
+
+Here's a summary of our conversation:
+
+Project Vision: The core idea is to create a visually engaging UI featuring a line-drawn room with a window and a table. The AI-generated city image is displayed in the window, and a mood-matching cocktail image appears on the table.
+User Interaction: We've covered user authentication, city input with country clarification, real-time city views, cocktail suggestions, and features for displaying more details and saving combinations.
+Technical Stack: The discussion has touched upon using React.js for the frontend, with a preference for AWS services for backend, database, AI models (geocoding, generative AI for images, weather API, mood analysis, cocktail pairing), authentication, and image storage. We're currently using mock data for backend services.
+UI Refinements: We've focused on the visual layout of the room, including the layering of images (Chair.png in front, Window-size.png as a frame for the city image), implementing a parallax effect where front elements move more, and adding a subtle rocking animation to the chair. The most recent adjustment was to ensure the window frame and generated city image are displayed as uncropped squares.
