@@ -3,6 +3,8 @@ import { create } from 'zustand';
 export type WeatherData = {
   city: string;
   country: string;
+  latitude: number;
+  longitude: number;
   temperature: number;
   condition: string;
   icon: string;
@@ -25,6 +27,8 @@ export type CityOption = {
   city: string;
   country: string;
   countryCode: string;
+  latitude: number;
+  longitude: number;
 };
 
 type AppState = {

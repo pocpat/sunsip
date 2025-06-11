@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore, type CityOption } from '../store/appStore';
 import { searchCities } from '../services/geocodingService';
-import { getWeatherData, getMockWeatherData } from '../services/weatherService';
+import { getWeatherData } from '../services/weatherService';
 import { getCocktailSuggestion } from '../services/cocktailService';
 import { generateCityImage } from '../services/imageGenerationService';
 import { Search, MapPin } from 'lucide-react';
@@ -63,17 +63,8 @@ const CitySearch: React.FC = () => {
     setQuery('');
 
     try {
-      // In a real implementation, these would be API calls to actual services
-      // For MVP, we'll use mock data
-      
-      // Get weather data
-      let weatherData;
-      try {
-        weatherData = await getWeatherData(city.city, city.country);
-      } catch (error) {
-        console.error('Error fetching real weather data, using mock data:', error);
-        weatherData = getMockWeatherData(city.city, city.country);
-      }
+      // Get weather data using coordinates
+      const weatherData = await getWeatherData(city.latitude, city.longitude, city.city, city.country);
       setWeatherData(weatherData);
       
       // Generate city image
@@ -164,6 +155,9 @@ const CitySearch: React.FC = () => {
                 <div>
                   <span className="font-medium">{city.city}</span>
                   <span className="text-gray-500 ml-2">{city.country}</span>
+                  <div className="text-xs text-gray-400">
+                    {city.latitude.toFixed(4)}, {city.longitude.toFixed(4)}
+                  </div>
                 </div>
               </div>
             ))}
