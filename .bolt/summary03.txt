@@ -1,0 +1,21 @@
+Project Context: Working on SunSip, a React/TypeScript web application that suggests cocktails based on weather and location, using Supabase for data storage.
+
+Main Activities:
+
+Test Debugging: Fixed multiple failing unit tests in the geocoding and weather services:
+
+Corrected API key expectations in test assertions
+Fixed empty query handling in geocoding service
+Updated test expectations to match actual implementation behavior
+Supabase Integration Testing:
+
+User asked about existing Supabase integration tests (none existed)
+Explained the difference between unit tests (mocked) and integration tests (real database)
+Implemented comprehensive Supabase integration tests covering:
+Saving/retrieving cocktail combinations
+User preferences management
+Database operations like rating updates and access tracking
+Proper test cleanup and authentication simulation
+Current State: The project now has both unit tests for service layer logic and integration tests for database operations, providing comprehensive test coverage for the application's core functionality.
+
+Key Technical Details: Tests use Vitest, mock external APIs for unit tests, and connect to real Supabase instance for integration testing with proper RLS policy validation.

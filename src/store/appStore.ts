@@ -3,6 +3,8 @@ import { create } from 'zustand';
 export type WeatherData = {
   city: string;
   country: string;
+  latitude: number;
+  longitude: number;
   temperature: number;
   condition: string;
   icon: string;
@@ -25,14 +27,16 @@ export type CityOption = {
   city: string;
   country: string;
   countryCode: string;
+  latitude: number;
+  longitude: number;
 };
 
 type AppState = {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   
-  currentView: 'search' | 'result';
-  setCurrentView: (view: 'search' | 'result') => void;
+  currentView: 'search' | 'result' | 'dashboard';
+  setCurrentView: (view: 'search' | 'result' | 'dashboard') => void;
   
   cityOptions: CityOption[];
   setCityOptions: (options: CityOption[]) => void;

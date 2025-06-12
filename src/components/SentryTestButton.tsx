@@ -3,7 +3,12 @@ import * as Sentry from "@sentry/react";
 
 const SentryTestButton: React.FC = () => {
   const handleTestError = () => {
-    throw new Error("This is your first Sentry error!");
+    try {
+      throw new Error("This is your first Sentry error!");
+    } catch (error) {
+      Sentry.captureException(error);
+      console.log("Sentry test error captured successfully");
+    }
   };
 
   const handleTestCaptureException = () => {
@@ -27,7 +32,7 @@ const SentryTestButton: React.FC = () => {
             onClick={handleTestError}
             className="w-full text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors"
           >
-            Test Error (Throws)
+            Test Error (Captured)
           </button>
           <button 
             onClick={handleTestCaptureException}

@@ -11,14 +11,52 @@ const AuthModal: React.FC = () => {
   const [view, setView] = useState<'login' | 'signup'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleClose = () => {
     setShowAuthModal(false);
   };
 
+  const getErrorMessage = (error: any): string => {
+    const errorMessage = error?.message || '';
+    
+    // Handle specific Supabase auth errors with user-friendly messages
+    if (errorMessage.includes('Invalid login credentials')) {
+      return 'The email or password you entered is incorrect. Please check your credentials and try again.';
+    }
+    
+    if (errorMessage.includes('Email not confirmed')) {
+      return 'Please check your email and click the confirmation link before signing in.';
+    }
+    
+    if (errorMessage.includes('User not found')) {
+      return 'No account found with this email address. Please sign up first or check your email.';
+    }
+    
+    if (errorMessage.includes('Password should be at least')) {
+      return 'Password must be at least 6 characters long.';
+    }
+    
+    if (errorMessage.includes('Unable to validate email address')) {
+      return 'Please enter a valid email address.';
+    }
+    
+    if (errorMessage.includes('User already registered')) {
+      return 'An account with this email already exists. Please sign in instead.';
+    }
+    
+    if (errorMessage.includes('Signup is disabled')) {
+      return 'Account registration is currently disabled. Please contact support.';
+    }
+    
+    // Default fallback for other errors
+    return errorMessage || 'An unexpected error occurred. Please try again.';
+  };
+
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -30,9 +68,12 @@ const AuthModal: React.FC = () => {
         throw error;
       }
       
-      handleClose();
+      setSuccessMessage('Successfully signed in!');
+      setTimeout(() => {
+        handleClose();
+      }, 1000);
     } catch (error: any) {
-      setError(error.message || 'Failed to sign in');
+      setError(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -41,6 +82,7 @@ const AuthModal: React.FC = () => {
   const handleSignup = async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
     
     try {
       const { error } = await supabase.auth.signUp({
@@ -52,10 +94,10 @@ const AuthModal: React.FC = () => {
         throw error;
       }
       
-      // Show success message and switch to login view
+      setSuccessMessage('Account created successfully! You can now sign in.');
       setView('login');
     } catch (error: any) {
-      setError(error.message || 'Failed to sign up');
+      setError(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -83,8 +125,15 @@ const AuthModal: React.FC = () => {
           </h2>
           
           {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-              {error}
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+              <div className="font-medium mb-1">Authentication Error</div>
+              <div>{error}</div>
+            </div>
+          )}
+          
+          {successMessage && (
+            <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
+              <div className="font-medium">{successMessage}</div>
             </div>
           )}
           
@@ -108,13 +157,25 @@ const AuthModal: React.FC = () => {
             <p className="text-gray-600">
               {view === 'login' ? "Don't have an account?" : "Already have an account?"}
               <button
-                onClick={() => setView(view === 'login' ? 'signup' : 'login')}
+                onClick={() => {
+                  setView(view === 'login' ? 'signup' : 'login');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
                 className="ml-1 text-primary-600 hover:text-primary-800 font-medium"
               >
                 {view === 'login' ? 'Sign up' : 'Log in'}
               </button>
             </p>
           </div>
+          
+          {view === 'login' && (
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-500">
+                Having trouble signing in? Make sure you're using the correct email and password.
+              </p>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

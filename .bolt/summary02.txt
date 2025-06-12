@@ -1,0 +1,5 @@
+We've been discussing the development of "SunSip," an AI application that generates city images based on real-time weather and time, paired with mood-matching cocktail images and recipes.
+Here's a summary of our conversation:
+Project Vision: The core idea is to create a visually engaging UI featuring a line-drawn room with a window and a table. The AI-generated city image is displayed in the window, and a mood-matching cocktail image appears on the table.
+User Interaction: We've covered user authentication, city input with country clarification, real-time city views, cocktail suggestions, and features for displaying more details and saving combinations.
+Technical Stack:application is set up with github from exported code to my local and deployed through Netlify. Also setup Sanity for handling errors. setup connection to Supabase DB. 

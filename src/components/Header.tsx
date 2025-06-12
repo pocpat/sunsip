@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import { Sunset, User, LogOut } from 'lucide-react';
+import { Sunset, User, LogOut, BarChart3 } from 'lucide-react';
 
 const Header: React.FC = () => {
-  const { resetApp, setShowAuthModal, currentView } = useAppStore();
+  const { resetApp, setShowAuthModal, currentView, setCurrentView } = useAppStore();
   const { isAuthenticated, logout } = useAuthStore();
 
   const handleReset = () => {
@@ -17,6 +17,10 @@ const Header: React.FC = () => {
     } else {
       setShowAuthModal(true);
     }
+  };
+
+  const handleDashboardClick = () => {
+    setCurrentView('dashboard');
   };
 
   return (
@@ -34,6 +38,25 @@ const Header: React.FC = () => {
               className="btn-outline text-white border-white/30 hover:bg-white/10"
             >
               New Search
+            </button>
+          )}
+
+          {currentView === 'dashboard' && (
+            <button 
+              onClick={handleReset}
+              className="btn-outline text-white border-white/30 hover:bg-white/10"
+            >
+              New Search
+            </button>
+          )}
+
+          {currentView === 'search' && isAuthenticated && (
+            <button 
+              onClick={handleDashboardClick}
+              className="flex items-center space-x-1 btn-outline text-white border-white/30 hover:bg-white/10"
+            >
+              <BarChart3 size={18} />
+              <span>Dashboard</span>
             </button>
           )}
           
