@@ -97,16 +97,23 @@ const Room: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] overflow-hidden bg-gray-100 rounded-lg shadow-xl font-inter">
-      {/* Background layer - simple gradient background */}
+ <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] overflow-hidden bg-gray-100 rounded-lg shadow-xl font-inter">
+      {/* Background layer  */}
       <motion.div 
-        className="absolute inset-0 bg-gradient-to-b from-amber-50 to-amber-100 rounded-lg"
+        className="absolute inset-0 from-amber-50 to-amber-100 rounded-lg"
         style={{
-          x: mousePosition.x * 3,
-          y: mousePosition.y * 3
+          backgroundColor: "#819077",
+          // x and y are fine here because this is a motion.div
+          x: mousePosition.x * 0,
+          y: mousePosition.y * 0
         }}
       />
-
+      {/* Frame image covering the whole area */}
+     <img
+  src="/images/frame10.png"
+  alt="Window frame"
+  className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
+/>
       {/* City view with window frame */}
       <div className="absolute top-[38%] left-[47%] w-[38%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden ">
         {/* Inner div for the city image to ensure it fits the window pane */}
@@ -121,31 +128,39 @@ const Room: React.FC = () => {
             {weatherAnimations}
           </div>
         </div>
-        {/* Window frame image, on top (higher z-index) */}
-        <img
-          src="/images/window-size.png"
-          alt="Window frame"
-          className="absolute inset-0 w-full h-full object-contain z-10"
-        />
       </div>
 
-      {/* Table with cocktail - Now uses table4.png */}
+      {/* Plant image in front of frame, behind table */}
+<motion.div
+  className="absolute inset-0 w-full h-full -left-10 z-20 top-2 pointer-events-none"
+  style={{
+    x: mousePosition.x * 10,
+    y: mousePosition.y * 10
+  }}
+>
+  <img
+    src="/images/plant10.png"
+    alt="Plant decor"
+    className="w-full h-full object-contain"
+  />
+</motion.div>
+      {/* Table with cocktail - Now uses table10.png */}
       <motion.div
-        className="absolute -bottom-2 left-0 w-full"
+        className="absolute -bottom-2 left-0 w-full z-30"
         style={{
-          x: mousePosition.x * 8,
-          y: mousePosition.y * 8
+          x: mousePosition.x * 20,
+          y: mousePosition.y * 20
         }}
       >
         <img
-          src="/images/table4.png"
+          src="/images/table10.png"
           alt="Table with plants and decor"
           className="w-full h-auto object-cover"
         />
         <motion.img
           src={cocktailData.imageUrl}
           alt={cocktailData.name}
-          className="absolute top-[28%] right-[11%] w-[19%] rounded-lg shadow-lg"
+          className="absolute top-[36%] right-[9%] w-[18%] rounded-lg shadow-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
@@ -154,22 +169,21 @@ const Room: React.FC = () => {
 
       {/* Chair in front */}
       <motion.div
-        className="absolute bottom-[-2%] left-[4%] w-[100%]"
+        className="absolute bottom-[-2%] left-[4%] w-[100%] z-40"
         style={{
-          x: mousePosition.x * 16,
-          y: mousePosition.y * 16,
+          x: mousePosition.x * 30,
+          y: mousePosition.y * 30,
           transformOrigin: "0% 80%"
         }}
         animate={chairControls}
       >
         <img
-          src="/images/Chair.png"
+          src="/images/chair10.png"
           alt="Chair"
           className="w-full"
         />
       </motion.div>
-    </div>
-  );
+    </div>  );
 };
 
 export default Room;
