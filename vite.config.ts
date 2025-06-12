@@ -6,7 +6,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react(), sentryVitePlugin({
     org: "elena-i2",
-    project: "sunsip"
+    project: "sunsip",
+    telemetry: false, 
   })],
 
   optimizeDeps: {
