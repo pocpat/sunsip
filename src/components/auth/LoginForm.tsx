@@ -15,34 +15,45 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
   const { 
     register, 
     handleSubmit,
-    formState: { errors } 
+    formState: { errors },
+    watch
   } = useForm<FormValues>();
 
   const onFormSubmit = (data: FormValues) => {
-    onSubmit(data.email, data.password);
+    // Trim whitespace from email to prevent common input errors
+    const cleanEmail = data.email.trim().toLowerCase();
+    onSubmit(cleanEmail, data.password);
   };
 
+  const emailValue = watch('email');
+
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
+    <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
       <div className="mb-4">
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email
+          Email Address
         </label>
         <input
           id="email"
           type="email"
-          className="input"
+          autoComplete="email"
+          className={`input ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
           placeholder="your@email.com"
           {...register('email', { 
-            required: 'Email is required',
+            required: 'Email address is required',
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address'
+              message: 'Please enter a valid email address'
             }
           })}
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+        )}
+        {emailValue && !errors.email && (
+          <p className="mt-1 text-xs text-gray-500">
+            Make sure this email matches your registered account
+          </p>
         )}
       </div>
       
@@ -53,13 +64,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
         <input
           id="password"
           type="password"
-          className="input"
-          placeholder="••••••••"
+          autoComplete="current-password"
+          className={`input ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+          placeholder="Enter your password"
           {...register('password', { 
             required: 'Password is required',
             minLength: {
               value: 6,
-              message: 'Password must be at least 6 characters'
+              message: 'Password must be at least 6 characters long'
             }
           })}
         />
@@ -71,17 +83,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full btn-primary"
+        className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-            <span>Logging in...</span>
+            <span>Signing in...</span>
           </div>
         ) : (
-          'Log in'
+          'Sign In'
         )}
       </button>
+      
+      <div className="mt-4 text-center">
+        <p className="text-xs text-gray-500">
+          Forgot your password? Contact support for assistance.
+        </p>
+      </div>
     </form>
   );
 };

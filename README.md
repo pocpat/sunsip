@@ -42,7 +42,7 @@ A beautiful web application that suggests cocktails based on your city's weather
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_WEATHER_API_KEY=your_weather_api_key
+   VITE_OPENWEATHER_API_KEY=your_weather_api_key
    VITE_GEOCODING_API_KEY=your_geocoding_api_key
    ```
 

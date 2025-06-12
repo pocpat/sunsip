@@ -7,6 +7,7 @@ import WeatherDetails from './components/WeatherDetails';
 import CocktailDetails from './components/CocktailDetails';
 import AuthModal from './components/auth/AuthModal';
 import SentryTestButton from './components/SentryTestButton';
+import UserDashboard from './components/UserDashboard';
 import { useAuthStore } from './store/authStore';
 import SavedCombinations from './components/SavedCombinations';
 
@@ -58,6 +59,8 @@ function App() {
                 {isAuthenticated && <SavedCombinations />}
               </div>
             )}
+
+            {currentView === 'dashboard' && isAuthenticated && <UserDashboard />}
           </>
         )}
       </main>

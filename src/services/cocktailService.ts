@@ -1,9 +1,11 @@
+import axios from 'axios';
 import type { CocktailData } from '../store/appStore';
+import { captureError, addBreadcrumb } from '../lib/sentry';
 
-// For a real implementation, this would connect to an AI service
-// For the MVP, we'll use a mock service that returns predefined cocktails based on conditions
+// TheCocktailDB API configuration
+const API_BASE_URL = 'https://www.thecocktaildb.com/api/json/v1/1';
 
-// Mock database of country preferences
+// Country drink preferences - using our hardcoded data for cultural relevance
 const countryDrinkPreferences: Record<string, string[]> = {
   'us': ['Whiskey', 'Bourbon', 'Rum'],
   'gb': ['Gin', 'Whisky', 'Beer'],
@@ -15,6 +17,28 @@ const countryDrinkPreferences: Record<string, string[]> = {
   'au': ['Beer', 'Wine', 'Rum'],
   'ca': ['Whisky', 'Beer', 'Ice Wine'],
   'de': ['Beer', 'Schnapps', 'Jägermeister'],
+  'es': ['Sangria', 'Wine', 'Sherry'],
+  'ie': ['Guinness', 'Irish Whiskey', 'Baileys'],
+  'br': ['Cachaça', 'Caipirinha', 'Beer'],
+  'cn': ['Baijiu', 'Huangjiu', 'Beer'],
+  'kr': ['Soju', 'Makgeolli', 'Beer'],
+  'in': ['Whisky', 'Beer', 'Rum'],
+  'nl': ['Jenever', 'Beer', 'Advocaat'],
+  'gr': ['Ouzo', 'Metaxa', 'Retsina'],
+  'se': ['Akvavit', 'Vodka', 'Punsch'],
+  'pl': ['Vodka', 'Mead', 'Beer'],
+  'ar': ['Wine', 'Fernet', 'Beer'],
+  'za': ['Wine', 'Brandy', 'Amarula'],
+  'pe': ['Pisco', 'Chicha de Jora', 'Beer'],
+  'tr': ['Rakı', 'Wine', 'Beer'],
+  'cu': ['Rum', 'Mojito', 'Daiquiri'],
+  'nz': ['Wine', 'Beer', 'Sauvignon Blanc'],
+  'il': ['Wine', 'Arak', 'Beer'],
+  'ua': ['Horilka', 'Vodka', 'Beer'],
+  'by': ['Vodka', 'Samogon', 'Beer'],
+  'lt': ['Vodka', 'Mead', 'Beer'],
+  'lv': ['Vodka', 'Riga Black Balsam', 'Beer'],
+  'bg': ['Rakia', 'Wine', 'Beer'],
 };
 
 // Default for countries not in the list
@@ -33,8 +57,8 @@ const weatherMoodMap: Record<string, string[]> = {
   'stormy': ['bold', 'intense', 'complex'],
 };
 
-// Mock cocktail database
-const cocktails: CocktailData[] = [
+// Fallback cocktails in case API fails
+const fallbackCocktails: CocktailData[] = [
   {
     name: 'Classic Old Fashioned',
     description: 'A timeless cocktail that showcases the rich flavors of bourbon or rye whiskey.',
@@ -77,43 +101,6 @@ const cocktails: CocktailData[] = [
     mood: 'refreshing'
   },
   {
-    name: 'Espresso Martini',
-    description: 'The perfect pick-me-up cocktail combining vodka with coffee liqueur and espresso.',
-    ingredients: [
-      '1.5 oz vodka',
-      '1 oz coffee liqueur',
-      '1 oz freshly brewed espresso, cooled',
-      '1/2 oz simple syrup',
-      'Coffee beans for garnish'
-    ],
-    recipe: [
-      'Add all ingredients to a shaker with ice',
-      'Shake vigorously for 20 seconds',
-      'Double strain into a chilled martini glass',
-      'Garnish with three coffee beans'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/2531188/pexels-photo-2531188.jpeg',
-    mood: 'energetic'
-  },
-  {
-    name: 'Hot Toddy',
-    description: 'A warming cocktail perfect for cold days or when you need comfort.',
-    ingredients: [
-      '2 oz whiskey',
-      '1 tbsp honey',
-      '1/2 oz lemon juice',
-      'Hot water',
-      'Cinnamon stick and lemon wheel for garnish'
-    ],
-    recipe: [
-      'Add whiskey, honey, and lemon juice to a mug',
-      'Fill with hot water and stir until honey dissolves',
-      'Garnish with a cinnamon stick and lemon wheel'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/5363250/pexels-photo-5363250.jpeg',
-    mood: 'warming'
-  },
-  {
     name: 'Mojito',
     description: 'A refreshing Cuban highball that combines rum, mint, and lime.',
     ingredients: [
@@ -133,173 +120,271 @@ const cocktails: CocktailData[] = [
     ],
     imageUrl: 'https://images.pexels.com/photos/4021983/pexels-photo-4021983.jpeg',
     mood: 'refreshing'
-  },
-  {
-    name: 'Manhattan',
-    description: 'A sophisticated cocktail with bourbon, sweet vermouth, and bitters.',
-    ingredients: [
-      '2 oz bourbon or rye whiskey',
-      '1 oz sweet vermouth',
-      '2 dashes Angostura bitters',
-      'Cherry for garnish'
-    ],
-    recipe: [
-      'Add all ingredients to a mixing glass with ice',
-      'Stir for 30 seconds until well-chilled',
-      'Strain into a chilled coupe glass',
-      'Garnish with a cherry'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg',
-    mood: 'complex'
-  },
-  {
-    name: 'Margarita',
-    description: 'A perfect balance of tequila, lime, and orange liqueur.',
-    ingredients: [
-      '2 oz tequila',
-      '1 oz Cointreau or triple sec',
-      '1 oz fresh lime juice',
-      'Salt for rim (optional)',
-      'Lime wheel for garnish'
-    ],
-    recipe: [
-      'If desired, salt the rim of a chilled glass',
-      'Add tequila, Cointreau, and lime juice to a shaker with ice',
-      'Shake until well-chilled',
-      'Strain into the prepared glass over fresh ice',
-      'Garnish with a lime wheel'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/3407782/pexels-photo-3407782.jpeg',
-    mood: 'bright'
-  },
-  {
-    name: 'Negroni',
-    description: 'A perfectly balanced classic with gin, vermouth, and Campari.',
-    ingredients: [
-      '1 oz gin',
-      '1 oz Campari',
-      '1 oz sweet vermouth',
-      'Orange peel for garnish'
-    ],
-    recipe: [
-      'Add all ingredients to a mixing glass with ice',
-      'Stir until well-chilled',
-      'Strain into a rocks glass with a large ice cube',
-      'Garnish with an orange peel'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/5947019/pexels-photo-5947019.jpeg',
-    mood: 'complex'
-  },
-  {
-    name: 'Piña Colada',
-    description: 'A tropical blend of rum, coconut, and pineapple.',
-    ingredients: [
-      '2 oz white rum',
-      '1.5 oz coconut cream',
-      '1.5 oz pineapple juice',
-      'Pineapple wedge and cherry for garnish'
-    ],
-    recipe: [
-      'Add all ingredients to a blender with 1 cup of crushed ice',
-      'Blend until smooth',
-      'Pour into a hurricane glass',
-      'Garnish with a pineapple wedge and cherry'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/4021983/pexels-photo-4021983.jpeg',
-    mood: 'refreshing'
-  },
-  {
-    name: 'Moscow Mule',
-    description: 'A refreshing mix of vodka, lime, and ginger beer served in a copper mug.',
-    ingredients: [
-      '2 oz vodka',
-      '1/2 oz lime juice',
-      'Ginger beer',
-      'Lime wheel for garnish'
-    ],
-    recipe: [
-      'Fill a copper mug with ice',
-      'Add vodka and lime juice',
-      'Top with ginger beer',
-      'Stir gently',
-      'Garnish with a lime wheel'
-    ],
-    imageUrl: 'https://images.pexels.com/photos/5947028/pexels-photo-5947028.jpeg',
-    mood: 'refreshing'
   }
 ];
 
+// Interface for TheCocktailDB API response
+interface CocktailAPIResponse {
+  drinks: Array<{
+    idDrink: string;
+    strDrink: string;
+    strDrinkThumb: string;
+    strInstructions: string;
+    strIngredient1?: string;
+    strIngredient2?: string;
+    strIngredient3?: string;
+    strIngredient4?: string;
+    strIngredient5?: string;
+    strIngredient6?: string;
+    strIngredient7?: string;
+    strIngredient8?: string;
+    strIngredient9?: string;
+    strIngredient10?: string;
+    strIngredient11?: string;
+    strIngredient12?: string;
+    strIngredient13?: string;
+    strIngredient14?: string;
+    strIngredient15?: string;
+    strMeasure1?: string;
+    strMeasure2?: string;
+    strMeasure3?: string;
+    strMeasure4?: string;
+    strMeasure5?: string;
+    strMeasure6?: string;
+    strMeasure7?: string;
+    strMeasure8?: string;
+    strMeasure9?: string;
+    strMeasure10?: string;
+    strMeasure11?: string;
+    strMeasure12?: string;
+    strMeasure13?: string;
+    strMeasure14?: string;
+    strMeasure15?: string;
+    [key: string]: any;
+  }> | null;
+}
+
+// Function to search cocktails by ingredient
+async function searchCocktailsByIngredient(ingredient: string): Promise<CocktailAPIResponse> {
+  try {
+    addBreadcrumb(`Searching cocktails by ingredient: ${ingredient}`, 'cocktail-api');
+    
+    const response = await axios.get(`${API_BASE_URL}/filter.php`, {
+      params: { i: ingredient }
+    });
+    
+    return response.data;
+  } catch (error) {
+    captureError(error as Error, {
+      service: 'thecocktaildb',
+      action: 'search_by_ingredient',
+      ingredient
+    });
+    throw error;
+  }
+}
+
+// Function to get full cocktail details by ID
+async function getCocktailDetails(cocktailId: string): Promise<CocktailAPIResponse> {
+  try {
+    addBreadcrumb(`Fetching cocktail details for ID: ${cocktailId}`, 'cocktail-api');
+    
+    const response = await axios.get(`${API_BASE_URL}/lookup.php`, {
+      params: { i: cocktailId }
+    });
+    
+    return response.data;
+  } catch (error) {
+    captureError(error as Error, {
+      service: 'thecocktaildb',
+      action: 'get_details',
+      cocktailId
+    });
+    throw error;
+  }
+}
+
+// Function to get a random cocktail
+async function getRandomCocktail(): Promise<CocktailAPIResponse> {
+  try {
+    addBreadcrumb('Fetching random cocktail', 'cocktail-api');
+    
+    const response = await axios.get(`${API_BASE_URL}/random.php`);
+    
+    return response.data;
+  } catch (error) {
+    captureError(error as Error, {
+      service: 'thecocktaildb',
+      action: 'get_random'
+    });
+    throw error;
+  }
+}
+
+// Function to map API response to our CocktailData type
+function mapApiResponseToCocktailData(apiCocktail: any, mood: string): CocktailData {
+  // Extract ingredients and measurements
+  const ingredients: string[] = [];
+  for (let i = 1; i <= 15; i++) {
+    const ingredient = apiCocktail[`strIngredient${i}`];
+    const measure = apiCocktail[`strMeasure${i}`];
+    
+    if (ingredient && ingredient.trim()) {
+      const formattedIngredient = measure && measure.trim() 
+        ? `${measure.trim()} ${ingredient.trim()}`
+        : ingredient.trim();
+      ingredients.push(formattedIngredient);
+    }
+  }
+
+  // Split instructions into recipe steps
+  const instructions = apiCocktail.strInstructions || '';
+  const recipe = instructions
+    .split(/[.!?]+/)
+    .map((step: string) => step.trim())
+    .filter((step: string) => step.length > 0)
+    .map((step: string) => step.charAt(0).toUpperCase() + step.slice(1));
+
+  // Create description from first part of instructions or use a default
+  const description = instructions.length > 100 
+    ? instructions.substring(0, 100) + '...'
+    : instructions || `A delicious ${apiCocktail.strDrink} cocktail.`;
+
+  return {
+    name: apiCocktail.strDrink,
+    description,
+    ingredients,
+    recipe: recipe.length > 0 ? recipe : ['Mix all ingredients and serve'],
+    imageUrl: apiCocktail.strDrinkThumb || 'https://images.pexels.com/photos/5379228/pexels-photo-5379228.jpeg',
+    mood
+  };
+}
+
+// Function to determine mood based on weather and temperature
+function determineMood(weatherCondition: string, temperature: number): string {
+  const condition = weatherCondition.toLowerCase();
+  
+  if (condition.includes('snow') || condition.includes('sleet')) {
+    return weatherMoodMap.snow[Math.floor(Math.random() * weatherMoodMap.snow.length)];
+  } else if (condition.includes('rain') || condition.includes('drizzle')) {
+    return weatherMoodMap.rain[Math.floor(Math.random() * weatherMoodMap.rain.length)];
+  } else if (condition.includes('cloud') || condition.includes('overcast')) {
+    return weatherMoodMap.cloudy[Math.floor(Math.random() * weatherMoodMap.cloudy.length)];
+  } else if (condition.includes('sunny') || condition.includes('clear')) {
+    return weatherMoodMap.sunny[Math.floor(Math.random() * weatherMoodMap.sunny.length)];
+  } else if (temperature > 25) {
+    return weatherMoodMap.hot[Math.floor(Math.random() * weatherMoodMap.hot.length)];
+  } else if (temperature < 5) {
+    return weatherMoodMap.cold[Math.floor(Math.random() * weatherMoodMap.cold.length)];
+  } else if (condition.includes('wind')) {
+    return weatherMoodMap.windy[Math.floor(Math.random() * weatherMoodMap.windy.length)];
+  } else if (condition.includes('fog') || condition.includes('mist')) {
+    return weatherMoodMap.foggy[Math.floor(Math.random() * weatherMoodMap.foggy.length)];
+  } else if (condition.includes('thunder') || condition.includes('storm')) {
+    return weatherMoodMap.stormy[Math.floor(Math.random() * weatherMoodMap.stormy.length)];
+  } else {
+    return 'balanced';
+  }
+}
+
+// Main function to get cocktail suggestion
 export async function getCocktailSuggestion(
   countryCode: string,
   weatherCondition: string,
   temperature: number
 ): Promise<CocktailData> {
-  // In a real implementation, this would call an AI service
-  // For MVP, we'll use our mock data to create a reasonable suggestion
+  addBreadcrumb(`Getting cocktail suggestion for ${countryCode}, ${weatherCondition}, ${temperature}°C`, 'cocktail');
   
   // Determine preferred spirits based on country
   const preferredSpirits = countryDrinkPreferences[countryCode.toLowerCase()] || defaultPreferences;
   
   // Determine mood based on weather
-  let mood: string;
-  if (weatherCondition.toLowerCase().includes('snow') || weatherCondition.toLowerCase().includes('sleet')) {
-    mood = weatherMoodMap.snow[Math.floor(Math.random() * weatherMoodMap.snow.length)];
-  } else if (weatherCondition.toLowerCase().includes('rain') || weatherCondition.toLowerCase().includes('drizzle')) {
-    mood = weatherMoodMap.rain[Math.floor(Math.random() * weatherMoodMap.rain.length)];
-  } else if (weatherCondition.toLowerCase().includes('cloud') || weatherCondition.toLowerCase().includes('overcast')) {
-    mood = weatherMoodMap.cloudy[Math.floor(Math.random() * weatherMoodMap.cloudy.length)];
-  } else if (weatherCondition.toLowerCase().includes('sunny') || weatherCondition.toLowerCase().includes('clear')) {
-    mood = weatherMoodMap.sunny[Math.floor(Math.random() * weatherMoodMap.sunny.length)];
-  } else if (temperature > 25) {
-    mood = weatherMoodMap.hot[Math.floor(Math.random() * weatherMoodMap.hot.length)];
-  } else if (temperature < 5) {
-    mood = weatherMoodMap.cold[Math.floor(Math.random() * weatherMoodMap.cold.length)];
-  } else if (weatherCondition.toLowerCase().includes('wind')) {
-    mood = weatherMoodMap.windy[Math.floor(Math.random() * weatherMoodMap.windy.length)];
-  } else if (weatherCondition.toLowerCase().includes('fog') || weatherCondition.toLowerCase().includes('mist')) {
-    mood = weatherMoodMap.foggy[Math.floor(Math.random() * weatherMoodMap.foggy.length)];
-  } else if (weatherCondition.toLowerCase().includes('thunder') || weatherCondition.toLowerCase().includes('storm')) {
-    mood = weatherMoodMap.stormy[Math.floor(Math.random() * weatherMoodMap.stormy.length)];
-  } else {
-    // Default mood
-    mood = 'balanced';
-  }
+  const mood = determineMood(weatherCondition, temperature);
   
-  // Find cocktails that match the preferred spirits
-  const matchingCocktails = cocktails.filter(cocktail => {
-    // Check if any of the preferred spirits are in the ingredients
-    return preferredSpirits.some(spirit => {
-      return cocktail.ingredients.some(ingredient => 
-        ingredient.toLowerCase().includes(spirit.toLowerCase())
-      );
-    });
-  });
-  
-  // If we have matches, prioritize those with matching mood
-  if (matchingCocktails.length > 0) {
-    const moodMatches = matchingCocktails.filter(cocktail => 
-      cocktail.mood === mood || 
-      weatherMoodMap[mood]?.includes(cocktail.mood)
-    );
-    
-    if (moodMatches.length > 0) {
-      return moodMatches[Math.floor(Math.random() * moodMatches.length)];
+  try {
+    // Try to find cocktails based on preferred spirits
+    for (const spirit of preferredSpirits) {
+      try {
+        // Map spirit names to API-compatible ingredient names
+        let apiIngredient = spirit;
+        if (spirit === 'Whisky') apiIngredient = 'Whiskey';
+        if (spirit === 'Cachaça') apiIngredient = 'Cachaca';
+        if (spirit === 'Rakı') apiIngredient = 'Raki';
+        
+        const cocktailsResponse = await searchCocktailsByIngredient(apiIngredient);
+        
+        if (cocktailsResponse.drinks && cocktailsResponse.drinks.length > 0) {
+          // Select a random cocktail from the results
+          const randomCocktail = cocktailsResponse.drinks[Math.floor(Math.random() * cocktailsResponse.drinks.length)];
+          
+          // Get full details for the selected cocktail
+          const detailsResponse = await getCocktailDetails(randomCocktail.idDrink);
+          
+          if (detailsResponse.drinks && detailsResponse.drinks.length > 0) {
+            const cocktailData = mapApiResponseToCocktailData(detailsResponse.drinks[0], mood);
+            
+            addBreadcrumb(`Successfully found cocktail: ${cocktailData.name}`, 'cocktail', {
+              spirit: apiIngredient,
+              mood,
+              country: countryCode
+            });
+            
+            return cocktailData;
+          }
+        }
+      } catch (error) {
+        // Continue to next spirit if this one fails
+        console.warn(`Failed to find cocktails for ${spirit}:`, error);
+        continue;
+      }
     }
     
-    // If no mood matches, return a random matching cocktail
-    return matchingCocktails[Math.floor(Math.random() * matchingCocktails.length)];
+    // If no spirit-based cocktails found, try to get a random cocktail
+    addBreadcrumb('No spirit-based cocktails found, trying random cocktail', 'cocktail');
+    
+    const randomResponse = await getRandomCocktail();
+    
+    if (randomResponse.drinks && randomResponse.drinks.length > 0) {
+      const cocktailData = mapApiResponseToCocktailData(randomResponse.drinks[0], mood);
+      
+      addBreadcrumb(`Using random cocktail: ${cocktailData.name}`, 'cocktail');
+      
+      return cocktailData;
+    }
+    
+    // If everything fails, use fallback
+    throw new Error('No cocktails found from API');
+    
+  } catch (error) {
+    captureError(error as Error, {
+      service: 'thecocktaildb',
+      countryCode,
+      weatherCondition,
+      temperature,
+      preferredSpirits
+    });
+    
+    console.error('Error fetching cocktail from API, using fallback:', error);
+    
+    // Fallback to our hardcoded cocktails
+    addBreadcrumb('API failed, using fallback cocktails', 'cocktail');
+    
+    // Try to match fallback cocktails with preferred spirits
+    const matchingFallbacks = fallbackCocktails.filter(cocktail => {
+      return preferredSpirits.some(spirit => {
+        return cocktail.ingredients.some(ingredient => 
+          ingredient.toLowerCase().includes(spirit.toLowerCase())
+        );
+      });
+    });
+    
+    if (matchingFallbacks.length > 0) {
+      const selectedCocktail = matchingFallbacks[Math.floor(Math.random() * matchingFallbacks.length)];
+      return { ...selectedCocktail, mood };
+    }
+    
+    // If no matching fallbacks, return a random fallback with the determined mood
+    const fallbackCocktail = fallbackCocktails[Math.floor(Math.random() * fallbackCocktails.length)];
+    return { ...fallbackCocktail, mood };
   }
-  
-  // If no spirit matches, try to match by mood
-  const moodMatches = cocktails.filter(cocktail => 
-    cocktail.mood === mood || 
-    weatherMoodMap[mood]?.includes(cocktail.mood)
-  );
-  
-  if (moodMatches.length > 0) {
-    return moodMatches[Math.floor(Math.random() * moodMatches.length)];
-  }
-  
-  // Fallback: return a random cocktail
-  return cocktails[Math.floor(Math.random() * cocktails.length)];
 }

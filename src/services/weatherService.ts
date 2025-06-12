@@ -2,46 +2,26 @@ import axios from 'axios';
 import type { WeatherData } from '../store/appStore';
 import { captureError, addBreadcrumb } from '../lib/sentry';
 
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
-const BASE_URL = 'https://my.meteoblue.com/packages/basic-1h_basic-day';
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
-// Meteoblue pictocode to weather condition mapping
-const pictocodeToCondition: Record<number, string> = {
-  1: 'Sunny',
-  2: 'Partly cloudy',
-  3: 'Partly cloudy',
-  4: 'Cloudy',
-  5: 'Rain showers',
-  6: 'Rain showers',
-  7: 'Sleet showers',
-  8: 'Snow showers',
-  9: 'Thunderstorms',
-  10: 'Fog',
-  11: 'Light rain',
-  12: 'Rain',
-  13: 'Light snow',
-  14: 'Snow',
-  15: 'Heavy snow',
-  16: 'Sleet',
-  17: 'Hail',
-  18: 'Thunderstorms with rain',
-  19: 'Thunderstorms with snow',
-  20: 'Thunderstorms with hail',
-  21: 'Clear night',
-  22: 'Partly cloudy night',
-  23: 'Partly cloudy night',
-  24: 'Cloudy night',
-  25: 'Rain showers night',
-  26: 'Rain showers night',
-  27: 'Sleet showers night',
-  28: 'Snow showers night',
-  29: 'Thunderstorms night',
-  30: 'Fog night',
-  31: 'Light rain night',
-  32: 'Rain night',
-  33: 'Light snow night',
-  34: 'Snow night',
-  35: 'Heavy snow night'
+// OpenWeatherMap weather condition mapping
+const conditionMapping: Record<string, string> = {
+  'Clear': 'Sunny',
+  'Clouds': 'Cloudy',
+  'Rain': 'Rain',
+  'Drizzle': 'Light rain',
+  'Thunderstorm': 'Thunderstorms',
+  'Snow': 'Snow',
+  'Mist': 'Fog',
+  'Smoke': 'Fog',
+  'Haze': 'Fog',
+  'Dust': 'Fog',
+  'Fog': 'Fog',
+  'Sand': 'Fog',
+  'Ash': 'Fog',
+  'Squall': 'Windy',
+  'Tornado': 'Stormy',
 };
 
 export async function getWeatherData(latitude: number, longitude: number, city: string, country: string): Promise<WeatherData> {
@@ -56,41 +36,47 @@ export async function getWeatherData(latitude: number, longitude: number, city: 
     
     const response = await axios.get(BASE_URL, {
       params: {
-        apikey: API_KEY,
         lat: latitude,
         lon: longitude,
-        format: 'json',
+        appid: API_KEY,
+        units: 'metric', // Get temperature in Celsius
       },
     });
 
-    const { metadata, data_1h } = response.data;
+    const data = response.data;
 
-    // Get current hour data (first element in arrays)
-    const currentTemp = data_1h.temperature[0];
-    const currentHumidity = data_1h.relativehumidity[0];
-    const currentWindSpeed = data_1h.windspeed[0] * 3.6; // Convert m/s to km/h
-    const currentPictocode = data_1h.pictocode[0];
-    const currentIsDaylight = data_1h.isdaylight[0];
-    const currentTime = data_1h.time[0];
-
-    // Convert pictocode to condition
-    const condition = pictocodeToCondition[currentPictocode] || 'Unknown';
-
+    // Extract weather data
+    const temperature = Math.round(data.main.temp);
+    const humidity = data.main.humidity;
+    const windSpeed = Math.round(data.wind.speed * 3.6); // Convert m/s to km/h
+    const weatherMain = data.weather[0].main;
+    const weatherDescription = data.weather[0].description;
+    const weatherIcon = data.weather[0].icon;
+    
+    // Map OpenWeatherMap condition to our condition
+    const condition = conditionMapping[weatherMain] || weatherMain;
+    
+    // Determine if it's day or night
+    const currentTime = data.dt;
+    const sunrise = data.sys.sunrise;
+    const sunset = data.sys.sunset;
+    const isDay = currentTime >= sunrise && currentTime <= sunset;
+    
     // Format local time
-    const localTime = formatLocalTime(currentTime, metadata.utc_timeoffset);
+    const localTime = formatLocalTime(currentTime, data.timezone);
 
     const weatherData: WeatherData = {
       city,
       country,
       latitude,
       longitude,
-      temperature: Math.round(currentTemp),
+      temperature,
       condition,
-      icon: `/icons/meteoblue-${currentPictocode}.png`,
-      humidity: Math.round(currentHumidity),
-      windSpeed: Math.round(currentWindSpeed),
+      icon: `https://openweathermap.org/img/wn/${weatherIcon}@2x.png`,
+      humidity,
+      windSpeed,
       localTime,
-      isDay: currentIsDaylight === 1,
+      isDay,
     };
 
     addBreadcrumb(`Successfully fetched weather data for ${city}`, 'weather', {
@@ -101,7 +87,7 @@ export async function getWeatherData(latitude: number, longitude: number, city: 
     return weatherData;
   } catch (error) {
     captureError(error as Error, {
-      service: 'meteoblue',
+      service: 'openweathermap',
       city,
       country,
       latitude,
@@ -111,26 +97,27 @@ export async function getWeatherData(latitude: number, longitude: number, city: 
     console.error('Error fetching weather data:', error);
     
     // Fallback to mock data
-    addBreadcrumb(`Meteoblue API failed, using mock weather data for ${city}, ${country}`, 'weather');
+    addBreadcrumb(`OpenWeatherMap API failed, using mock weather data for ${city}, ${country}`, 'weather');
     return getMockWeatherData(latitude, longitude, city, country);
   }
 }
 
-function formatLocalTime(timeString: string, utcOffset: number): string {
+function formatLocalTime(unixTimestamp: number, timezoneOffset: number): string {
   try {
-    // Parse the time string (format: "2025-06-10 00:00")
-    const date = new Date(timeString + 'Z'); // Add Z to treat as UTC
+    // Create date from Unix timestamp (in seconds)
+    const date = new Date(unixTimestamp * 1000);
     
-    // Add the UTC offset (in hours)
-    date.setHours(date.getHours() + utcOffset);
+    // Add timezone offset (in seconds)
+    const localDate = new Date(date.getTime() + (timezoneOffset * 1000));
     
-    return date.toLocaleString('en-US', {
+    return localDate.toLocaleString('en-US', {
       hour: 'numeric',
       minute: 'numeric',
       hour12: true,
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'UTC', // Use UTC since we already applied the offset
     });
   } catch (error) {
     // Fallback to current time if parsing fails
@@ -149,26 +136,52 @@ function formatLocalTime(timeString: string, utcOffset: number): string {
 export function getMockWeatherData(latitude: number, longitude: number, city: string, country: string): WeatherData {
   addBreadcrumb(`Using mock weather data for ${city}, ${country}`, 'weather');
   
-  // Generate random weather conditions
-  const conditions = ['Sunny', 'Partly cloudy', 'Cloudy', 'Overcast', 'Fog', 'Light rain', 'Rain', 'Light snow', 'Snow'];
-  const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
+  // Generate random weather conditions with realistic temperature ranges
+  const weatherConditions = [
+    { condition: 'Sunny', tempRange: [18, 35] },
+    { condition: 'Partly cloudy', tempRange: [12, 28] },
+    { condition: 'Cloudy', tempRange: [8, 22] },
+    { condition: 'Overcast', tempRange: [5, 18] },
+    { condition: 'Fog', tempRange: [2, 15] },
+    { condition: 'Light rain', tempRange: [8, 20] },
+    { condition: 'Rain', tempRange: [5, 18] },
+    { condition: 'Light snow', tempRange: [-8, 2] },
+    { condition: 'Snow', tempRange: [-15, 0] },
+  ];
   
-  // Random temperature based on condition
-  let tempRange;
-  if (randomCondition.includes('Snow')) {
-    tempRange = [-10, 5];
-  } else if (randomCondition.includes('Rain')) {
-    tempRange = [5, 20];
-  } else if (randomCondition === 'Sunny') {
-    tempRange = [20, 35];
+  // Randomly select a weather condition
+  const selectedWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+  
+  // Generate temperature within the realistic range for the condition
+  const tempRange = selectedWeather.tempRange;
+  const temperature = Math.floor(Math.random() * (tempRange[1] - tempRange[0] + 1)) + tempRange[0];
+  
+  // Adjust humidity based on weather condition
+  let humidity: number;
+  if (selectedWeather.condition.includes('Rain') || selectedWeather.condition === 'Fog') {
+    humidity = Math.floor(Math.random() * 20) + 80; // 80-100% for wet conditions
+  } else if (selectedWeather.condition.includes('Snow')) {
+    humidity = Math.floor(Math.random() * 30) + 70; // 70-100% for snow
+  } else if (selectedWeather.condition === 'Sunny') {
+    humidity = Math.floor(Math.random() * 40) + 30; // 30-70% for sunny
   } else {
-    tempRange = [10, 25];
+    humidity = Math.floor(Math.random() * 50) + 40; // 40-90% for other conditions
   }
   
-  const temperature = Math.floor(Math.random() * (tempRange[1] - tempRange[0])) + tempRange[0];
+  // Adjust wind speed based on weather condition
+  let windSpeed: number;
+  if (selectedWeather.condition.includes('Storm') || selectedWeather.condition.includes('Thunder')) {
+    windSpeed = Math.floor(Math.random() * 20) + 20; // 20-40 km/h for storms
+  } else if (selectedWeather.condition.includes('Snow') && temperature < -5) {
+    windSpeed = Math.floor(Math.random() * 15) + 10; // 10-25 km/h for snow
+  } else if (selectedWeather.condition === 'Fog') {
+    windSpeed = Math.floor(Math.random() * 8) + 2; // 2-10 km/h for fog (low wind)
+  } else {
+    windSpeed = Math.floor(Math.random() * 20) + 5; // 5-25 km/h for normal conditions
+  }
   
-  // Random time of day
-  const isDay = Math.random() > 0.5;
+  // Determine if it's day or night (more likely to be day for better UX)
+  const isDay = Math.random() > 0.3; // 70% chance of daytime
   
   // Create a date object for local time
   const now = new Date();
@@ -187,10 +200,10 @@ export function getMockWeatherData(latitude: number, longitude: number, city: st
     latitude,
     longitude,
     temperature,
-    condition: randomCondition,
-    icon: `/icons/${randomCondition.toLowerCase().replace(/ /g, '-')}.png`,
-    humidity: Math.floor(Math.random() * 100),
-    windSpeed: Math.floor(Math.random() * 30),
+    condition: selectedWeather.condition,
+    icon: `/icons/${selectedWeather.condition.toLowerCase().replace(/ /g, '-')}.png`,
+    humidity,
+    windSpeed,
     localTime,
     isDay,
   };

@@ -10,7 +10,7 @@ export default defineConfig({
   },
   define: {
     'import.meta.env.VITE_GEOCODING_API_KEY': JSON.stringify('test-api-key'),
-    'import.meta.env.VITE_WEATHER_API_KEY': JSON.stringify('test-weather-key'),
+    'import.meta.env.VITE_OPENWEATHER_API_KEY': JSON.stringify('test-weather-key'),
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('https://test.supabase.co'),
     'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify('test-anon-key'),
   },

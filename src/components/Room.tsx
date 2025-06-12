@@ -98,23 +98,17 @@ const Room: React.FC = () => {
 
   return (
     <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] overflow-hidden bg-gray-100 rounded-lg shadow-xl font-inter">
-      {/* Background layer with picture frames */}
+      {/* Background layer - simple gradient background */}
       <motion.div 
-        className="absolute inset-0 bg-sky-50 rounded-lg"
+        className="absolute inset-0 bg-gradient-to-b from-amber-50 to-amber-100 rounded-lg"
         style={{
-          x: mousePosition.x * 5,
-          y: mousePosition.y * 5
+          x: mousePosition.x * 3,
+          y: mousePosition.y * 3
         }}
-      >
-        <img
-          src="/images/picframes3.png"
-          alt="Wall with picture frames"
-          className="absolute inset-0 w-full h-full object-cover rounded-lg" 
-        />
-      </motion.div>
+      />
 
       {/* City view with window frame */}
-      <div className="absolute top-[38%] left-[47%] w-[38%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden shadow-lg">
+      <div className="absolute top-[38%] left-[47%] w-[38%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden ">
         {/* Inner div for the city image to ensure it fits the window pane */}
         <div className="absolute top-[15%] left-[10%] w-[80%] h-[70%] overflow-hidden">
           <img
@@ -135,23 +129,23 @@ const Room: React.FC = () => {
         />
       </div>
 
-      {/* Table with cocktail - Now has mouse parallax only */}
+      {/* Table with cocktail - Now uses table4.png */}
       <motion.div
         className="absolute -bottom-2 left-0 w-full"
         style={{
-          x: mousePosition.x * 8, // Mouse parallax
-          y: mousePosition.y * 8 // Mouse parallax
+          x: mousePosition.x * 8,
+          y: mousePosition.y * 8
         }}
       >
         <img
-          src="/images/table3.png"
-          alt="Table"
+          src="/images/table4.png"
+          alt="Table with plants and decor"
           className="w-full h-auto object-cover"
         />
         <motion.img
           src={cocktailData.imageUrl}
           alt={cocktailData.name}
-          className="absolute top-[33%] right-[10%] w-[19%] rounded-lg shadow-lg"
+          className="absolute top-[28%] right-[11%] w-[19%] rounded-lg shadow-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
@@ -162,8 +156,8 @@ const Room: React.FC = () => {
       <motion.div
         className="absolute bottom-[-2%] left-[4%] w-[100%]"
         style={{
-          x: mousePosition.x * 10,
-          y: mousePosition.y * 10,
+          x: mousePosition.x * 16,
+          y: mousePosition.y * 16,
           transformOrigin: "0% 80%"
         }}
         animate={chairControls}
