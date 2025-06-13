@@ -7,6 +7,7 @@ import Room from './Room';
 import WeatherDetails from './WeatherDetails';
 import CocktailDetails from './CocktailDetails';
 import SavedCombinations from './SavedCombinations';
+import Footer from './Footer';
 
 const ResultsPage: React.FC = () => {
   const { resetApp } = useAppStore();
@@ -55,6 +56,7 @@ const ResultsPage: React.FC = () => {
         <RotateCcw size={18} />
         <span>New Search</span>
       </motion.button>
+      <Footer />
     </motion.div>
    
   );
