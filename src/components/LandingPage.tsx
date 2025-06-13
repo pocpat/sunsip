@@ -7,6 +7,7 @@ import { generateCityImage } from '../services/imageGenerationService';
 import { Search, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Room from './Room';
+import Footer from './Footer';
 
 const LandingPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -107,18 +108,6 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-
-
-
-
-
-
-
-
-
-
-
-    
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#819077' }}>
       {/* Main Landing Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
@@ -193,48 +182,42 @@ const LandingPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Bottom Third - Room Preview */}
-       {/*  <motion.div 
-          className="w-full max-w-3xl mx-auto aspect-[16/9] relative overflow-hidden"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-        >
-           <div className="absolute inset-0 bg-gradient-to-t from-transparent to-black/20">
-  <div className="absolute inset-0">
-            <Room isPreview={true} />
-          </div>
-        </motion.div>
-        */}
-{/* Bottom Third - Room Sneak-Peek */}
-<div className="w-full max-w-5xl mx-auto aspect-[16/9] relative overflow-hidden" style={{ backgroundColor: '#819077' }}>  <div
-    className="w-full"
-    style={{
-      height: '40%', // or '33%' for 1/3
-      overflow: 'hidden',
-    }}
-  >
-    <img
-      src="/images/loadingPrev10.png"
-      alt="Room preview"
-      className="w-full h-full object-cover"
-      style={{ display: 'block', objectPosition: 'top' }}
-    />
+
+
+
+<div className="container mx-auto px-4 pb-8">
+  <div className="w-full aspect-[16/9] relative" style={{ backgroundColor: '#819077' }}>
+    <div
+      className="w-full relative"
+      style={{
+        height: '40%',
+        overflow: 'hidden',
+        // THE SHADOW GOES HERE!
+         boxShadow: '0 10px 15px -5px rgba(0, 0, 0, 0.3)'
+      }}
+    >
+      <img
+        src="/images/loadingPrev10.png"
+        alt="Room preview"
+        className="w-full h-auto" // h-auto is often better than h-full here
+        style={{ display: 'block', objectFit: 'cover', objectPosition: 'top' }}
+      />
     
+    </div>
   </div>
-  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
      </div>
- {/* Shadow at the bottom */}
-<div className="absolute left-0 bottom-0 w-full pointer-events-none" style={{
-      height: '40px',
-      background: 'linear-gradient(to bottom, rgba(0,0,0,0.12), rgba(0,0,0,0.25), rgba(0,0,0,0.0))'
-    }}
-  />
-
-
-
-
-   
+     <Footer />
     </div>
    
   );
