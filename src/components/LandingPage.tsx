@@ -1,0 +1,243 @@
+import React, { useState, useEffect } from 'react';
+import { useAppStore, type CityOption } from '../store/appStore';
+import { searchCities } from '../services/geocodingService';
+import { getWeatherData } from '../services/weatherService';
+import { getCocktailSuggestion } from '../services/cocktailService';
+import { generateCityImage } from '../services/imageGenerationService';
+import { Search, MapPin } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Room from './Room';
+
+const LandingPage: React.FC = () => {
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  
+  const {
+    cityOptions,
+    setCityOptions,
+    setSelectedCity,
+    setWeatherData,
+    setCocktailData,
+    setCityImageUrl,
+    setCurrentView,
+    setIsLoading,
+  } = useAppStore();
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Search for cities when debounced query changes
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (debouncedQuery.trim().length < 2) {
+        setCityOptions([]);
+        return;
+      }
+
+      setIsSearching(true);
+
+      try {
+        const results = await searchCities(debouncedQuery);
+        setCityOptions(results);
+      } catch (error) {
+        console.error('Error searching cities:', error);
+        setCityOptions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    fetchCities();
+  }, [debouncedQuery, setCityOptions]);
+
+  const handleCitySelect = async (city: CityOption) => {
+    setIsLoading(true);
+    setSelectedCity(city);
+    setCityOptions([]);
+    setQuery('');
+
+    try {
+      // Get weather data using coordinates
+      const weatherData = await getWeatherData(city.latitude, city.longitude, city.city, city.country);
+      setWeatherData(weatherData);
+      
+      // Generate city image
+      const cityImageUrl = await generateCityImage(
+        city.city,
+        city.country,
+        weatherData.condition,
+        weatherData.isDay
+      );
+      setCityImageUrl(cityImageUrl);
+      
+      // Get cocktail suggestion
+      const cocktailData = await getCocktailSuggestion(
+        city.countryCode,
+        weatherData.condition,
+        weatherData.temperature
+      );
+      setCocktailData(cocktailData);
+      
+      // Switch to result view
+      setCurrentView('result');
+    } catch (error) {
+      console.error('Error processing city selection:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    if (!isFocused) {
+      setIsFocused(true);
+    }
+  };
+
+  return (
+
+
+
+
+
+
+
+
+
+
+
+    
+    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#819077' }}>
+      {/* Main Landing Content */}
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Top Third - Main Content */}
+        {/*  <div className="flex-1 flex items-center justify-start px-6 md:px-12 lg:px-24"> */}
+        <div className="container mx-auto py-40 md:px-12 lg:px-24">
+          <motion.div 
+            className="max-w-2xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight whitespace-nowrap">
+              FIND YOUR PERFECT SIP
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed whitespace-nowrap">
+              Discover a cocktail that matches your city's vibe and weather
+            </p>
+            
+            {/* Search Input */}
+            <div className="relative max-w-lg">
+              <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
+                <div className="pl-4">
+                  <Search size={20} className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={handleInputChange}
+                  onFocus={handleInputFocus}
+                  placeholder="Enter a city name..."
+                  className="w-full p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400"
+                />
+                {isSearching && (
+                  <div className="pr-4">
+                    <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
+
+              {/* City Options Dropdown */}
+              <AnimatePresence>
+                {cityOptions.length > 0 && (
+                  <motion.div 
+                    className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-72 overflow-auto"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {cityOptions.map((city, index) => (
+                      <div
+                        key={`${city.city}-${city.country}-${index}`}
+                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-0 flex items-center transition-colors"
+                        onClick={() => handleCitySelect(city)}
+                      >
+                        <MapPin size={16} className="text-primary-500 mr-2 flex-shrink-0" />
+                        <div>
+                          <span className="font-medium text-gray-800">{city.city}</span>
+                          <span className="text-gray-500 ml-2">{city.country}</span>
+                          <div className="text-xs text-gray-400">
+                            {city.latitude.toFixed(4)}, {city.longitude.toFixed(4)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom Third - Room Preview */}
+       {/*  <motion.div 
+          className="w-full max-w-3xl mx-auto aspect-[16/9] relative overflow-hidden"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+           <div className="absolute inset-0 bg-gradient-to-t from-transparent to-black/20">
+  <div className="absolute inset-0">
+            <Room isPreview={true} />
+          </div>
+        </motion.div>
+        */}
+{/* Bottom Third - Room Sneak-Peek */}
+<div className="w-full max-w-5xl mx-auto aspect-[16/9] relative overflow-hidden" style={{ backgroundColor: '#819077' }}>  <div
+    className="w-full"
+    style={{
+      height: '40%', // or '33%' for 1/3
+      overflow: 'hidden',
+    }}
+  >
+    <img
+      src="/images/loadingPrev10.png"
+      alt="Room preview"
+      className="w-full h-full object-cover"
+      style={{ display: 'block', objectPosition: 'top' }}
+    />
+    
+  </div>
+  </div>
+     </div>
+ {/* Shadow at the bottom */}
+<div className="absolute left-0 bottom-0 w-full pointer-events-none" style={{
+      height: '40px',
+      background: 'linear-gradient(to bottom, rgba(0,0,0,0.12), rgba(0,0,0,0.25), rgba(0,0,0,0.0))'
+    }}
+  />
+
+
+
+
+   
+    </div>
+   
+  );
+};
+
+export default LandingPage;

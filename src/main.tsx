@@ -8,7 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 
 // Initialize Sentry as early as possible
 Sentry.init({
-  dsn: "https://fe5490714faee07e5e18bf08bbf4f5c1@o4509465867714560.ingest.us.sentry.io/4509466250903552",
+  dsn: import.meta.env.VITE_SENTRY_DSN,
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
