@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import { Sunset, MoreHorizontal, BarChart3, User, LogOut, Save } from 'lucide-react';
+import { Sunset, MoreVertical, BarChart3, User, LogOut, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header: React.FC = () => {
@@ -49,7 +49,7 @@ const Header: React.FC = () => {
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
           >
-            <MoreHorizontal size={24} />
+            <MoreVertical size={24} />
           </button>
           
           <AnimatePresence>
