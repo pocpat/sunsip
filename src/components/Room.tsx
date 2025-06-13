@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { motion, useAnimation } from 'framer-motion';
 
-const Room: React.FC = () => {
+interface RoomProps {
+  isPreview?: boolean;
+}
+
+const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
   const { weatherData, cityImageUrl, cocktailData } = useAppStore();
   const [weatherAnimations, setWeatherAnimations] = useState<JSX.Element[]>([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -35,7 +39,7 @@ const Room: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!weatherData) return;
+    if (!weatherData || isPreview) return;
 
     const condition = weatherData.condition.toLowerCase();
     const animations: JSX.Element[] = [];
@@ -90,100 +94,134 @@ const Room: React.FC = () => {
       }
     }
     setWeatherAnimations(animations);
-  }, [weatherData]);
+  }, [weatherData, isPreview]);
 
-  if (!weatherData || !cityImageUrl || !cocktailData) {
-    return null;
+  // For preview mode, show the room without requiring data
+  const showRoom = isPreview || (weatherData && cityImageUrl && cocktailData);
+
+  if (!showRoom) {
+    return (
+      <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 rounded-lg shadow-xl font-inter flex items-center justify-center">
+        <div className="text-gray-500 text-lg">Loading room...</div>
+      </div>
+    );
   }
 
   return (
- <div className="relative w-full max-w-4xl mx-auto aspect-[16/9] overflow-hidden bg-gray-100 rounded-lg shadow-xl font-inter">
-      {/* Background layer  */}
-      <motion.div 
-        className="absolute inset-0 from-amber-50 to-amber-100 rounded-lg"
+<div className="relative w-full h-full overflow-hidden font-inter"> 
+       <motion.div 
+        className="absolute inset-0 rounded-lg"
         style={{
-          backgroundColor: "#819077",
-          // x and y are fine here because this is a motion.div
-          x: mousePosition.x * 0,
-          y: mousePosition.y * 0
+          backgroundColor: "#8B9A7A", // Warm sage green background
+          x: mousePosition.x * 2,
+          y: mousePosition.y * 2
         }}
       />
-      {/* Frame image covering the whole area */}
-     <img
-  src="/images/frame10.png"
-  alt="Window frame"
-  className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
-/>
-      {/* City view with window frame */}
-      <div className="absolute top-[38%] left-[47%] w-[38%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden ">
-        {/* Inner div for the city image to ensure it fits the window pane */}
-        <div className="absolute top-[15%] left-[10%] w-[80%] h-[70%] overflow-hidden">
-          <img
-            src={cityImageUrl}
-            alt={`${weatherData.city} with ${weatherData.condition}`}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          {/* Weather animations should also go inside this inner 'pane' div */}
-          <div className="absolute inset-0">
-            {weatherAnimations}
-          </div>
+
+      {/* Frame/Wall structure - lowest layer */}
+      <motion.div
+        className="absolute inset-0 w-full h-full z-10"
+        style={{
+          x: mousePosition.x * 1,
+          y: mousePosition.y * 1
+        }}
+      >
+        <img
+          src="/images/frame10.png"
+          alt="Room frame and wall"
+          className="w-full h-full object-contain pointer-events-none"
+        />
+      </motion.div>
+
+      {/* City view window - positioned within the frame */}
+      <div className="absolute top-[36%] left-[47%] w-[32%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden z-0">
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          {isPreview ? (
+            // Blue glass placeholder for preview
+            <div 
+              className="absolute inset-0 w-full h-full"
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #1e3a8a 100%)',
+                opacity: 0.8
+              }}
+            />
+          ) : (
+            <>
+              <img
+                src={cityImageUrl}
+                alt={`${weatherData?.city} with ${weatherData?.condition}`}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {/* Weather animations overlay */}
+              <div className="absolute inset-0">
+                {weatherAnimations}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Plant image in front of frame, behind table */}
-<motion.div
-  className="absolute inset-0 w-full h-full -left-10 z-20 top-2 pointer-events-none"
-  style={{
-    x: mousePosition.x * 10,
-    y: mousePosition.y * 10
-  }}
->
-  <img
-    src="/images/plant10.png"
-    alt="Plant decor"
-    className="w-full h-full object-contain"
-  />
-</motion.div>
-      {/* Table with cocktail - Now uses table10.png */}
+      {/* Plant decoration - behind table, in front of frame */}
       <motion.div
-        className="absolute -bottom-2 left-0 w-full z-30"
+        className="absolute inset-0  w-full h-full z-30 -left-9"
         style={{
-          x: mousePosition.x * 20,
-          y: mousePosition.y * 20
+          x: mousePosition.x * 8,
+          y: mousePosition.y * 8
+        }}
+      >
+        <img
+          src="/images/plant10.png"
+          alt="Plant decoration"
+          className="w-full h-full object-contain pointer-events-none"
+        />
+      </motion.div>
+
+      {/* Table with cocktail - middle layer */}
+      <motion.div
+        className="absolute inset-0 w-full h-full z-40"
+        style={{
+          x: mousePosition.x * 12,
+          y: mousePosition.y * 12
         }}
       >
         <img
           src="/images/table10.png"
-          alt="Table with plants and decor"
-          className="w-full h-auto object-cover"
+          alt="Table with decor"
+          className="w-full h-full object-contain"
         />
-        <motion.img
-          src={cocktailData.imageUrl}
-          alt={cocktailData.name}
-          className="absolute top-[36%] right-[9%] w-[18%] rounded-lg shadow-lg"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-        />
+        
+        {/* Cocktail positioned on the table - only show if not preview and data exists */}
+        {!isPreview && cocktailData && (
+          <motion.img
+            src={cocktailData.imageUrl}
+            alt={cocktailData.name}
+            className="absolute top-[42%] right-[10%] w-[16%] rounded-lg shadow-lg z-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          />
+        )}
       </motion.div>
 
-      {/* Chair in front */}
+      {/* Chair in front - highest layer */}
       <motion.div
-        className="absolute bottom-[-2%] left-[4%] w-[100%] z-40"
+        className="absolute inset-0 top-[5%] w-full h-full z-50"
         style={{
-          x: mousePosition.x * 30,
-          y: mousePosition.y * 30,
-          transformOrigin: "0% 80%"
+          transformOrigin: "left bottom", // or "0% 100%"
+          x: mousePosition.x * 20,
+          y: mousePosition.y * 20,
+         
         }}
         animate={chairControls}
       >
         <img
           src="/images/chair10.png"
           alt="Chair"
-          className="w-full"
+          className="w-full h-full object-contain"
         />
       </motion.div>
-    </div>  );
+    </div>
+  );
 };
 
 export default Room;
