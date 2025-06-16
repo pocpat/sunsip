@@ -71,15 +71,7 @@ const Header: React.FC = () => {
                   </button>
                 )}
                 
-                {currentView === 'result' && isAuthenticated && (
-                  <button 
-                    onClick={handleSave}
-                    className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <Save size={18} />
-                    <span>Save</span>
-                  </button>
-                )}
+
                 
                 <button 
                   onClick={handleAuthClick}
