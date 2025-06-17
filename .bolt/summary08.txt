@@ -1,0 +1,67 @@
+Conversation Summary
+We discussed integrating AI-powered image generation into the SunSip cocktail app to enhance the user experience. Here's what we covered:
+
+Initial Request
+You wanted to explore text-to-image models on OpenRouter for generating city images
+Goal: Replace static Pexels images with dynamic AI-generated visuals
+Service Integration Plan
+We identified two services to integrate:
+
+ImageRouter.io (Free image generation)
+
+Endpoint: https://api.imagerouter.io/v1/openai/images/generations
+Models: stabilityai/sdxl-turbo:free, black-forest-labs/FLUX-1-schnell:free
+For generating city images with weather context
+OpenRouter (Text generation - "The Brain")
+
+Model: DeepSeek R1 (free)
+For identifying famous landmarks in cities to improve image prompts
+Portfolio Mode Feature
+Added a toggle switch in the 3-dots menu to switch between "Live Mode" (using APIs) and "Mocked Mode" (using fallback images)
+Visual indicator: CloudOff icon appears next to logo when in mocked mode
+Environment variable: VITE_PORTFOLIO_MODE_ENABLED=true
+Current Status
+IMPORTANT: The plan was discussed and designed in detail, but the actual code implementation has NOT been applied yet. The conversation covered:
+
+Service integration architecture
+Error handling strategies
+Environment variable setup
+UI/UX design for the mode toggle
+Two-step process: text model identifies landmarks → image model generates visuals
+Next Step
+The implementation needs to be actually applied to the codebase to make the AI image generation and portfolio mode toggle functional.
+
+Here's the refined plan to implement the "Brain" and "Artist" logic, along with the "Portfolio Mode" switch and its visual indicator:
+The Plan
+Update Test Environment Configuration:
+Modify vitest.config.ts: Add VITE_OPENROUTER_API_KEY, VITE_OPENROUTER_TEXT_MODEL, VITE_IMAGEROUTER_API_KEY, and VITE_PORTFOLIO_MODE_ENABLED to the define block, setting them to appropriate test values.
+Extend Application State for Portfolio Mode:
+Modify src/store/appStore.ts:
+Add a new state property isPortfolioMode: boolean;.
+Initialize isPortfolioMode by parsing the VITE_PORTFOLIO_MODE_ENABLED environment variable (e.g., import.meta.env.VITE_PORTFOLIO_MODE_ENABLED === 'true').
+Add a new action setIsPortfolioMode: (mode: boolean) => void; to allow toggling this state.
+Create Text Generation Service (src/services/textGenerationService.ts):
+Create a new file src/services/textGenerationService.ts.
+Implement an asynchronous function, getLandmarkSuggestion(city: string, country: string): Promise<string | null>.
+This function will construct the prompt for the OpenRouter text model and make an axios.post request to the OpenRouter API endpoint (https://openrouter.ai/api/v1/chat/completions).
+It will use import.meta.env.VITE_OPENROUTER_API_KEY for authorization and import.meta.env.VITE_OPENROUTER_TEXT_MODEL for the model name.
+The function will parse the API response to extract the landmark or description and include error handling, returning null or a generic fallback on failure.
+Modify Image Generation Service (src/services/imageGenerationService.ts):
+Modify the generateCityImage function.
+Import useAppStore to access the isPortfolioMode state.
+Import the new getLandmarkSuggestion function from src/services/textGenerationService.ts.
+If isPortfolioMode is true, the function will immediately return a hardcoded Pexels image URL (your existing fallback logic) without making any external API calls.
+If isPortfolioMode is false (live mode):
+Call getLandmarkSuggestion(city, country) to get the landmark or description.
+Construct the imagerouter.io prompt using the city, country, the obtained landmark/description, weather condition, and time of day, ensuring it includes your desired style and size.
+Make a POST request to the imagerouter.io endpoint (https://api.imagerouter.io/v1/openai/images/generations) using import.meta.env.VITE_IMAGEROUTER_API_KEY for authorization.
+Specify a free model (e.g., stabilityai/sdxl-turbo:free) and include the quality parameter in the request body.
+Parse the response to extract the generated image URL.
+Implement robust error handling for the imagerouter.io call, falling back to Pexels images if the API call fails.
+Implement Portfolio Mode Switch and Indicator in Header:
+Modify src/components/Header.tsx:
+Import useAppStore and CloudOff from lucide-react.
+Access isPortfolioMode and setIsPortfolioMode from the useAppStore.
+Add a new menu item within the existing 3-dots menu. Label it "Toggle Mocked Mode" or "Toggle Live Mode" based on the current isPortfolioMode state.
+Attach an onClick handler to this menu item that calls setIsPortfolioMode(!isPortfolioMode).
+Add a visual indicator next to the "SunSip" logo when isPortfolioMode is true. This will be the CloudOff icon, styled to fit the UI.

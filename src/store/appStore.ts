@@ -56,6 +56,9 @@ type AppState = {
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   
+  isPortfolioMode: boolean;
+  setIsPortfolioMode: (mode: boolean) => void;
+  
   resetApp: () => void;
 };
 
@@ -83,6 +86,9 @@ export const useAppStore = create<AppState>((set) => ({
   
   showAuthModal: false,
   setShowAuthModal: (show) => set({ showAuthModal: show }),
+  
+  isPortfolioMode: import.meta.env.VITE_PORTFOLIO_MODE_ENABLED === 'true',
+  setIsPortfolioMode: (mode) => set({ isPortfolioMode: mode }),
   
   resetApp: () => set({
     currentView: 'search',
