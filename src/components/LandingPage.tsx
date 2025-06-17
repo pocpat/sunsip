@@ -202,12 +202,13 @@ const LandingPage: React.FC = () => {
 
         {/* --- REVISED IMAGE SECTION --- */}
         {/* We create one container that defines the cropped area */}
+        <div className="container mx-auto px-4 pb-0 mb-0">
         <div
           className="relative w-full"
           style={{
-            height: "40vh", // This sets a height (e.g., 40% of the screen height).
+            height: "20vh", // This sets a height (e.g., 20% of the screen height).
             overflow: "hidden", // This crops the image
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
+            boxShadow: "0 10px 10px -5px rgba(0, 0, 0, 0.3)",
           }}
         >
           <img
@@ -218,6 +219,8 @@ const LandingPage: React.FC = () => {
             style={{ objectFit: "cover", objectPosition: "top" }}
           />
         </div>
+        </div>
+        {/* This container will hold the room preview */}
         {/* --- END REVISED IMAGE SECTION --- */}
       </main>
 

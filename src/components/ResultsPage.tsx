@@ -28,10 +28,12 @@ const ResultsPage: React.FC = () => {
     >
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="flex flex-col items-center">
-          {/* Room Component - Same width as the grid below */}
-<div className="w-full aspect-[16/9]  mb-5 "> {/* or h-screen for full viewport height */}
-  <Room isPreview={false} />
-</div>
+          {/* Room Component - Same width as Landing page sneak-peek */}
+          <div className="w-full max-w-5xl mx-auto mb-5">
+            <div className="w-full aspect-[16/9]">
+              <Room isPreview={false} />
+            </div>
+          </div>
           
           {/* Weather and Cocktail Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
