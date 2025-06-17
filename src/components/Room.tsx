@@ -17,11 +17,12 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
   useEffect(() => {
     // Initial chair animation (the "rocking" rotation)
     chairControls.start({
-      rotate: [0, -2, 0],
+      rotate: [0, -4, 0],
       transition: {
-        duration: 4,
-        ease: "easeOut",
-        times: [0, 0.5, 1]
+      duration: 4,           // duration of one back-and-forth
+      ease: "easeInOut",
+      repeat: 3,             // 3 repeats + 1 initial = 4 total
+      repeatType: "reverse", // rock back and forth
       }
     });
   }, [chairControls]);
@@ -165,8 +166,8 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
       <motion.div
         className="absolute inset-0  w-full h-full z-30 -left-9"
         style={{
-          x: mousePosition.x * 8,
-          y: mousePosition.y * 10
+          x: mousePosition.x * 3,
+          y: mousePosition.y * 5
         }}
       >
         <img
@@ -180,8 +181,8 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
       <motion.div
         className="absolute inset-0 w-full h-full z-40"
         style={{
-          x: mousePosition.x * 10,
-          y: mousePosition.y * 12
+          x: mousePosition.x * 5,
+          y: mousePosition.y * 7
         }}
       >
         <img
@@ -207,9 +208,9 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
       <motion.div
         className="absolute inset-0 top-[5%] w-full h-full z-50"
         style={{
-          transformOrigin: "left bottom", // or "0% 100%"
-          x: mousePosition.x * 20,
-          y: mousePosition.y * 25,
+          transformOrigin: "25% 100%", // or "0% 100%"
+          x: mousePosition.x * 7,
+          y: mousePosition.y * 9,
          
         }}
         animate={chairControls}
