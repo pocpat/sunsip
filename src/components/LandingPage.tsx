@@ -120,100 +120,94 @@ const LandingPage: React.FC = () => {
     >
       {/* This container will hold all content and grow to push the footer down */}
       <main className="flex-grow">
+        {/* Main Content */}
+        <div className="container mx-auto py-40 md:px-12 lg:px-24">
+          <motion.div
+            className="max-w-2xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight whitespace-nowrap">
+              FIND YOUR PERFECT SIP
+            </h1>
 
+            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed whitespace-nowrap">
+              Discover a cocktail that matches your city's vibe and weather
+            </p>
 
-
- 
-          {/* Main Content */}
-          <div className="container mx-auto py-40 md:px-12 lg:px-24">
-            <motion.div
-              className="max-w-2xl"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight whitespace-nowrap">
-                FIND YOUR PERFECT SIP
-              </h1>
-
-              <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed whitespace-nowrap">
-                Discover a cocktail that matches your city's vibe and weather
-              </p>
-
-              {/* Search Input */}
-              <div className="relative max-w-lg">
-                <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
-                  <div className="pl-4">
-                    <Search size={20} className="text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={handleInputChange}
-                    onFocus={handleInputFocus}
-                    placeholder="Enter a city name..."
-                    className="w-full p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400"
-                  />
-                  {isSearching && (
-                    <div className="pr-4">
-                      <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                  )}
+            {/* Search Input */}
+            <div className="relative max-w-lg">
+              <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
+                <div className="pl-4">
+                  <Search size={20} className="text-gray-400" />
                 </div>
+                <input
+                  id="city-search"
+                  name="city-search"
+                  type="text"
+                  value={query}
+                  onChange={handleInputChange}
+                  onFocus={handleInputFocus}
+                  placeholder="Enter a city name..."
+                  className="w-full p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400"
+                />
+                {isSearching && (
+                  <div className="pr-4">
+                    <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
 
-                {/* City Options Dropdown */}
-                <AnimatePresence>
-                  {cityOptions.length > 0 && (
-                    <motion.div
-                      className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-72 overflow-auto"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {cityOptions.map((city, index) => (
-                        <div
-                          key={`${city.city}-${city.country}-${index}`}
-                          className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-0 flex items-center transition-colors"
-                          onClick={() => handleCitySelect(city)}
-                        >
-                          <MapPin
-                            size={16}
-                            className="text-primary-500 mr-2 flex-shrink-0"
-                          />
-                          <div>
-                            <span className="font-medium text-gray-800">
-                              {city.city}
-                            </span>
-                            <span className="text-gray-500 ml-2">
-                              {city.country}
-                            </span>
-                            <div className="text-xs text-gray-400">
-                              {city.latitude.toFixed(4)},{" "}
-                              {city.longitude.toFixed(4)}
-                            </div>
+              {/* City Options Dropdown */}
+              <AnimatePresence>
+                {cityOptions.length > 0 && (
+                  <motion.div
+                    className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-72 overflow-auto"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {cityOptions.map((city, index) => (
+                      <div
+                        key={`${city.city}-${city.country}-${index}`}
+                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-0 flex items-center transition-colors"
+                        onClick={() => handleCitySelect(city)}
+                      >
+                        <MapPin
+                          size={16}
+                          className="text-primary-500 mr-2 flex-shrink-0"
+                        />
+                        <div>
+                          <span className="font-medium text-gray-800">
+                            {city.city}
+                          </span>
+                          <span className="text-gray-500 ml-2">
+                            {city.country}
+                          </span>
+                          <div className="text-xs text-gray-400">
+                            {city.latitude.toFixed(4)},{" "}
+                            {city.longitude.toFixed(4)}
                           </div>
                         </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        </div>
 
-
-
-
-
- {/* --- REVISED IMAGE SECTION --- */}
+        {/* --- REVISED IMAGE SECTION --- */}
         {/* We create one container that defines the cropped area */}
-        <div 
+        <div
           className="relative w-full"
           style={{
-            height: '40vh', // This sets a height (e.g., 40% of the screen height).
-            overflow: 'hidden', // This crops the image
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)' 
+            height: "40vh", // This sets a height (e.g., 40% of the screen height).
+            overflow: "hidden", // This crops the image
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
           }}
         >
           <img
@@ -221,13 +215,10 @@ const LandingPage: React.FC = () => {
             alt="Room preview"
             // These styles make the image cover the container from the top
             className="absolute top-0 left-0 w-full h-auto"
-            style={{ objectFit: 'cover', objectPosition: 'top' }}
+            style={{ objectFit: "cover", objectPosition: "top" }}
           />
         </div>
         {/* --- END REVISED IMAGE SECTION --- */}
-       
-
-
       </main>
 
       <Footer />

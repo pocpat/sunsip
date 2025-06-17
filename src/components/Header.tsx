@@ -95,12 +95,12 @@ const Header: React.FC = () => {
                   {isPortfolioMode ? (
                     <>
                       <Cloud size={18} />
-                      <span>Enable Live Mode</span>
+                      <span>Live Mode</span>
                     </>
                   ) : (
                     <>
                       <CloudOff size={18} />
-                      <span>Enable Portfolio Mode</span>
+                      <span>Demo Mode</span>
                     </>
                   )}
                 </button>
