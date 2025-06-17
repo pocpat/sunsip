@@ -166,7 +166,7 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
         className="absolute inset-0  w-full h-full z-30 -left-9"
         style={{
           x: mousePosition.x * 8,
-          y: mousePosition.y * 8
+          y: mousePosition.y * 10
         }}
       >
         <img
@@ -180,7 +180,7 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
       <motion.div
         className="absolute inset-0 w-full h-full z-40"
         style={{
-          x: mousePosition.x * 12,
+          x: mousePosition.x * 10,
           y: mousePosition.y * 12
         }}
       >
@@ -209,7 +209,7 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
         style={{
           transformOrigin: "left bottom", // or "0% 100%"
           x: mousePosition.x * 20,
-          y: mousePosition.y * 20,
+          y: mousePosition.y * 25,
          
         }}
         animate={chairControls}
