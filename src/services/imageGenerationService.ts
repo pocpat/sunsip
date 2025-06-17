@@ -53,11 +53,11 @@ export async function generateCityImage(
     const response = await axios.post(
       IMAGEROUTER_BASE_URL,
       {
-        model: 'dall-e-3',
+        model: 'stabilityai/sdxl-turbo:free',
         prompt: prompt,
         n: 1,
         size: '1024x1024',
-        quality: 'standard'
+        quality: 'auto'
       },
       {
         headers: {

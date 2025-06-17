@@ -2,7 +2,7 @@ import axios from 'axios';
 import { captureError, addBreadcrumb } from '../lib/sentry';
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL || 'deepseek/deepseek-r1:free';
+const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL ;
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export async function getLandmarkSuggestion(city: string, country: string): Promise<string | null> {
