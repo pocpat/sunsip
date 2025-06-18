@@ -66,7 +66,7 @@ const LandingPage: React.FC = () => {
     setQuery("");
 
     try {
-      // Get weather data using coordinates
+      // Get weather data first (required for other calls)
       const weatherData = await getWeatherData(
         city.latitude,
         city.longitude,
@@ -75,21 +75,23 @@ const LandingPage: React.FC = () => {
       );
       setWeatherData(weatherData);
 
-      // Generate city image
-      const cityImageUrl = await generateCityImage(
-        city.city,
-        city.country,
-        weatherData.condition,
-        weatherData.isDay
-      );
-      setCityImageUrl(cityImageUrl);
+      // Parallelize image generation and cocktail suggestion
+      const [cityImageUrl, cocktailData] = await Promise.all([
+        generateCityImage(
+          city.city,
+          city.country,
+          weatherData.condition,
+          weatherData.isDay
+        ),
+        getCocktailSuggestion(
+          city.countryCode,
+          weatherData.condition,
+          weatherData.temperature
+        )
+      ]);
 
-      // Get cocktail suggestion
-      const cocktailData = await getCocktailSuggestion(
-        city.countryCode,
-        weatherData.condition,
-        weatherData.temperature
-      );
+      // Set the results
+      setCityImageUrl(cityImageUrl);
       setCocktailData(cocktailData);
 
       // Switch to result view
