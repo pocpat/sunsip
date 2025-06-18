@@ -202,9 +202,9 @@ const LandingPage: React.FC = () => {
 
         {/* --- REVISED IMAGE SECTION --- */}
         {/* We create one container that defines the cropped area */}
-        <div className="container mx-auto px-4 pb-0 mb-0">
+        <div className="container mx-auto px-4  pb-0 mb-0">
         <div
-          className="relative w-full " // to lower the image mt-40
+          className="relative w-full"
           style={{
             height: "20vh", // This sets a height (e.g., 20% of the screen height).
             overflow: "hidden", // This crops the image
