@@ -6,6 +6,7 @@ import ResultsPage from './components/ResultsPage';
 import AuthModal from './components/auth/AuthModal';
 import SentryTestButton from './components/SentryTestButton';
 import UserDashboard from './components/UserDashboard';
+import BoltBadge from './components/BoltBadge';
 import { useAuthStore } from './store/authStore';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -86,8 +87,12 @@ function App() {
       </AnimatePresence>
          {showAuthModal && <AuthModal />}
       
-      {/* Sentry Test Button - Only show in development */}
+      {/* Bolt.new Badge */}
+      <BoltBadge />
+      
+          {/* Sentry Test Button - Only show in development */}
       {import.meta.env.DEV && <SentryTestButton />}
+    
    
     </div>
   );

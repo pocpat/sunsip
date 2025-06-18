@@ -5,6 +5,59 @@ const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL ;
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+// Retry configuration
+const MAX_RETRIES = 3;
+const BASE_DELAY = 1000; // 1 second
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<any> {
+  try {
+    const response = await axios.post(
+      OPENROUTER_BASE_URL,
+      {
+        model: OPENROUTER_TEXT_MODEL,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 20,
+        temperature: 0.3,
+        top_p: 0.9,
+        stream: false
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          //'HTTP-Referer': window.location.origin,
+          //'X-Title': 'SunSip - Weather & Cocktails'
+        },
+        timeout: 15000 // Increased timeout to 15 seconds
+      }
+    );
+
+    return response;
+  } catch (error: any) {
+    // Check if it's a 503 error and we haven't exceeded max retries
+    if (error.response?.status === 503 && retryCount < MAX_RETRIES) {
+      const delay = BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
+      
+      addBreadcrumb(`OpenRouter API returned 503, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`, 'text-generation');
+      
+      await sleep(delay);
+      return makeOpenRouterRequest(prompt, retryCount + 1);
+    }
+    
+    // If it's not a 503 error or we've exceeded max retries, throw the error
+    throw error;
+  }
+}
+
 export async function getLandmarkSuggestion(city: string, country: string): Promise<string | null> {
   // If no API key is provided, return null to use fallback
   if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'test-openrouter-key' || OPENROUTER_API_KEY === 'your-openrouter-api-key') {
@@ -31,31 +84,7 @@ export async function getLandmarkSuggestion(city: string, country: string): Prom
 
     Now, provide the phrase for: ${city}, ${country}`;
 
-    const response = await axios.post(
-      OPENROUTER_BASE_URL,
-      {
-        model: OPENROUTER_TEXT_MODEL,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 20,
-        temperature: 0.3,
-        top_p: 0.9,
-        stream: false
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-          //'HTTP-Referer': window.location.origin,
-          //'X-Title': 'SunSip - Weather & Cocktails'
-        },
-        timeout: 10000 // 10 second timeout
-      }
-    );
+    const response = await makeOpenRouterRequest(prompt);
 
     if (response.data?.choices?.[0]?.message?.content) {
       const landmark = response.data.choices[0].message.content.trim();
