@@ -45,23 +45,12 @@ const ResultsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* New Search Button */}
-      <motion.button
-        onClick={handleNewSearch}
-        className="fixed bottom-6 right-6 bg-white text-gray-800 px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 font-medium"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1, duration: 0.3 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <RotateCcw size={18} />
-        <span>New Search</span>
-      </motion.button>
+
       <Footer />
     </motion.div>
    
   );
 };
+
 
 export default ResultsPage;

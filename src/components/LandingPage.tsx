@@ -119,7 +119,7 @@ const LandingPage: React.FC = () => {
       style={{ backgroundColor: "#819077" }}
     >
       {/* This container will hold all content and grow to push the footer down */}
-      <main className="flex-grow">
+      <main className="flex-grow mt-40">
         {/* Main Content */}
         <div className="container mx-auto py-40 md:px-12 lg:px-24">
           <motion.div
@@ -204,7 +204,7 @@ const LandingPage: React.FC = () => {
         {/* We create one container that defines the cropped area */}
         <div className="container mx-auto px-4 pb-0 mb-0">
         <div
-          className="relative w-full"
+          className="relative w-full " // to lower the image mt-40
           style={{
             height: "20vh", // This sets a height (e.g., 20% of the screen height).
             overflow: "hidden", // This crops the image

@@ -84,11 +84,11 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {showAuthModal && <AuthModal />}
+         {showAuthModal && <AuthModal />}
       
       {/* Sentry Test Button - Only show in development */}
       {import.meta.env.DEV && <SentryTestButton />}
+   
     </div>
   );
 }
