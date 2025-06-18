@@ -175,7 +175,9 @@ export async function saveUserPreferences(userId: string, preferences: {
         favorite_weather_moods: preferences.favoriteWeatherMoods,
         updated_at: new Date().toISOString(),
       }
-    ])
+    ], {
+      onConflict: 'user_id'
+    })
     .select()
     .single();
 

@@ -6,8 +6,15 @@ import { captureError, addBreadcrumb } from '../lib/sentry';
 const IMAGEROUTER_API_KEY = import.meta.env.VITE_IMAGEROUTER_API_KEY;
 const IMAGEROUTER_BASE_URL = 'https://api.imagerouter.io/v1/openai/images/generations';
 
+// Array of image generation models to try in order
+const IMAGE_GENERATION_MODELS = [
+  'stabilityai/sdxl-turbo:free',
+  'google/gemini-2.0-flash-exp:free',
+  'black-forest-labs/FLUX-1-schnell:free'
+];
+
 export async function generateCityImage(
- city: string,
+  city: string,
   country: string,
   weatherCondition: string,
   isDay: boolean
@@ -18,13 +25,13 @@ export async function generateCityImage(
   // If in portfolio mode, immediately return fallback Pexels images
   if (isPortfolioMode) {
     addBreadcrumb(`Portfolio mode enabled, using fallback images for ${city}, ${country}`, 'image-generation');
-    return getFallbackCityImage(  weatherCondition, isDay);
+    return getFallbackCityImage(weatherCondition, isDay);
   }
 
   // If no API key is provided, use fallback images
   if (!IMAGEROUTER_API_KEY || IMAGEROUTER_API_KEY === 'test-imagerouter-key' || IMAGEROUTER_API_KEY === 'your-imagerouter-api-key') {
     addBreadcrumb(`No valid ImageRouter API key found, using fallback images for ${city}, ${country}`, 'image-generation');
-    return getFallbackCityImage( weatherCondition, isDay);
+    return getFallbackCityImage(weatherCondition, isDay);
   }
 
   try {
@@ -49,56 +56,89 @@ export async function generateCityImage(
 
     addBreadcrumb(`Using prompt: ${prompt}`, 'image-generation');
 
-    // Step 3: Generate image using ImageRouter with corrected payload structure
-    const response = await axios.post(
-      IMAGEROUTER_BASE_URL,
-      {
-        model: 'stabilityai/sdxl-turbo:free',
-        prompt: prompt,
-        n: 1,
-        size: '1024x1024',
-        quality: 'auto'
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${IMAGEROUTER_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000 // 30 second timeout for image generation
-      }
-    );
+    // Step 3: Try each model in sequence until one succeeds
+    for (let i = 0; i < IMAGE_GENERATION_MODELS.length; i++) {
+      const model = IMAGE_GENERATION_MODELS[i];
+      
+      try {
+        addBreadcrumb(`Attempting image generation with model: ${model}`, 'image-generation');
+        
+        const response = await axios.post(
+          IMAGEROUTER_BASE_URL,
+          {
+            model: model,
+            prompt: prompt,
+            n: 1,
+            size: '1024x1024'
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${IMAGEROUTER_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 30000 // 30 second timeout for image generation
+          }
+        );
 
-    if (response.data?.data?.[0]?.url) {
-      const generatedImageUrl = response.data.data[0].url;
-      
-      addBreadcrumb(`Successfully generated AI image: ${generatedImageUrl}`, 'image-generation', {
-        city,
-        country,
-        landmark,
-        weatherCondition,
-        isDay
-      });
-      
-      return generatedImageUrl;
+        if (response.data?.data?.[0]?.url) {
+          const generatedImageUrl = response.data.data[0].url;
+          
+          addBreadcrumb(`Successfully generated AI image with ${model}: ${generatedImageUrl}`, 'image-generation', {
+            city,
+            country,
+            landmark,
+            weatherCondition,
+            isDay,
+            model,
+            attemptNumber: i + 1
+          });
+          
+          return generatedImageUrl;
+        }
+
+        addBreadcrumb(`No image URL in response from ${model}`, 'image-generation');
+        
+      } catch (modelError) {
+        captureError(modelError as Error, {
+          service: 'imagerouter',
+          action: 'generate_image_attempt',
+          model,
+          attemptNumber: i + 1,
+          city,
+          country,
+          weatherCondition,
+          isDay
+        });
+
+        console.error(`Error with model ${model} (attempt ${i + 1}/${IMAGE_GENERATION_MODELS.length}):`, modelError);
+        
+        // If this is not the last model, continue to the next one
+        if (i < IMAGE_GENERATION_MODELS.length - 1) {
+          addBreadcrumb(`Model ${model} failed, trying next model`, 'image-generation');
+          continue;
+        }
+      }
     }
 
-    addBreadcrumb('No image URL in ImageRouter response', 'image-generation');
-    throw new Error('No image URL in response');
+    // If we reach here, all models failed
+    addBreadcrumb('All image generation models failed', 'image-generation');
+    throw new Error('All image generation models failed');
 
   } catch (error) {
     captureError(error as Error, {
       service: 'imagerouter',
-      action: 'generate_image',
+      action: 'generate_image_all_models_failed',
       city,
       country,
       weatherCondition,
-      isDay
+      isDay,
+      modelsAttempted: IMAGE_GENERATION_MODELS
     });
 
-    console.error('Error generating AI image, falling back to Pexels:', error);
+    console.error('Error generating AI image with all models, falling back to Pexels:', error);
     
     // Fallback to Pexels images on error
-    return getFallbackCityImage( weatherCondition, isDay);
+    return getFallbackCityImage(weatherCondition, isDay);
   }
 }
 
@@ -120,16 +160,9 @@ function getWeatherType(weatherCondition: string): string {
   }
 }
 
+type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'foggy';
+type TimeOfDay = 'day' | 'night';
 
-  
-    type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'foggy';
- 
-  type TimeOfDay = 'day' | 'night';
-
-
-
-  
-  
 // Default fallback images for each weather type and time of day
 const defaultImages: Record<WeatherType, Record<TimeOfDay, string>> = {
   sunny: {
@@ -155,7 +188,6 @@ const defaultImages: Record<WeatherType, Record<TimeOfDay, string>> = {
 };
 
 function getFallbackCityImage(
- 
   weatherCondition: string,
   isDay: boolean
 ): string {
