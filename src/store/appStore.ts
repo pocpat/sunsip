@@ -35,6 +35,9 @@ type AppState = {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
   
+  loadingStep: string;
+  setLoadingStep: (step: string) => void;
+  
   currentView: 'search' | 'result' | 'dashboard';
   setCurrentView: (view: 'search' | 'result' | 'dashboard') => void;
   
@@ -66,6 +69,9 @@ export const useAppStore = create<AppState>((set) => ({
   isLoading: false,
   setIsLoading: (isLoading) => set({ isLoading }),
   
+  loadingStep: '',
+  setLoadingStep: (step) => set({ loadingStep: step }),
+  
   currentView: 'search',
   setCurrentView: (view) => set({ currentView: view }),
   
@@ -96,5 +102,6 @@ export const useAppStore = create<AppState>((set) => ({
     weatherData: undefined,
     cocktailData: undefined,
     cityImageUrl: undefined,
+    loadingStep: '',
   }),
 }));
