@@ -1,8 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import { Sunset, MoreVertical, BarChart3, User, LogOut, Save, CloudOff, Cloud, RotateCw } from 'lucide-react';
+import { 
+  Sunset, 
+  MoreVertical, 
+  BarChart3, 
+  User, 
+  LogOut, 
+  CloudOff, 
+  Cloud, 
+  House as HouseIcon // Using an alias is still a good idea!
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
 
 const Header: React.FC = () => {
   const { resetApp, setShowAuthModal, currentView, setCurrentView, isPortfolioMode, setIsPortfolioMode } = useAppStore();
@@ -85,8 +95,8 @@ const Header: React.FC = () => {
           
           {/* Right side buttons */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Start Over Button - Only show on result page */}
-            {currentView === 'result' && (
+            {/* Start Over Button - Show on result and dashboard pages */}
+            {(currentView === 'result' || currentView === 'dashboard') && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -96,10 +106,11 @@ const Header: React.FC = () => {
                 className="p-2 rounded-full hover:bg-white/10 transition-colors"
                 title="Start Over"
               >
-                <RotateCw size={18} className="text-white sm:w-5 sm:h-5" />
+                <HouseIcon size={18} className="text-white sm:w-5 sm:h-5" />
               </motion.button>
             )}
 
+            
             {/* Menu */}
             <div className="relative" ref={menuRef}>
               <button 

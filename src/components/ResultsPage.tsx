@@ -23,7 +23,7 @@ const ResultsPage: React.FC = () => {
       style={{ backgroundColor: '#819077' }}
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 1.4, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 py-6 sm:py-8 pt-20 sm:pt-24">
         <div className="flex flex-col items-center">

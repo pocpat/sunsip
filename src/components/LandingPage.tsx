@@ -13,6 +13,7 @@ const LandingPage: React.FC = () => {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [showPeek, setShowPeek] = useState(true);
 
   const {
     cityOptions,
@@ -24,6 +25,7 @@ const LandingPage: React.FC = () => {
     setCurrentView,
     setIsLoading,
     setLoadingStep,
+    currentView,
   } = useAppStore();
 
   // Debounce search query
@@ -122,8 +124,9 @@ const LandingPage: React.FC = () => {
       setLoadingStep('Almost there... Adding the final touches!');
       await new Promise(resolve => setTimeout(resolve, 800)); // Final pause
 
-      // Switch to result view
+      // Switch to result view and trigger animation
       setCurrentView("result");
+      setTimeout(() => setShowPeek(false), 700); // 700ms matches animation duration
     } catch (error) {
       console.error("Error processing city selection:", error);
     } finally {
@@ -158,7 +161,7 @@ const LandingPage: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             {/* Responsive Typography */}
-            <h1 className="text-3xl mt-8 sm:mt-12 md:mt-16 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
               FIND YOUR PERFECT SIP
             </h1>
 
@@ -229,29 +232,43 @@ const LandingPage: React.FC = () => {
             </div>
           </motion.div>
         </div>
-  </main>
-        {/* Responsive Sneak-Peek Image Section */}
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0 ">
-          <div
-            className="relative w-full overflow-hidden rounded-t-lg shadow-lg"
-            style={{
-              height: "15vh", // Responsive height using viewport units
-              minHeight: "120px", // Minimum height for very small screens
-              maxHeight: "200px", // Maximum height for larger screens
-            }}
-          >
-            <img
-              src="/images/loadingPrev10.png"
-              alt="Room preview"
-              className="absolute top-0 left-0 w-full h-auto min-h-full"
-              style={{ 
-                objectFit: "cover", 
-                objectPosition: "top center"
-              }}
-            />
-          </div>
-        </div>
-    
+      </main>
+
+      {/* Peek image and result overlay */}
+      <div className="relative w-full">
+        <AnimatePresence>
+          {showPeek && (
+            <motion.div
+              key="peek"
+              className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{ position: "relative", zIndex: 1 }}
+            >
+              <div
+                className="relative w-full overflow-hidden rounded-t-lg shadow-lg"
+                style={{
+                  height: "15vh",
+                  minHeight: "120px",
+                  maxHeight: "200px",
+                }}
+              >
+                <img
+                  src="/images/loadingPrev10.png"
+                  alt="Room preview"
+                  className="absolute top-0 left-0 w-full h-auto min-h-full"
+                  style={{ 
+                    objectFit: "cover", 
+                    objectPosition: "top center"
+                  }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <Footer />
     </div>

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { captureError, addBreadcrumb } from '../lib/sentry';
+import { useAppStore } from '../store/appStore';
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL ;
@@ -37,7 +38,7 @@ async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<an
           //'HTTP-Referer': window.location.origin,
           //'X-Title': 'SunSip - Weather & Cocktails'
         },
-        timeout: 15000 // Increased timeout to 15 seconds
+        timeout: 30000 // Increased timeout to 30 seconds
       }
     );
 
@@ -59,6 +60,13 @@ async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<an
 }
 
 export async function getLandmarkSuggestion(city: string, country: string): Promise<string | null> {
+  // Check for demo mode first
+  const isPortfolioMode = useAppStore.getState().isPortfolioMode;
+  if (isPortfolioMode) {
+    addBreadcrumb(`Demo mode enabled, skipping landmark suggestion for ${city}, ${country}`, 'text-generation');
+    return null;
+  }
+
   // If no API key is provided, return null to use fallback
   if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'test-openrouter-key' || OPENROUTER_API_KEY === 'your-openrouter-api-key') {
     addBreadcrumb(`No valid OpenRouter API key found, skipping landmark suggestion for ${city}, ${country}`, 'text-generation');

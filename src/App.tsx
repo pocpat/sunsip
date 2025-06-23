@@ -65,11 +65,33 @@ function App() {
       <main className="relative">
         <AnimatePresence mode="wait">
           {currentView === 'search' && <LandingPage key="landing" />}
-          {currentView === 'result' && <ResultsPage key="results" />}
           {currentView === 'dashboard' && isAuthenticated && (
             <div key="dashboard" className="min-h-screen pt-24" style={{ backgroundColor: '#819077' }}>
               <UserDashboard />
             </div>
+          )}
+        </AnimatePresence>
+
+        {/* Result page overlay */}
+        <AnimatePresence>
+          {currentView === 'result' && (
+            <motion.div
+              key="results"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.7, ease: "easeInOut" }}
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: 0,
+                zIndex: 2,
+              }}
+            >
+              <ResultsPage />
+            </motion.div>
           )}
         </AnimatePresence>
       </main>
