@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { CocktailData } from '../store/appStore';
 import { captureError, addBreadcrumb } from '../lib/sentry';
+import { useAppStore } from '../store/appStore';
 
 // TheCocktailDB API configuration
 const API_BASE_URL = 'https://www.thecocktaildb.com/api/json/v1/1';
@@ -300,6 +301,30 @@ export async function getCocktailSuggestion(
   
   // Determine mood based on weather
   const mood = determineMood(weatherCondition, temperature);
+  
+  // Check for demo mode first
+  const isPortfolioMode = useAppStore.getState().isPortfolioMode;
+  if (isPortfolioMode) {
+    addBreadcrumb('Demo mode enabled, using fallback cocktails', 'cocktail');
+    
+    // Try to match fallback cocktails with preferred spirits
+    const matchingFallbacks = fallbackCocktails.filter(cocktail => {
+      return preferredSpirits.some(spirit => {
+        return cocktail.ingredients.some(ingredient => 
+          ingredient.toLowerCase().includes(spirit.toLowerCase())
+        );
+      });
+    });
+    
+    if (matchingFallbacks.length > 0) {
+      const selectedCocktail = matchingFallbacks[Math.floor(Math.random() * matchingFallbacks.length)];
+      return { ...selectedCocktail, mood };
+    }
+    
+    // If no matching fallbacks, return a random fallback with the determined mood
+    const fallbackCocktail = fallbackCocktails[Math.floor(Math.random() * fallbackCocktails.length)];
+    return { ...fallbackCocktail, mood };
+  }
   
   try {
     // Try to find cocktails based on preferred spirits

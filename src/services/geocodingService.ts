@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { CityOption } from '../store/appStore';
+import { useAppStore } from '../store/appStore';
 
 const API_KEY = import.meta.env.VITE_GEOCODING_API_KEY || 'your-geocoding-api-key';
 
@@ -153,6 +154,12 @@ const optimizedCityDatabase: Record<string, CityOption[]> = {
 };
 
 export async function searchCities(query: string): Promise<CityOption[]> {
+  // Check for demo mode first
+  const isPortfolioMode = useAppStore.getState().isPortfolioMode;
+  if (isPortfolioMode) {
+    return getOptimizedCityResults(query);
+  }
+
   // If no valid API key is provided, use optimized mock data directly
   if (!API_KEY || API_KEY === 'your-geocoding-api-key') {
     return getOptimizedCityResults(query);
@@ -233,6 +240,6 @@ function getOptimizedCityResults(query: string): CityOption[] {
 }
 
 // Legacy function for backward compatibility
-function getMockCityResults(query: string): CityOption[] {
+export function getMockCityResults(query: string): CityOption[] {
   return getOptimizedCityResults(query);
 }

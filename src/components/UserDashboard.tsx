@@ -182,7 +182,7 @@ const UserDashboard: React.FC = () => {
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 1.4 }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -212,7 +212,7 @@ const UserDashboard: React.FC = () => {
         className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        transition={{ duration: 1.4, delay: 0.1 }}
       >
         <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
           <div className="flex items-center justify-between">
@@ -263,7 +263,7 @@ const UserDashboard: React.FC = () => {
           className="lg:col-span-1"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 1.4, delay: 0.2 }}
         >
           <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100">
@@ -362,7 +362,7 @@ const UserDashboard: React.FC = () => {
           className="lg:col-span-2"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 1.4, delay: 0.3 }}
         >
           <div className="bg-white rounded-lg shadow-md border border-gray-100">
             <div className="p-6 border-b border-gray-100">

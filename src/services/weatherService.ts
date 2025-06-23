@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { WeatherData } from '../store/appStore';
 import { captureError, addBreadcrumb } from '../lib/sentry';
+import { useAppStore } from '../store/appStore';
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -25,6 +26,13 @@ const conditionMapping: Record<string, string> = {
 };
 
 export async function getWeatherData(latitude: number, longitude: number, city: string, country: string): Promise<WeatherData> {
+  // Check for demo mode first
+  const isPortfolioMode = useAppStore.getState().isPortfolioMode;
+  if (isPortfolioMode) {
+    addBreadcrumb(`Demo mode enabled, using mock weather data for ${city}, ${country}`, 'weather');
+    return getMockWeatherData(latitude, longitude, city, country);
+  }
+
   // If no API key is provided, use mock data instead of making API calls
   if (!API_KEY || API_KEY === 'your-weather-api-key') {
     addBreadcrumb(`No valid API key found, using mock weather data for ${city}, ${country}`, 'weather');
@@ -133,7 +141,7 @@ function formatLocalTime(unixTimestamp: number, timezoneOffset: number): string 
 }
 
 // For MVP, use this function to get mock weather data when API key is not available
-function getMockWeatherData(latitude: number, longitude: number, city: string, country: string): WeatherData {
+export function getMockWeatherData(latitude: number, longitude: number, city: string, country: string): WeatherData {
   addBreadcrumb(`Using mock weather data for ${city}, ${country}`, 'weather');
   
   // Generate random weather conditions with realistic temperature ranges
