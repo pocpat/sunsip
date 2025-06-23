@@ -24,7 +24,7 @@ export type SavedCombination = {
   savedAt: string;
 };
 
-export type UserPreferences = {
+type UserPreferences = {
   id: string;
   preferredSpirits: string[];
   dietaryRestrictions: string[];

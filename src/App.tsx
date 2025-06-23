@@ -90,8 +90,7 @@ function App() {
       {/* Bolt.new Badge */}
       <BoltBadge />
       
-          {/* Sentry Test Button - Only show in development */}
-      {import.meta.env.DEV && <SentryTestButton />}
+    
     
    
     </div>

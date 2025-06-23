@@ -6,7 +6,6 @@ import { getCocktailSuggestion } from "../services/cocktailService";
 import { generateCityImage } from "../services/imageGenerationService";
 import { Search, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Room from "./Room";
 import Footer from "./Footer";
 
 const LandingPage: React.FC = () => {
@@ -115,34 +114,33 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    //<div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: '#819077' }}>
     <div
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: "#819077" }}
     >
-      {/* This container will hold all content and grow to push the footer down */}
-      <main className="flex-grow mt-40">
-        {/* Main Content */}
-        <div className="container mx-auto py-40 md:px-12 lg:px-24">
+      {/* Main Content */}
+      <main className="flex-grow pt-20 sm:pt-24 md:pt-32 lg:pt-40">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24">
           <motion.div
-            className="max-w-2xl"
+            className="max-w-4xl"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight whitespace-nowrap">
+            {/* Responsive Typography */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
               FIND YOUR PERFECT SIP
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed whitespace-nowrap">
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 leading-relaxed max-w-3xl">
               Discover a cocktail that matches your city's vibe and weather
             </p>
 
-            {/* Search Input */}
-            <div className="relative max-w-lg">
+            {/* Responsive Search Input */}
+            <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg">
               <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
-                <div className="pl-4">
-                  <Search size={20} className="text-gray-400" />
+                <div className="pl-3 sm:pl-4">
+                  <Search size={18} className="text-gray-400 sm:w-5 sm:h-5" />
                 </div>
                 <input
                   id="city-search"
@@ -152,11 +150,11 @@ const LandingPage: React.FC = () => {
                   onChange={handleInputChange}
                   onFocus={handleInputFocus}
                   placeholder="Enter a city name..."
-                  className="w-full p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400"
+                  className="w-full p-3 sm:p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400 text-sm sm:text-base"
                 />
                 {isSearching && (
-                  <div className="pr-4">
-                    <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="pr-3 sm:pr-4">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 )}
               </div>
@@ -165,7 +163,7 @@ const LandingPage: React.FC = () => {
               <AnimatePresence>
                 {cityOptions.length > 0 && (
                   <motion.div
-                    className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-72 overflow-auto"
+                    className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-60 sm:max-h-72 overflow-auto"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
@@ -178,17 +176,17 @@ const LandingPage: React.FC = () => {
                         onClick={() => handleCitySelect(city)}
                       >
                         <MapPin
-                          size={16}
-                          className="text-primary-500 mr-2 flex-shrink-0"
+                          size={14}
+                          className="text-primary-500 mr-2 flex-shrink-0 sm:w-4 sm:h-4"
                         />
-                        <div>
-                          <span className="font-medium text-gray-800">
+                        <div className="min-w-0 flex-1">
+                          <span className="font-medium text-gray-800 text-sm sm:text-base">
                             {city.city}
                           </span>
-                          <span className="text-gray-500 ml-2">
+                          <span className="text-gray-500 ml-2 text-sm">
                             {city.country}
                           </span>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-400 truncate">
                             {city.latitude.toFixed(4)},{" "}
                             {city.longitude.toFixed(4)}
                           </div>
@@ -202,28 +200,27 @@ const LandingPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* --- REVISED IMAGE SECTION --- */}
-        {/* We create one container that defines the cropped area */}
-        <div className="container mx-auto px-4  pb-0 mb-0">
-        <div
-          className="relative w-full"
-          style={{
-            height: "20vh", // This sets a height (e.g., 20% of the screen height).
-            overflow: "hidden", // This crops the image
-            boxShadow: "0 10px 10px -5px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          <img
-            src="/images/loadingPrev10.png"
-            alt="Room preview"
-            // These styles make the image cover the container from the top
-            className="absolute top-0 left-0 w-full h-auto"
-            style={{ objectFit: "cover", objectPosition: "top" }}
-          />
+        {/* Responsive Sneak-Peek Image Section */}
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0 mt-8 sm:mt-12 md:mt-16">
+          <div
+            className="relative w-full overflow-hidden rounded-t-lg shadow-lg"
+            style={{
+              height: "15vh", // Responsive height using viewport units
+              minHeight: "120px", // Minimum height for very small screens
+              maxHeight: "200px", // Maximum height for larger screens
+            }}
+          >
+            <img
+              src="/images/loadingPrev10.png"
+              alt="Room preview"
+              className="absolute top-0 left-0 w-full h-auto min-h-full"
+              style={{ 
+                objectFit: "cover", 
+                objectPosition: "top center"
+              }}
+            />
+          </div>
         </div>
-        </div>
-        {/* This container will hold the room preview */}
-        {/* --- END REVISED IMAGE SECTION --- */}
       </main>
 
       <Footer />

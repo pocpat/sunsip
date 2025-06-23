@@ -133,7 +133,7 @@ function formatLocalTime(unixTimestamp: number, timezoneOffset: number): string 
 }
 
 // For MVP, use this function to get mock weather data when API key is not available
-export function getMockWeatherData(latitude: number, longitude: number, city: string, country: string): WeatherData {
+function getMockWeatherData(latitude: number, longitude: number, city: string, country: string): WeatherData {
   addBreadcrumb(`Using mock weather data for ${city}, ${country}`, 'weather');
   
   // Generate random weather conditions with realistic temperature ranges

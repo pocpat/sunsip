@@ -190,7 +190,7 @@ export async function searchCities(query: string): Promise<CityOption[]> {
 }
 
 // Optimized function using our curated city database for faster search
-export function getOptimizedCityResults(query: string): CityOption[] {
+function getOptimizedCityResults(query: string): CityOption[] {
   // Handle empty query first
   const lowercaseQuery = query.toLowerCase().trim();
   
@@ -233,6 +233,6 @@ export function getOptimizedCityResults(query: string): CityOption[] {
 }
 
 // Legacy function for backward compatibility
-export function getMockCityResults(query: string): CityOption[] {
+function getMockCityResults(query: string): CityOption[] {
   return getOptimizedCityResults(query);
 }
