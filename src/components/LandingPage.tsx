@@ -158,7 +158,7 @@ const LandingPage: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             {/* Responsive Typography */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl mt-8 sm:mt-12 md:mt-16 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
               FIND YOUR PERFECT SIP
             </h1>
 
@@ -229,9 +229,9 @@ const LandingPage: React.FC = () => {
             </div>
           </motion.div>
         </div>
-
+  </main>
         {/* Responsive Sneak-Peek Image Section */}
-        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0 mt-8 sm:mt-12 md:mt-16">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0 ">
           <div
             className="relative w-full overflow-hidden rounded-t-lg shadow-lg"
             style={{
@@ -251,7 +251,7 @@ const LandingPage: React.FC = () => {
             />
           </div>
         </div>
-      </main>
+    
 
       <Footer />
     </div>
