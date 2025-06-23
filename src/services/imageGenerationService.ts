@@ -211,4 +211,4 @@ function getFallbackCityImage(
   return defaultImages[weatherType][timeOfDay];
 }
 
-export { getFallbackCityImage };
+;
