@@ -23,6 +23,7 @@ const LandingPage: React.FC = () => {
     setCityImageUrl,
     setCurrentView,
     setIsLoading,
+    setLoadingStep,
   } = useAppStore();
 
   // Debounce search query
@@ -65,7 +66,12 @@ const LandingPage: React.FC = () => {
     setQuery("");
 
     try {
-      // Get weather data first (required for other calls)
+      // Step 1: Finding city (already done, but we show the step)
+      setLoadingStep('Finding your city…');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UX
+
+      // Step 2: Get weather data
+      setLoadingStep(`Checking the weather in ${city.city}…`);
       const weatherData = await getWeatherData(
         city.latitude,
         city.longitude,
@@ -74,7 +80,21 @@ const LandingPage: React.FC = () => {
       );
       setWeatherData(weatherData);
 
-      // Parallelize image generation and cocktail suggestion
+      // Step 3: Weather analysis
+      setLoadingStep('Looking outside... Is it sunny or rainy?');
+      await new Promise(resolve => setTimeout(resolve, 800)); // Pause for effect
+
+      // Step 4: Country drink preferences
+      setLoadingStep('Country drink preferences…');
+      await new Promise(resolve => setTimeout(resolve, 600)); // Pause for effect
+
+      // Step 5: Selecting mood
+      setLoadingStep('Selecting mood…');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Pause for effect
+
+      // Step 6: Parallelize image generation and cocktail suggestion
+      setLoadingStep(`Painting a picture of ${city.city}…`);
+      
       const [cityImageUrl, cocktailData] = await Promise.all([
         generateCityImage(
           city.city,
@@ -82,16 +102,25 @@ const LandingPage: React.FC = () => {
           weatherData.condition,
           weatherData.isDay
         ),
-        getCocktailSuggestion(
-          city.countryCode,
-          weatherData.condition,
-          weatherData.temperature
-        )
+        (async () => {
+          // Add a small delay before cocktail mixing step
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          setLoadingStep('Mixing your perfect cocktail…');
+          return getCocktailSuggestion(
+            city.countryCode,
+            weatherData.condition,
+            weatherData.temperature
+          );
+        })()
       ]);
 
       // Set the results
       setCityImageUrl(cityImageUrl);
       setCocktailData(cocktailData);
+
+      // Step 7: Final touches
+      setLoadingStep('Almost there... Adding the final touches!');
+      await new Promise(resolve => setTimeout(resolve, 800)); // Final pause
 
       // Switch to result view
       setCurrentView("result");
@@ -99,6 +128,7 @@ const LandingPage: React.FC = () => {
       console.error("Error processing city selection:", error);
     } finally {
       setIsLoading(false);
+      setLoadingStep('');
     }
   };
 

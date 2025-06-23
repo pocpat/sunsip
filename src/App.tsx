@@ -9,9 +9,10 @@ import UserDashboard from './components/UserDashboard';
 import BoltBadge from './components/BoltBadge';
 import { useAuthStore } from './store/authStore';
 import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle } from 'lucide-react';
 
 function App() {
-  const { isLoading, currentView, showAuthModal } = useAppStore();
+  const { isLoading, currentView, showAuthModal, loadingStep } = useAppStore();
   const { isAuthenticated } = useAuthStore();
 
   // Preload images for better UX
@@ -33,6 +34,30 @@ function App() {
     preloadImages();
   }, []);
 
+  // Define all loading steps in order
+  const loadingSteps = [
+    'Finding your city…',
+    'Checking the weather',
+    'Looking outside... Is it sunny or rainy?',
+    'Country drink preferences',
+    'Selecting mood',
+    'Painting a picture',
+    'Mixing your perfect cocktail…',
+    'Almost there... Adding the final touches!'
+  ];
+
+  // Function to check if a step is completed
+  const isStepCompleted = (step: string) => {
+    const currentStepIndex = loadingSteps.findIndex(s => loadingStep.includes(s.split('…')[0]) || loadingStep.includes(s));
+    const stepIndex = loadingSteps.findIndex(s => s === step);
+    return currentStepIndex > stepIndex;
+  };
+
+  // Function to check if a step is current
+  const isCurrentStep = (step: string) => {
+    return loadingStep.includes(step.split('…')[0]) || loadingStep.includes(step);
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -49,7 +74,7 @@ function App() {
         </AnimatePresence>
       </main>
       
-      {/* Subtle Loading Overlay */}
+      {/* Enhanced Loading Overlay with Step-by-Step Progress */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -61,7 +86,7 @@ function App() {
             transition={{ duration: 0.3 }}
           >
             <motion.div
-              className="bg-white rounded-lg shadow-xl p-8 flex flex-col items-center space-y-4"
+              className="bg-white rounded-lg shadow-xl p-8 flex flex-col items-center space-y-6 max-w-md w-full mx-4"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -74,12 +99,46 @@ function App() {
               </div>
               
               <div className="text-center">
-                <h3 className="text-lg font-display font-semibold text-gray-800 mb-1">
+                <h3 className="text-lg font-display font-semibold text-gray-800 mb-4">
                   Creating your SunSip experience
                 </h3>
-                <p className="text-sm text-gray-600">
-                  Finding the perfect cocktail for your weather...
-                </p>
+                
+                {/* Loading Steps */}
+                <div className="space-y-3 text-left">
+                  {loadingSteps.map((step, index) => {
+                    const isCompleted = isStepCompleted(step);
+                    const isCurrent = isCurrentStep(step);
+                    
+                    return (
+                      <motion.div
+                        key={index}
+                        className={`flex items-center space-x-3 transition-all duration-300 ${
+                          isCompleted || isCurrent ? 'opacity-100' : 'opacity-40'
+                        }`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: isCompleted || isCurrent ? 1 : 0.4, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                      >
+                        <div className="flex-shrink-0">
+                          {isCompleted ? (
+                            <CheckCircle size={16} className="text-green-500" />
+                          ) : isCurrent ? (
+                            <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                          )}
+                        </div>
+                        <span className={`text-sm ${
+                          isCompleted ? 'text-green-600 font-medium' : 
+                          isCurrent ? 'text-primary-600 font-medium' : 
+                          'text-gray-500'
+                        }`}>
+                          {isCurrent && loadingStep !== step ? loadingStep : step}
+                        </span>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             </motion.div>
           </motion.div>
