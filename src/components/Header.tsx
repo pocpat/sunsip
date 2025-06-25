@@ -18,6 +18,7 @@ const Header: React.FC = () => {
   const { resetApp, changeView, currentView, isPortfolioMode, setIsPortfolioMode } = useAppStore();
   const { isAuthenticated, logout } = useAuthStore();
   const [showMenu, setShowMenu] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close menu
@@ -73,6 +74,7 @@ const Header: React.FC = () => {
     <header className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6">
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex justify-between items-center">
+          
           {/* Logo with Portfolio Mode Indicator */}
           <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={handleReset}>
             <Sunset size={24} className="text-accent-300 sm:w-7 sm:h-7" />

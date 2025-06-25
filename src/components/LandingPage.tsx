@@ -22,7 +22,7 @@ const LandingPage: React.FC = () => {
     setWeatherData,
     setCocktailData,
     setCityImageUrl,
-    changeView, // Use the new function
+    changeView, 
     setIsLoading,
     setLoadingStep,
   } = useAppStore();

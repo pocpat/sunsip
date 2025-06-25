@@ -4,7 +4,7 @@ import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import ResultsPage from './components/ResultsPage';
 import AuthModal from './components/auth/AuthModal';
-import SentryTestButton from './components/SentryTestButton';
+//import SentryTestButton from './components/SentryTestButton';
 import UserDashboard from './components/UserDashboard';
 import BoltBadge from './components/BoltBadge';
 import { useAuthStore } from './store/authStore';
@@ -69,13 +69,19 @@ function App() {
       <Header />
       
       <main className="relative min-h-screen" style={{ backgroundColor: '#819077' }}> {/* Moved background color here */}
-        <AnimatePresence mode="sync"> {/* Changed mode to "sync" */}
+        <AnimatePresence mode="sync"> 
           {currentView === 'search' && (
             <motion.div
-              key="search" // Key should match currentView for AnimatePresence
-              {...landingPageProps} // Apply all props from the hook
-              style={{ ...landingPageProps.style, zIndex: currentView === 'search' ? 2 : 1 }} // Higher zIndex for the entering page
-            >
+              key="search" 
+              {...landingPageProps} 
+ style={{
+                ...landingPageProps.style,
+                zIndex: currentView === 'search' ? 2 : 1,
+                position: 'absolute',
+                width: '100%',
+                top: 0,
+                left: 0,
+              }}            >
               <LandingPage />
             </motion.div>
           )}
@@ -84,8 +90,14 @@ function App() {
             <motion.div 
               key="dashboard" // Key should match currentView for AnimatePresence
               {...dashboardPageProps} // Apply all props from the hook
-              style={{ ...dashboardPageProps.style, zIndex: currentView === 'dashboard' ? 2 : 1 }} // Higher zIndex for the entering page
-            >
+ style={{
+                ...dashboardPageProps.style,
+                zIndex: currentView === 'dashboard' ? 2 : 1,
+                position: 'absolute',
+                width: '100%',
+                top: 0,
+                left: 0,
+              }}            >
               <UserDashboard />
             </motion.div>
           )}
@@ -94,8 +106,14 @@ function App() {
             <motion.div
               key="result" // Key should match currentView for AnimatePresence
               {...resultsPageProps} // Apply all props from the hook
-              style={{ ...resultsPageProps.style, zIndex: currentView === 'result' ? 2 : 1 }} // Higher zIndex for the entering page
-            >
+  style={{
+                ...resultsPageProps.style,
+                zIndex: currentView === 'result' ? 2 : 1,
+                position: 'absolute',
+                width: '100%',
+                top: 0,
+                left: 0,
+              }}            >
               <ResultsPage />
             </motion.div>
           )}
