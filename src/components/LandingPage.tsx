@@ -22,10 +22,9 @@ const LandingPage: React.FC = () => {
     setWeatherData,
     setCocktailData,
     setCityImageUrl,
-    setCurrentView,
+    changeView, // Use the new function
     setIsLoading,
     setLoadingStep,
-    currentView,
   } = useAppStore();
 
   // Debounce search query
@@ -66,6 +65,7 @@ const LandingPage: React.FC = () => {
     setSelectedCity(city);
     setCityOptions([]);
     setQuery("");
+ 
 
     try {
       // Step 1: Finding city (already done, but we show the step)
@@ -124,8 +124,8 @@ const LandingPage: React.FC = () => {
       setLoadingStep('Almost there... Adding the final touches!');
       await new Promise(resolve => setTimeout(resolve, 800)); // Final pause
 
-      // Switch to result view and trigger animation
-      setCurrentView("result");
+      // Call the new navigation function. No need to set direction here.
+      changeView("result");
       setTimeout(() => setShowPeek(false), 700); // 700ms matches animation duration
     } catch (error) {
       console.error("Error processing city selection:", error);
@@ -274,5 +274,5 @@ const LandingPage: React.FC = () => {
     </div>
   );
 };
-
 export default LandingPage;
+

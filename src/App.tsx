@@ -10,9 +10,10 @@ import BoltBadge from './components/BoltBadge';
 import { useAuthStore } from './store/authStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
+import { usePageTransition } from './hooks/usePageTransition'; // Import the new hook
 
 function App() {
-  const { isLoading, currentView, showAuthModal, loadingStep } = useAppStore();
+  const { isLoading, currentView, showAuthModal, loadingStep, transitionDirection } = useAppStore();
   const { isAuthenticated } = useAuthStore();
 
   // Preload images for better UX
@@ -58,37 +59,42 @@ function App() {
     return loadingStep.includes(step.split('…')[0]) || loadingStep.includes(step);
   };
 
+  // Get transition props for each page using the custom hook
+  const landingPageProps = usePageTransition('landing', transitionDirection);
+  const resultsPageProps = usePageTransition('results', transitionDirection);
+  const dashboardPageProps = usePageTransition('dashboard', transitionDirection);
+
   return (
     <div className="min-h-screen">
       <Header />
       
-      <main className="relative">
-        <AnimatePresence mode="wait">
-          {currentView === 'search' && <LandingPage key="landing" />}
-          {currentView === 'dashboard' && isAuthenticated && (
-            <div key="dashboard" className="min-h-screen pt-24" style={{ backgroundColor: '#819077' }}>
-              <UserDashboard />
-            </div>
+      <main className="relative min-h-screen" style={{ backgroundColor: '#819077' }}> {/* Moved background color here */}
+        <AnimatePresence mode="sync"> {/* Changed mode to "sync" */}
+          {currentView === 'search' && (
+            <motion.div
+              key="search" // Key should match currentView for AnimatePresence
+              {...landingPageProps} // Apply all props from the hook
+              style={{ ...landingPageProps.style, zIndex: currentView === 'search' ? 2 : 1 }} // Higher zIndex for the entering page
+            >
+              <LandingPage />
+            </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Result page overlay */}
-        <AnimatePresence>
+          {currentView === 'dashboard' && isAuthenticated && ( // Re-added isAuthenticated condition here
+            <motion.div 
+              key="dashboard" // Key should match currentView for AnimatePresence
+              {...dashboardPageProps} // Apply all props from the hook
+              style={{ ...dashboardPageProps.style, zIndex: currentView === 'dashboard' ? 2 : 1 }} // Higher zIndex for the entering page
+            >
+              <UserDashboard />
+            </motion.div>
+          )}
+        
           {currentView === 'result' && (
             <motion.div
-              key="results"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-100%" }}
-              transition={{ duration: 0.7, ease: "easeInOut" }}
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: 0,
-                top: 0,
-                zIndex: 2,
-              }}
+              key="result" // Key should match currentView for AnimatePresence
+              {...resultsPageProps} // Apply all props from the hook
+              style={{ ...resultsPageProps.style, zIndex: currentView === 'result' ? 2 : 1 }} // Higher zIndex for the entering page
             >
               <ResultsPage />
             </motion.div>
@@ -179,3 +185,4 @@ function App() {
 }
 
 export default App;
+

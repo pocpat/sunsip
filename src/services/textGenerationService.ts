@@ -38,7 +38,7 @@ async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<an
           //'HTTP-Referer': window.location.origin,
           //'X-Title': 'SunSip - Weather & Cocktails'
         },
-        timeout: 30000 // Increased timeout to 30 seconds
+        timeout: 60000 // Increased timeout to 30 seconds
       }
     );
 

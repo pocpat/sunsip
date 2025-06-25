@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 const Header: React.FC = () => {
-  const { resetApp, setShowAuthModal, currentView, setCurrentView, isPortfolioMode, setIsPortfolioMode } = useAppStore();
+  const { resetApp, changeView, currentView, isPortfolioMode, setIsPortfolioMode } = useAppStore();
   const { isAuthenticated, logout } = useAuthStore();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -37,10 +37,13 @@ const Header: React.FC = () => {
     };
   }, [showMenu]);
 
+
   const handleReset = () => {
+    // Logo click should do the same as "Start Over"
     resetApp();
     setShowMenu(false);
   };
+
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -52,7 +55,7 @@ const Header: React.FC = () => {
   };
 
   const handleDashboardClick = () => {
-    setCurrentView('dashboard');
+    changeView('dashboard');
     setShowMenu(false);
   };
 
@@ -61,13 +64,8 @@ const Header: React.FC = () => {
     setShowMenu(false);
   };
 
-  const handleSave = () => {
-    // This would trigger save functionality
-    console.log('Save clicked');
-    setShowMenu(false);
-  };
-
   const handleStartOver = () => {
+    // resetApp now handles its own direction logic
     resetApp();
   };
 
@@ -92,6 +90,7 @@ const Header: React.FC = () => {
               </motion.div>
             )}
           </div>
+
           
           {/* Right side buttons */}
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -124,7 +123,7 @@ const Header: React.FC = () => {
                 {showMenu && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    animate={{ opacity: 1, scale: 1, y: -0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                     transition={{ duration: 0.2 }}
                     className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2"
