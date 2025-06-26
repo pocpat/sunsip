@@ -125,26 +125,28 @@ const LandingPage = () => {
     <div className="flex flex-col flex-grow" style={{ minHeight: "66vh" }}>
       <div className="flex flex-col justify-center h-full" style={{ flex: 1 }}>
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24">
+
+
+
           {/* Titles block, left-aligned */}
           <div className="max-w-3xl text-left mx-0">
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap">
-                FIND YOUR PERFECT SIP
-              </h1>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap">
-                Discover a cocktail that matches your city's vibe and weather
-              </p>
-            </motion.p>
+          <motion.h1
+  initial={{ opacity: 0, y: 50 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1, delay: 0.2, ease: "easeInOut" }}
+  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap"
+>
+  FIND YOUR PERFECT SIP
+</motion.h1>
+
+<motion.p
+  initial={{ opacity: 0, y: 65 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1, delay: 0.3, ease: "easeInOut" }}
+  className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
+>
+  Discover a cocktail that matches your city's vibe and weather
+</motion.p>
           </div>
 
 

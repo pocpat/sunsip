@@ -20,7 +20,7 @@ const ResultsPage: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen relative"
+      className="min-h-screen overflow-hidden relative"
       style={{ backgroundColor: '#819077' }}
     >
       <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 py-6 sm:py-8 pt-20 sm:pt-24">
