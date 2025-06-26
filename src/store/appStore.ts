@@ -109,12 +109,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     let direction = "100%"; // Default to UP (e.g., search -> result)
 
     const transitions = {
-      // 'search-result': '100%',   // lo-re: UP
-      // 'search-dashboard': '-100%', // lo-db: DOWN
-      // 'result-search': '-100%',   // re-lo: DOWN
-      // 'result-dashboard': '-100%', // re-db: DOWN
-      // 'dashboard-search': '100%',   // db-lo: UP
-      // 'dashboard-result': '100%', // db-re: UP
+
       'search-result': '100%',   // lo-re: UP
       'search-dashboard': '100%', // lo-db: DOWN
       'result-search': '100%',   // re-lo: DOWN

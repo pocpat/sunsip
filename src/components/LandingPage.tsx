@@ -133,7 +133,7 @@ const LandingPage = () => {
           <motion.h1
   initial={{ opacity: 0, y: 50 }}
   animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 1, delay: 0.2, ease: "easeInOut" }}
+  transition={{ duration: 1.6, delay: 0.2, ease: "easeInOut" }}
   className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap"
 >
   FIND YOUR PERFECT SIP
@@ -142,7 +142,7 @@ const LandingPage = () => {
 <motion.p
   initial={{ opacity: 0, y: 65 }}
   animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 1, delay: 0.3, ease: "easeInOut" }}
+  transition={{ duration: 1.6, delay: 0.3, ease: "easeInOut" }}
   className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
 >
   Discover a cocktail that matches your city's vibe and weather
@@ -152,6 +152,12 @@ const LandingPage = () => {
 
 
               {/* ...your search input code... */}
+          <motion.div
+  initial={{ opacity: 0, y: 80 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1.6, delay: 0.4, ease: "easeInOut" }}
+  className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
+>
             <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg">
               <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
                 <div className="pl-3 sm:pl-4">
@@ -210,7 +216,10 @@ const LandingPage = () => {
                 )}
               </AnimatePresence>
             </div>
-        
+  </motion.div>
+
+
+          
         </div>
       </div>
     {/* Peek image and footer are now part of the static layout */}
