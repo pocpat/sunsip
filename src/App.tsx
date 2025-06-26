@@ -70,15 +70,16 @@ function App() {
   // Calculate initialY and exitY based on transitionDirection
   // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
   const initialY = transitionDirection; 
+ 
   // exitY is where the outgoing page goes (opposite of initialY for a "push" effect)
-  const exitY = transitionDirection === '100%' ? '-100%' : '100%'; 
-
+  const exitY = '100%'; // transitionDirection === '100%' ? '-100%' : '100%'; 
+  console.log("Transition direction:", transitionDirection, "Initial Y:", initialY, "Exit Y:", exitY, "Current View:", currentView);
   return (
     <div className="min-h-screen">
       <Header />
       
       <main className="relative min-h-screen" style={{ backgroundColor: '#819077' }}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           {currentView === 'search' && (
             <motion.div 
               key="search"
@@ -86,7 +87,7 @@ function App() {
               animate={{ y: 0 }}
             exit={{ y: exitY }}
             transition={pageTransition}
-               style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: currentView === 'search' ? 2 : 1 }}
+               style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: 1 }}
               // Special fade-out for lo->re transition
               // When exiting, if transitionDirection is UP ('100%') and it's the search page, fade out quickly.
 
@@ -103,7 +104,7 @@ function App() {
               animate={{ y: 0 }}
               exit={{ y: exitY }}
               transition={pageTransition}
-              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: currentView === 'dashboard' ? 2 : 1 }}
+              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: 1 }}
             >
               <UserDashboard />
             </motion.div>
@@ -115,7 +116,7 @@ function App() {
               initial={{ y: initialY }}
               animate={{ y: 0 }}
               exit={{ y: exitY }}
-              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: currentView === 'result' ? 2 : 1 }}
+              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: 1 }}
              transition={pageTransition}
             >
               <ResultsPage />

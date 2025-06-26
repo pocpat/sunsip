@@ -103,21 +103,30 @@ export const useAppStore = create<AppState>((set, get) => ({
   
   changeView: (newView) => {
     const currentView = get().currentView;
+    
     if (currentView === newView) return; // Don't do anything if we're already there
 
-    let direction = '100%'; // Default to UP (e.g., search -> result)
+    let direction = "100%"; // Default to UP (e.g., search -> result)
 
     const transitions = {
+      // 'search-result': '100%',   // lo-re: UP
+      // 'search-dashboard': '-100%', // lo-db: DOWN
+      // 'result-search': '-100%',   // re-lo: DOWN
+      // 'result-dashboard': '-100%', // re-db: DOWN
+      // 'dashboard-search': '100%',   // db-lo: UP
+      // 'dashboard-result': '100%', // db-re: UP
       'search-result': '100%',   // lo-re: UP
-      'search-dashboard': '-100%', // lo-db: DOWN
-      'result-search': '-100%',   // re-lo: DOWN
-      'result-dashboard': '-100%', // re-db: DOWN
+      'search-dashboard': '100%', // lo-db: DOWN
+      'result-search': '100%',   // re-lo: DOWN
+      'result-dashboard': '100%', // re-db: DOWN
       'dashboard-search': '100%',   // db-lo: UP
       'dashboard-result': '100%', // db-re: UP
     };
     
     const transitionKey = `${currentView}-${newView}` as keyof typeof transitions;
     direction = transitions[transitionKey] || direction;
+    console.log(`Transitioning from ${currentView} to ${newView} with key: ${transitionKey}, direction: ${direction}`);
+
     
     set({ currentView: newView, transitionDirection: direction });
   },
