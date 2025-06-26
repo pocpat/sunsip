@@ -70,10 +70,12 @@ function App() {
   // Calculate initialY and exitY based on transitionDirection
   // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
   const initialY = transitionDirection; 
- 
+
   // exitY is where the outgoing page goes (opposite of initialY for a "push" effect)
-  const exitY = '100%'; // transitionDirection === '100%' ? '-100%' : '100%'; 
-  console.log("Transition direction:", transitionDirection, "Initial Y:", initialY, "Exit Y:", exitY, "Current View:", currentView);
+  const exitY = transitionDirection === '100%' ? '-100%' : '100%';  
+ useEffect(() => {
+    console.log("Transition direction:", transitionDirection, "Initial Y:", initialY, "Exit Y:", exitY, "Current View:", currentView);
+  }, [transitionDirection, initialY, exitY, currentView]);
   return (
     <div className="min-h-screen">
       <Header />

@@ -109,18 +109,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     let direction = "100%"; // Default to UP (e.g., search -> result)
 
     const transitions = {
-      // 'search-result': '100%',   // lo-re: UP
-      // 'search-dashboard': '-100%', // lo-db: DOWN
-      // 'result-search': '-100%',   // re-lo: DOWN
-      // 'result-dashboard': '-100%', // re-db: DOWN
-      // 'dashboard-search': '100%',   // db-lo: UP
-      // 'dashboard-result': '100%', // db-re: UP
       'search-result': '100%',   // lo-re: UP
-      'search-dashboard': '100%', // lo-db: DOWN
-      'result-search': '100%',   // re-lo: DOWN
-      'result-dashboard': '100%', // re-db: DOWN
+      'search-dashboard': '-100%', // lo-db: DOWN
+      'result-search': '-100%',   // re-lo: DOWN
+      'result-dashboard': '-100%', // re-db: DOWN
       'dashboard-search': '100%',   // db-lo: UP
       'dashboard-result': '100%', // db-re: UP
+
+
+
+       //  UP
+      // 'search-result': '100%',  
+      // 'search-dashboard': '100%', 
+      // 'result-search': '100%',   
+      // 'result-dashboard': '100%', 
+      // 'dashboard-search': '100%',   
+      // 'dashboard-result': '100%', 
     };
     
     const transitionKey = `${currentView}-${newView}` as keyof typeof transitions;
@@ -131,6 +135,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ currentView: newView, transitionDirection: direction });
   },
 
+  
   resetApp: () => {
     // Let changeView handle the direction for the reset to 'search'
     get().changeView('search');
