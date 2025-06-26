@@ -14,6 +14,13 @@ function App() {
   const { isLoading, currentView, showAuthModal, loadingStep, transitionDirection } = useAppStore();
   const { isAuthenticated } = useAuthStore();
 
+  useEffect(() => {
+    document.body.classList.add("transitioning");
+    return () => {
+      document.body.classList.remove("transitioning");
+    };
+  }, [currentView, transitionDirection]);
+  
   // Preload images for better UX
   useEffect(() => {
     const preloadImages = async () => {
@@ -104,7 +111,7 @@ function App() {
               animate={{ y: 0 }}
               exit={{ y: exitY }}
               transition={pageTransition}
-              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: 1 }}
+              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow:"hidden",zIndex: 1 }}
             >
               <UserDashboard />
             </motion.div>
