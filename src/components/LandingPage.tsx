@@ -8,12 +8,11 @@ import { Search, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "./Footer";
 
-const LandingPage: React.FC = () => {
+const LandingPage = () => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [showPeek, setShowPeek] = useState(true);
 
   const {
     cityOptions,
@@ -22,10 +21,9 @@ const LandingPage: React.FC = () => {
     setWeatherData,
     setCocktailData,
     setCityImageUrl,
-    setCurrentView,
+    changeView, 
     setIsLoading,
     setLoadingStep,
-    currentView,
   } = useAppStore();
 
   // Debounce search query
@@ -66,13 +64,9 @@ const LandingPage: React.FC = () => {
     setSelectedCity(city);
     setCityOptions([]);
     setQuery("");
-
     try {
-      // Step 1: Finding city (already done, but we show the step)
       setLoadingStep('Finding your city…');
-      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UX
-
-      // Step 2: Get weather data
+      await new Promise(resolve => setTimeout(resolve, 500));
       setLoadingStep(`Checking the weather in ${city.city}…`);
       const weatherData = await getWeatherData(
         city.latitude,
@@ -81,22 +75,13 @@ const LandingPage: React.FC = () => {
         city.country
       );
       setWeatherData(weatherData);
-
-      // Step 3: Weather analysis
       setLoadingStep('Looking outside... Is it sunny or rainy?');
-      await new Promise(resolve => setTimeout(resolve, 800)); // Pause for effect
-
-      // Step 4: Country drink preferences
+      await new Promise(resolve => setTimeout(resolve, 800));
       setLoadingStep('Country drink preferences…');
-      await new Promise(resolve => setTimeout(resolve, 600)); // Pause for effect
-
-      // Step 5: Selecting mood
+      await new Promise(resolve => setTimeout(resolve, 600));
       setLoadingStep('Selecting mood…');
-      await new Promise(resolve => setTimeout(resolve, 500)); // Pause for effect
-
-      // Step 6: Parallelize image generation and cocktail suggestion
+      await new Promise(resolve => setTimeout(resolve, 500));
       setLoadingStep(`Painting a picture of ${city.city}…`);
-      
       const [cityImageUrl, cocktailData] = await Promise.all([
         generateCityImage(
           city.city,
@@ -105,7 +90,6 @@ const LandingPage: React.FC = () => {
           weatherData.isDay
         ),
         (async () => {
-          // Add a small delay before cocktail mixing step
           await new Promise(resolve => setTimeout(resolve, 1000));
           setLoadingStep('Mixing your perfect cocktail…');
           return getCocktailSuggestion(
@@ -115,18 +99,11 @@ const LandingPage: React.FC = () => {
           );
         })()
       ]);
-
-      // Set the results
       setCityImageUrl(cityImageUrl);
       setCocktailData(cocktailData);
-
-      // Step 7: Final touches
       setLoadingStep('Almost there... Adding the final touches!');
-      await new Promise(resolve => setTimeout(resolve, 800)); // Final pause
-
-      // Switch to result view and trigger animation
-      setCurrentView("result");
-      setTimeout(() => setShowPeek(false), 700); // 700ms matches animation duration
+      await new Promise(resolve => setTimeout(resolve, 800));
+      changeView("result");
     } catch (error) {
       console.error("Error processing city selection:", error);
     } finally {
@@ -135,41 +112,44 @@ const LandingPage: React.FC = () => {
     }
   };
 
-  const handleInputFocus = () => {
-    setIsFocused(true);
-  };
+  const handleInputFocus = () => setIsFocused(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
-    if (!isFocused) {
-      setIsFocused(true);
-    }
+    if (!isFocused) setIsFocused(true);
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "#819077" }}
-    >
-      {/* Main Content */}
-      <main className="flex-grow pt-20 sm:pt-24 md:pt-32 lg:pt-40">
+  <main className="min-h-screen flex flex-col" style={{ backgroundColor: "#819077" }}>
+    {/* Main Content: 2/3 of the screen */}
+    <div className="flex flex-col flex-grow" style={{ minHeight: "66vh" }}>
+      <div className="flex flex-col justify-center h-full" style={{ flex: 1 }}>
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24">
-          <motion.div
-            className="max-w-4xl"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            {/* Responsive Typography */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
-              FIND YOUR PERFECT SIP
-            </h1>
+          {/* Titles block, left-aligned */}
+          <div className="max-w-3xl text-left mx-0">
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap">
+                FIND YOUR PERFECT SIP
+              </h1>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap">
+                Discover a cocktail that matches your city's vibe and weather
+              </p>
+            </motion.p>
+          </div>
 
-            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 leading-relaxed max-w-3xl">
-              Discover a cocktail that matches your city's vibe and weather
-            </p>
 
-            {/* Responsive Search Input */}
+
+              {/* ...your search input code... */}
             <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg">
               <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
                 <div className="pl-3 sm:pl-4">
@@ -191,8 +171,6 @@ const LandingPage: React.FC = () => {
                   </div>
                 )}
               </div>
-
-              {/* City Options Dropdown */}
               <AnimatePresence>
                 {cityOptions.length > 0 && (
                   <motion.div
@@ -230,48 +208,25 @@ const LandingPage: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
+        
         </div>
-      </main>
-
-      {/* Peek image and result overlay */}
-      <div className="relative w-full">
-        <AnimatePresence>
-          {showPeek && (
-            <motion.div
-              key="peek"
-              className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0"
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ position: "relative", zIndex: 1 }}
-            >
-              <div
-                className="relative w-full overflow-hidden rounded-t-lg shadow-lg"
-                style={{
-                  height: "15vh",
-                  minHeight: "120px",
-                  maxHeight: "200px",
-                }}
-              >
-                <img
-                  src="/images/loadingPrev10.png"
-                  alt="Room preview"
-                  className="absolute top-0 left-0 w-full h-auto min-h-full"
-                  style={{ 
-                    objectFit: "cover", 
-                    objectPosition: "top center"
-                  }}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
-
+    {/* Peek image and footer are now part of the static layout */}
+      <div className="relative w-full">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pb-0 mb-0" style={{ position: "relative", zIndex: 1 }}>
+          <div className="relative w-full overflow-hidden rounded-t-lg shadow-lg" style={{ height: "15vh", minHeight: "120px", maxHeight: "200px" }}>
+            <img
+              src="/images/loadingPrev10.png"
+              alt="Room preview"
+              className="absolute top-0 left-0 w-full h-auto min-h-full"
+              style={{ objectFit: "cover", objectPosition: "top center" }}
+            />
+          </div>
+        </div>
+           </div>
+      </div>
       <Footer />
-    </div>
+    </main>
   );
 };
 

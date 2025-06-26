@@ -10,20 +10,18 @@ import SavedCombinations from './SavedCombinations';
 import Footer from './Footer';
 
 const ResultsPage: React.FC = () => {
-  const { resetApp } = useAppStore();
+  const { resetApp, changeView } = useAppStore();
   const { isAuthenticated } = useAuthStore();
 
   const handleNewSearch = () => {
-    resetApp();
+    changeView("search"); // Use changeView to go back to search
+    resetApp(); // Reset app data
   };
 
   return (
-    <motion.div 
+    <div 
       className="min-h-screen relative"
       style={{ backgroundColor: '#819077' }}
-      initial={{ y: '100%' }}
-      animate={{ y: 0 }}
-      transition={{ duration: 1.4, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 py-6 sm:py-8 pt-20 sm:pt-24">
         <div className="flex flex-col items-center">
@@ -50,7 +48,7 @@ const ResultsPage: React.FC = () => {
       </div>
 
       <Footer />
-    </motion.div>
+    </div>
   );
 };
 

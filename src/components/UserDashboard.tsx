@@ -17,9 +17,12 @@ import {
   Cloud,
   Edit3,
   Save,
-  X
+  X,
+  ArrowLeft, // Import ArrowLeft
+  House as HouseIcon // Import HouseIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '../store/appStore'; // Import useAppStore
 
 interface TopCombination {
   id: string;
@@ -33,6 +36,7 @@ interface TopCombination {
 
 const UserDashboard: React.FC = () => {
   const { user, savedCombinations, setSavedCombinations, userPreferences, setUserPreferences } = useAuthStore();
+  const { changeView, resetApp } = useAppStore(); // Destructure changeView and resetApp from useAppStore
   const [topCombinations, setTopCombinations] = useState<TopCombination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditingPreferences, setIsEditingPreferences] = useState(false);
@@ -161,6 +165,14 @@ const UserDashboard: React.FC = () => {
     return { totalCombinations, averageRating, totalAccesses, ratedCombinations };
   };
 
+  const handleGoBackToResults = () => {
+    changeView('result');
+  };
+
+  const handleGoBackToLanding = () => {
+    resetApp(); // resetApp handles changing view to 'search'
+  };
+
   if (!user) {
     return null;
   }
@@ -176,7 +188,9 @@ const UserDashboard: React.FC = () => {
   const stats = getStats();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className=" bg-[#819077] max-w-7xl mx-auto px-4 py-8">
+
+
       {/* Header */}
       <motion.div 
         className="mb-8"
@@ -185,7 +199,7 @@ const UserDashboard: React.FC = () => {
         transition={{ duration: 1.4 }}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 mt-20">
             <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
               <User size={32} className="text-white" />
             </div>
@@ -458,3 +472,4 @@ const UserDashboard: React.FC = () => {
 };
 
 export default UserDashboard;
+

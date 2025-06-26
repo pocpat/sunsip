@@ -102,8 +102,11 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
 
   if (!showRoom) {
     return (
-      <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 rounded-lg shadow-xl font-inter flex items-center justify-center">
-        <div className="text-gray-500 text-lg">Loading room...</div>
+      <div
+        className="relative w-full aspect-[16/9] overflow-hidden rounded-lg shadow-xl font-inter flex items-center justify-center"
+        style={{ backgroundColor: '#819077' }} // Use the consistent background color
+      >
+        {/* No text or placeholder, just the background */}
       </div>
     );
   }
@@ -196,7 +199,7 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
           <motion.img
             src={cocktailData.imageUrl}
             alt={cocktailData.name}
-            className="absolute top-[42%] right-[10%] w-[16%] rounded-lg shadow-lg z-10"
+            className="absolute right-[10%] bottom-[20%] w-[16%] rounded-lg shadow-lg z-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}

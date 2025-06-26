@@ -31,6 +31,8 @@ export type CityOption = {
   longitude: number;
 };
 
+export type AppView = 'search' | 'result' | 'dashboard';
+
 type AppState = {
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
@@ -38,8 +40,7 @@ type AppState = {
   loadingStep: string;
   setLoadingStep: (step: string) => void;
   
-  currentView: 'search' | 'result' | 'dashboard';
-  setCurrentView: (view: 'search' | 'result' | 'dashboard') => void;
+  currentView: AppView;
   
   cityOptions: CityOption[];
   setCityOptions: (options: CityOption[]) => void;
@@ -62,10 +63,13 @@ type AppState = {
   isPortfolioMode: boolean;
   setIsPortfolioMode: (mode: boolean) => void;
   
+  transitionDirection: string; // This is now managed internally by changeView
+  
+  changeView: (newView: AppView) => void; // New centralized navigation function
   resetApp: () => void;
 };
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   isLoading: false,
   setIsLoading: (isLoading) => set({ isLoading }),
   
@@ -73,7 +77,6 @@ export const useAppStore = create<AppState>((set) => ({
   setLoadingStep: (step) => set({ loadingStep: step }),
   
   currentView: 'search',
-  setCurrentView: (view) => set({ currentView: view }),
   
   cityOptions: [],
   setCityOptions: (options) => set({ cityOptions: options }),
@@ -96,12 +99,50 @@ export const useAppStore = create<AppState>((set) => ({
   isPortfolioMode: import.meta.env.VITE_PORTFOLIO_MODE_ENABLED === 'true',
   setIsPortfolioMode: (mode) => set({ isPortfolioMode: mode }),
   
-  resetApp: () => set({
-    currentView: 'search',
-    selectedCity: undefined,
-    weatherData: undefined,
-    cocktailData: undefined,
-    cityImageUrl: undefined,
-    loadingStep: '',
-  }),
+  transitionDirection: "-100%", // Default initial direction
+  
+  changeView: (newView) => {
+    const currentView = get().currentView;
+    
+    if (currentView === newView) return; // Don't do anything if we're already there
+
+    let direction = "100%"; // Default to UP (e.g., search -> result)
+
+    const transitions = {
+      // 'search-result': '100%',   // lo-re: UP
+      // 'search-dashboard': '-100%', // lo-db: DOWN
+      // 'result-search': '-100%',   // re-lo: DOWN
+      // 'result-dashboard': '-100%', // re-db: DOWN
+      // 'dashboard-search': '100%',   // db-lo: UP
+      // 'dashboard-result': '100%', // db-re: UP
+      'search-result': '100%',   // lo-re: UP
+      'search-dashboard': '100%', // lo-db: DOWN
+      'result-search': '100%',   // re-lo: DOWN
+      'result-dashboard': '100%', // re-db: DOWN
+      'dashboard-search': '100%',   // db-lo: UP
+      'dashboard-result': '100%', // db-re: UP
+    };
+    
+    const transitionKey = `${currentView}-${newView}` as keyof typeof transitions;
+    direction = transitions[transitionKey] || direction;
+    console.log(`Transitioning from ${currentView} to ${newView} with key: ${transitionKey}, direction: ${direction}`);
+
+    
+    set({ currentView: newView, transitionDirection: direction });
+  },
+
+  resetApp: () => {
+    // Let changeView handle the direction for the reset to 'search'
+    get().changeView('search');
+
+    // Then, reset all application data
+    set({
+      selectedCity: undefined,
+      weatherData: undefined,
+      cocktailData: undefined,
+      cityImageUrl: undefined,
+      loadingStep: '',
+      // Note: currentView is already set by changeView
+    });
+  },
 }));
