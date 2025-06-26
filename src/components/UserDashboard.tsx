@@ -188,7 +188,7 @@ const UserDashboard: React.FC = () => {
   const stats = getStats();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className=" bg-[#819077] max-w-7xl mx-auto px-4 py-8">
 
 
       {/* Header */}
@@ -472,3 +472,4 @@ const UserDashboard: React.FC = () => {
 };
 
 export default UserDashboard;
+

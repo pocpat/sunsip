@@ -1,16 +1,14 @@
-import { useEffect } from 'react';
-import { useAppStore } from './store/appStore';
-import Header from './components/Header';
-import LandingPage from './components/LandingPage';
-import ResultsPage from './components/ResultsPage';
-import AuthModal from './components/auth/AuthModal';
-//import SentryTestButton from './components/SentryTestButton';
-import UserDashboard from './components/UserDashboard';
-import BoltBadge from './components/BoltBadge';
-import { useAuthStore } from './store/authStore';
-import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle } from 'lucide-react';
-import { usePageTransition } from './hooks/usePageTransition'; // Import the new hook
+import { useEffect } from "react";
+import { useAppStore } from "./store/appStore";
+import Header from "./components/Header";
+import LandingPage from "./components/LandingPage";
+import ResultsPage from "./components/ResultsPage";
+import AuthModal from "./components/auth/AuthModal";
+import UserDashboard from "./components/UserDashboard";
+import BoltBadge from "./components/BoltBadge";
+import { useAuthStore } from "./store/authStore";
+import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle } from "lucide-react";
 
 function App() {
   const { isLoading, currentView, showAuthModal, loadingStep, transitionDirection } = useAppStore();
@@ -20,108 +18,114 @@ function App() {
   useEffect(() => {
     const preloadImages = async () => {
       const imagesToPreload = [
-        '/images/room-day.png',
-        '/images/room-night.png',
-        '/images/table.png',
-        '/images/loadingPrev10.png',
+        "/images/room-day.png",
+        "/images/room-night.png",
+        "/images/table.png",
+        "/images/loadingPrev10.png",
       ];
-      
-      imagesToPreload.forEach(src => {
+
+      imagesToPreload.forEach((src) => {
         const img = new Image();
         img.src = src;
       });
     };
-    
+
     preloadImages();
   }, []);
 
   // Define all loading steps in order
   const loadingSteps = [
-    'Finding your city…',
-    'Checking the weather',
-    'Looking outside... Is it sunny or rainy?',
-    'Country drink preferences',
-    'Selecting mood',
-    'Painting a picture',
-    'Mixing your perfect cocktail…',
-    'Almost there... Adding the final touches!'
+    "Finding your city…",
+    "Checking the weather",
+    "Looking outside... Is it sunny or rainy?",
+    "Country drink preferences",
+    "Selecting mood",
+    "Painting a picture",
+    "Mixing your perfect cocktail…",
+    "Almost there... Adding the final touches!",
   ];
 
   // Function to check if a step is completed
   const isStepCompleted = (step: string) => {
-    const currentStepIndex = loadingSteps.findIndex(s => loadingStep.includes(s.split('…')[0]) || loadingStep.includes(s));
-    const stepIndex = loadingSteps.findIndex(s => s === step);
+    const currentStepIndex = loadingSteps.findIndex(
+      (s) => loadingStep.includes(s.split("…")[0]) || loadingStep.includes(s)
+    );
+    const stepIndex = loadingSteps.findIndex((s) => s === step);
     return currentStepIndex > stepIndex;
   };
 
   // Function to check if a step is current
   const isCurrentStep = (step: string) => {
-    return loadingStep.includes(step.split('…')[0]) || loadingStep.includes(step);
+    return (
+      loadingStep.includes(step.split("…")[0]) || loadingStep.includes(step)
+    );
   };
 
-  // Get transition props for each page using the custom hook
-  const landingPageProps = usePageTransition('landing', transitionDirection);
-  const resultsPageProps = usePageTransition('results', transitionDirection);
-  const dashboardPageProps = usePageTransition('dashboard', transitionDirection);
+  // Define the transition properties
+  const pageTransition = {
+    duration: 0.7,
+    ease: 'easeInOut',
+  };
+
+  // Calculate initialY and exitY based on transitionDirection
+  // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
+  const initialY = transitionDirection; 
+  // exitY is where the outgoing page goes (opposite of initialY for a "push" effect)
+  const exitY = transitionDirection === '100%' ? '-100%' : '100%'; 
 
   return (
     <div className="min-h-screen">
       <Header />
       
-      <main className="relative min-h-screen" style={{ backgroundColor: '#819077' }}> {/* Moved background color here */}
-        <AnimatePresence mode="sync"> 
+      <main className="relative min-h-screen" style={{ backgroundColor: '#819077' }}>
+        <AnimatePresence mode="wait">
           {currentView === 'search' && (
-            <motion.div
-              key="search" 
-              {...landingPageProps} 
- style={{
-                ...landingPageProps.style,
-                zIndex: currentView === 'search' ? 2 : 1,
-                position: 'absolute',
-                width: '100%',
-                top: 0,
-                left: 0,
-              }}            >
+            <motion.div 
+              key="search"
+              initial={{ y: initialY }}
+              animate={{ y: 0 }}
+            exit={{ y: exitY }}
+            transition={pageTransition}
+               style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: currentView === 'search' ? 2 : 1 }}
+              // Special fade-out for lo->re transition
+              // When exiting, if transitionDirection is UP ('100%') and it's the search page, fade out quickly.
+
+            >
               <LandingPage />
             </motion.div>
           )}
 
-          {currentView === 'dashboard' && isAuthenticated && ( // Re-added isAuthenticated condition here
+          
+          {currentView === 'dashboard' && isAuthenticated && (
             <motion.div 
-              key="dashboard" // Key should match currentView for AnimatePresence
-              {...dashboardPageProps} // Apply all props from the hook
- style={{
-                ...dashboardPageProps.style,
-                zIndex: currentView === 'dashboard' ? 2 : 1,
-                position: 'absolute',
-                width: '100%',
-                top: 0,
-                left: 0,
-              }}            >
+              key="dashboard"
+              initial={{ y: initialY }}
+              animate={{ y: 0 }}
+              exit={{ y: exitY }}
+              transition={pageTransition}
+              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: currentView === 'dashboard' ? 2 : 1 }}
+            >
               <UserDashboard />
             </motion.div>
           )}
         
           {currentView === 'result' && (
             <motion.div
-              key="result" // Key should match currentView for AnimatePresence
-              {...resultsPageProps} // Apply all props from the hook
-  style={{
-                ...resultsPageProps.style,
-                zIndex: currentView === 'result' ? 2 : 1,
-                position: 'absolute',
-                width: '100%',
-                top: 0,
-                left: 0,
-              }}            >
+              key="result"
+              initial={{ y: initialY }}
+              animate={{ y: 0 }}
+              exit={{ y: exitY }}
+              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: currentView === 'result' ? 2 : 1 }}
+             transition={pageTransition}
+            >
               <ResultsPage />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
       
-      {/* Enhanced Loading Overlay with Step-by-Step Progress */}
-      <AnimatePresence>
+      {/* Your Loading Overlay, AuthModal, and Badge JSX remain the same */}
+         <AnimatePresence>
         {isLoading && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center"
@@ -138,7 +142,6 @@ function App() {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              {/* Elegant spinning loader */}
               <div className="relative">
                 <div className="w-12 h-12 border-4 border-gray-200 rounded-full"></div>
                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
@@ -149,7 +152,6 @@ function App() {
                   Creating your SunSip experience
                 </h3>
                 
-                {/* Loading Steps */}
                 <div className="space-y-3 text-left">
                   {loadingSteps.map((step, index) => {
                     const isCompleted = isStepCompleted(step);
@@ -190,14 +192,9 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-         {showAuthModal && <AuthModal />}
       
-      {/* Bolt.new Badge */}
+      {showAuthModal && <AuthModal />}
       <BoltBadge />
-      
-    
-    
-   
     </div>
   );
 }

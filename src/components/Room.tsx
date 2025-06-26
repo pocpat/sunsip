@@ -229,4 +229,3 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
 };
 
 export default Room;
-
