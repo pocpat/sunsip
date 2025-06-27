@@ -1,4 +1,4 @@
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "./store/appStore";
 import Header from "./components/Header";
 import LandingPage from "./components/LandingPage";
@@ -19,13 +19,12 @@ function App() {
     transitionDirection,
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
-const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
+  const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
   // Track previous view
   const prevView = useRef<string | null>(null);
   useEffect(() => {
     prevView.current = currentView;
   }, [currentView]);
-
 
   useEffect(() => {
     document.body.classList.add("transitioning");
@@ -88,17 +87,16 @@ const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
   };
 
   const getSearchExitY = () => {
-  if (navSource === "button") return "100%"; // Exit down if button
-  if (navSource === "input") return "-100%"; // Exit up if input
-  return "-100%"; // Default
-};
+    if (navSource === "button") return "100%"; // Exit down if button
+    if (navSource === "input") return "-100%"; // Exit up if input
+    return "-100%"; // Default
+  };
 
-const getDashboardInitialY = () => {
-  if (navSource === "button") return "-100%"; // Enter from top if button
-  if (navSource === "input") return "100%";   // Enter from bottom if input
-  return "-100%"; // Default
-};
-
+  const getDashboardInitialY = () => {
+    if (navSource === "button") return "-100%"; // Enter from top if button
+    if (navSource === "input") return "100%"; // Enter from bottom if input
+    return "-100%"; // Default
+  };
 
   // Calculate initialY and exitY based on transitionDirection
   // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
@@ -109,42 +107,37 @@ const getDashboardInitialY = () => {
 
   return (
     <div className="min-h-screen">
-  <Header setNavSource={setNavSource} />
+      <Header setNavSource={setNavSource} />
 
       <main
         className="relative min-h-screen"
         style={{ backgroundColor: "#819077" }}
       >
-        <AnimatePresence mode="sync">
-          {currentView === "search" && (
-            <motion.div
-              key="search"
-              initial={{ y: 0 }}
-              animate={{ y: 0 }}
-              exit={{ y: getSearchExitY() }}
-              transition={pageTransition}
-              style={{
-                position: "static",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-                //overflow: "hidden",
-                zIndex: 1,
-              }} // Special fade-out for lo->re transition
-              // When exiting, if transitionDirection is UP ('100%') and it's the search page, fade out quickly.
-            >
-            <LandingPage setNavSource={setNavSource} />
-            </motion.div>
-          )}
+        <motion.div
+          key="search"
+          initial={false}
+          animate={{
+            opacity: currentView === "search" ? 1 : 0,
+            pointerEvents: currentView === "search" ? "auto" : "none",
+          }}
+          transition={pageTransition}
+          style={{
+            width: "100%",
+            zIndex: 1,
+            position: "relative",
+          }}
+        >
+          <LandingPage setNavSource={setNavSource} />
+        </motion.div>
 
+        {/* Animate overlays above LandingPage */}
+        <AnimatePresence mode="sync">
           {currentView === "dashboard" && isAuthenticated && (
             <motion.div
               key="dashboard"
-              //initial={{ y: "-100%" }} // Always enter from top
-               initial={{ y: getDashboardInitialY() }}
+              initial={{ y: "-100%" }}
               animate={{ y: 0 }}
-              exit={{ y: "-100%" }} // Always exit up
+              exit={{ y: "-100%" }}
               transition={pageTransition}
               style={{
                 position: "absolute",
@@ -153,7 +146,7 @@ const getDashboardInitialY = () => {
                 top: 0,
                 left: 0,
                 overflow: "hidden",
-                zIndex: 1,
+                zIndex: 2,
               }}
             >
               <UserDashboard />
@@ -162,10 +155,10 @@ const getDashboardInitialY = () => {
 
           {currentView === "result" && (
             <motion.div
-              key="dashboard"
-              initial={{ y: "100%" }} // Always enter from bottom
+              key="result"
+              initial={{ y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }} // Always exit down
+              exit={{ y: "100%" }}
               transition={pageTransition}
               style={{
                 position: "absolute",
@@ -174,7 +167,7 @@ const getDashboardInitialY = () => {
                 top: 0,
                 left: 0,
                 overflow: "hidden",
-                zIndex: 1,
+                zIndex: 3,
               }}
             >
               <ResultsPage />
