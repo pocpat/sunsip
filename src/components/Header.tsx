@@ -7,7 +7,12 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Header: React.FC = () => {
+
+interface HeaderProps {
+  setNavSource: React.Dispatch<React.SetStateAction<"button" | "input" | null>>;
+}
+
+const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
   // Destructure ONLY the centralized navigation functions from the store.
   const { 
     resetApp, 
@@ -95,7 +100,7 @@ const Header: React.FC = () => {
                 {showMenu && (
                   <motion.div initial={{ opacity: 0, scale: 0.95, y: -10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -10 }} transition={{ duration: 0.2 }} className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
                     {isAuthenticated && (
-                      <button onClick={handleDashboardClick} className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base">
+                      <button onClick={() => { setNavSource("button"); changeView("dashboard");setShowMenu(false); }} className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base">
                         <BarChart3 size={16} className="sm:w-[18px] sm:h-[18px]" />
                         <span>Dashboard</span>
                       </button>

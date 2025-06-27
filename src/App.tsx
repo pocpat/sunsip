@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "./store/appStore";
 import Header from "./components/Header";
 import LandingPage from "./components/LandingPage";
@@ -11,8 +11,22 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
 function App() {
-  const { isLoading, currentView, showAuthModal, loadingStep, transitionDirection } = useAppStore();
+  const {
+    isLoading,
+    currentView,
+    showAuthModal,
+    loadingStep,
+    transitionDirection,
+  } = useAppStore();
   const { isAuthenticated } = useAuthStore();
+  const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
+  
+  
+  // Track previous view
+  const prevView = useRef<string | null>(null);
+  useEffect(() => {
+    prevView.current = currentView;
+  }, [currentView]);
 
   useEffect(() => {
     document.body.classList.add("transitioning");
@@ -20,7 +34,7 @@ function App() {
       document.body.classList.remove("transitioning");
     };
   }, [currentView, transitionDirection]);
-  
+
   // Preload images for better UX
   useEffect(() => {
     const preloadImages = async () => {
@@ -71,73 +85,90 @@ function App() {
   // Define the transition properties
   const pageTransition = {
     duration: 0.7,
-    ease: 'easeInOut',
+    ease: "easeInOut",
+  };
+
+  const getSearchExitY = () => {
+    if (navSource === "button") return "100%"; // Exit down if button
+    if (navSource === "input") return "-100%"; // Exit up if input
+    return "-100%"; // Default
+  };
+
+  const getDashboardInitialY = () => {
+    if (navSource === "button") return "-100%"; // Enter from top if button
+    if (navSource === "input") return "100%"; // Enter from bottom if input
+    return "-100%"; // Default
   };
 
   // Calculate initialY and exitY based on transitionDirection
   // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
-  const initialY = transitionDirection; 
- 
+  const initialY = transitionDirection;
+
   // exitY is where the outgoing page goes (opposite of initialY for a "push" effect)
-  const exitY = '100%'; // transitionDirection === '100%' ? '-100%' : '100%'; 
-  console.log("Transition direction:", transitionDirection, "Initial Y:", initialY, "Exit Y:", exitY, "Current View:", currentView);
+  const exitY = "100%"; // transitionDirection === '100%' ? '-100%' : '100%';
+
   return (
     <div className="min-h-screen">
-      <Header />
-      
-      <main className="relative min-h-screen" style={{ backgroundColor: '#819077' }}>
-        <AnimatePresence mode="sync">
-          {currentView === 'search' && (
-            <motion.div 
-              key="search"
-              initial={{ y: initialY }}
-              animate={{ y: 0 }}
-            exit={{ y: exitY }}
-            transition={pageTransition}
-               style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: 1 }}
-              // Special fade-out for lo->re transition
-              // When exiting, if transitionDirection is UP ('100%') and it's the search page, fade out quickly.
+      <Header setNavSource={setNavSource} />
 
-            >
-              <LandingPage />
-            </motion.div>
-          )}
+      <main className="relative min-h-screen" style={{ backgroundColor: "#819077" }}>
+  {/* Always render LandingPage as a normal block */}
+  <div style={{ width: "100%", zIndex: 1, position: "relative" }}>
+    <LandingPage setNavSource={setNavSource} />
+  </div>
 
-          
-          {currentView === 'dashboard' && isAuthenticated && (
-            <motion.div 
-              key="dashboard"
-              initial={{ y: initialY }}
-              animate={{ y: 0 }}
-              exit={{ y: exitY }}
-              transition={pageTransition}
-              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow:"hidden",zIndex: 1 }}
-            >
-              <UserDashboard />
-            </motion.div>
-          )}
-        
-          {currentView === 'result' && (
-            <motion.div
-              key="result"
-              initial={{ y: initialY }}
-              animate={{ y: 0 }}
-              exit={{ y: exitY }}
-              style={{ position:"absolute", width: "100%", height: "100%", top: 0, left: 0, overflow: "hidden",zIndex: 1 }}
-             transition={pageTransition}
-            >
-              <ResultsPage />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-      
+  {/* Animate overlays above LandingPage */}
+  <AnimatePresence mode="sync">
+    {currentView === "dashboard" && isAuthenticated && (
+      <motion.div
+        key="dashboard"
+        initial={{ y: "-100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "-100%" }}
+        transition={pageTransition}
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          top: 0,
+          left: 0,
+          overflow: "hidden",
+          zIndex: 2,
+        }}
+      >
+        <UserDashboard />
+      </motion.div>
+    )}
+
+    {currentView === "result" && (
+      <motion.div
+        key="result"
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }} // This will animate the Result page down on exit
+        transition={pageTransition}
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          top: 0,
+          left: 0,
+          overflow: "hidden",
+          zIndex: 3,
+        }}
+      >
+        <ResultsPage />
+      </motion.div>
+    )}
+  </AnimatePresence>
+</main>
+
       {/* Your Loading Overlay, AuthModal, and Badge JSX remain the same */}
-         <AnimatePresence>
+      <AnimatePresence>
         {isLoading && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(129, 144, 119, 0.85)' }}
+            style={{ backgroundColor: "rgba(129, 144, 119, 0.85)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -154,25 +185,30 @@ function App() {
                 <div className="w-12 h-12 border-4 border-gray-200 rounded-full"></div>
                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
-              
+
               <div className="text-center">
                 <h3 className="text-lg font-display font-semibold text-gray-800 mb-4">
                   Creating your SunSip experience
                 </h3>
-                
+
                 <div className="space-y-3 text-left">
                   {loadingSteps.map((step, index) => {
                     const isCompleted = isStepCompleted(step);
                     const isCurrent = isCurrentStep(step);
-                    
+
                     return (
                       <motion.div
                         key={index}
                         className={`flex items-center space-x-3 transition-all duration-300 ${
-                          isCompleted || isCurrent ? 'opacity-100' : 'opacity-40'
+                          isCompleted || isCurrent
+                            ? "opacity-100"
+                            : "opacity-40"
                         }`}
                         initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: isCompleted || isCurrent ? 1 : 0.4, x: 0 }}
+                        animate={{
+                          opacity: isCompleted || isCurrent ? 1 : 0.4,
+                          x: 0,
+                        }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                       >
                         <div className="flex-shrink-0">
@@ -184,12 +220,18 @@ function App() {
                             <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
                           )}
                         </div>
-                        <span className={`text-sm ${
-                          isCompleted ? 'text-green-600 font-medium' : 
-                          isCurrent ? 'text-primary-600 font-medium' : 
-                          'text-gray-500'
-                        }`}>
-                          {isCurrent && loadingStep !== step ? loadingStep : step}
+                        <span
+                          className={`text-sm ${
+                            isCompleted
+                              ? "text-green-600 font-medium"
+                              : isCurrent
+                              ? "text-primary-600 font-medium"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {isCurrent && loadingStep !== step
+                            ? loadingStep
+                            : step}
                         </span>
                       </motion.div>
                     );
@@ -200,7 +242,7 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {showAuthModal && <AuthModal />}
       <BoltBadge />
     </div>
@@ -208,4 +250,3 @@ function App() {
 }
 
 export default App;
-
