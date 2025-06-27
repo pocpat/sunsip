@@ -20,8 +20,7 @@ function App() {
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
-  
-  
+
   // Track previous view
   const prevView = useRef<string | null>(null);
   useEffect(() => {
@@ -111,57 +110,70 @@ function App() {
     <div className="min-h-screen">
       <Header setNavSource={setNavSource} />
 
-      <main className="relative min-h-screen" style={{ backgroundColor: "#819077" }}>
-  {/* Always render LandingPage as a normal block */}
-  <div style={{ width: "100%", zIndex: 1, position: "relative" }}>
-    <LandingPage setNavSource={setNavSource} />
-  </div>
-
-  {/* Animate overlays above LandingPage */}
-  <AnimatePresence mode="sync">
-    {currentView === "dashboard" && isAuthenticated && (
-      <motion.div
-        key="dashboard"
-        initial={{ y: "-100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "-100%" }}
-        transition={pageTransition}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          top: 0,
-          left: 0,
-          overflow: "hidden",
-          zIndex: 2,
-        }}
+      <main
+        className="relative min-h-screen"
+        style={{ backgroundColor: "#819077" }}
       >
-        <UserDashboard />
-      </motion.div>
-    )}
+        {/* Always render LandingPage as a normal block */}
+        <div style={{ width: "100%", zIndex: 1, position: "relative" }}>
+          <motion.div
+            key={
+              currentView === "search" ? "landing-visible" : "landing-hidden"
+            }
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <LandingPage setNavSource={setNavSource} />
+          </motion.div>
+        </div>
 
-    {currentView === "result" && (
-      <motion.div
-        key="result"
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }} // This will animate the Result page down on exit
-        transition={pageTransition}
-        style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          top: 0,
-          left: 0,
-          overflow: "hidden",
-          zIndex: 3,
-        }}
-      >
-        <ResultsPage />
-      </motion.div>
-    )}
-  </AnimatePresence>
-</main>
+        {/* Animate overlays above LandingPage */}
+        <AnimatePresence mode="sync">
+          {currentView === "dashboard" && isAuthenticated && (
+            <motion.div
+              key="dashboard"
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={pageTransition}
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
+                overflow: "hidden",
+                zIndex: 2,
+              }}
+            >
+              <UserDashboard />
+            </motion.div>
+          )}
+
+          {currentView === "result" && (
+            <motion.div
+              key="result"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }} // This will animate the Result page down on exit
+              transition={pageTransition}
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
+                overflow: "hidden",
+                zIndex: 3,
+              }}
+            >
+              <ResultsPage />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
 
       {/* Your Loading Overlay, AuthModal, and Badge JSX remain the same */}
       <AnimatePresence>

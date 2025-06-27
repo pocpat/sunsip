@@ -140,8 +140,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
             {/* Titles block, left-aligned */}
             <div className="max-w-3xl text-left mx-0">
               <motion.h1
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 35 , x: 20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
                 transition={{ duration: 1.6, delay: 0.2, ease: "easeInOut" }}
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap"
               >
@@ -149,8 +149,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
               </motion.h1>
 
               <motion.p
-                initial={{ opacity: 0, y: 65 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 40, x: -10 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
                 transition={{ duration: 1.6, delay: 0.3, ease: "easeInOut" }}
                 className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
               >
@@ -160,8 +160,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
 
             {/* ...your search input code... */}
             <motion.div
-              initial={{ opacity: 0, y: 80 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 45, x: 10 }}
+              animate={{ opacity: 1, y: 0, x: 0 }}
               transition={{ duration: 1.6, delay: 0.4, ease: "easeInOut" }}
               className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
             >
