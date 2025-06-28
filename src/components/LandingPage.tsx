@@ -8,12 +8,9 @@ import { Search, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "./Footer";
 
-interface LandingPageProps {
-  setNavSource: React.Dispatch<React.SetStateAction<"button" | "input" | null>>;
-  
-}
 
-const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
+
+const LandingPage: React.FC = () => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -108,7 +105,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
       setCocktailData(cocktailData);
       setLoadingStep("Almost there... Adding the final touches!");
       await new Promise((resolve) => setTimeout(resolve, 800));
-      setNavSource("input");
+    
       changeView("result");
     } catch (error) {
       console.error("Error processing city selection:", error);

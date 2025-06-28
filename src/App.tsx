@@ -10,6 +10,27 @@ import { useAuthStore } from "./store/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
+
+ //--- ANIMATION VARIANTS ---
+// This defines HOW the pages animate. It uses the 'direction' passed from AnimatePresence.
+const pageVariants = {
+  initial: (direction: string) => ({
+    y: direction,
+  }),
+  animate: {
+    y: 0,
+  },
+  exit: (direction: string) => ({
+    y: direction === '100%' ? '-100%' : '100%',
+  }),
+};
+
+const pageTransition = {
+  duration: 0.7,
+  ease: "easeInOut",
+};
+
+
 function App() {
   const {
     isLoading,
@@ -19,7 +40,10 @@ function App() {
     transitionDirection,
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
-  const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
+
+ 
+
+
 
   // Track previous view
   const prevView = useRef<string | null>(null);
@@ -81,72 +105,55 @@ function App() {
     );
   };
 
-  // Define the transition properties
-  const pageTransition = {
-    duration: 0.7,
-    ease: "easeInOut",
-  };
 
-  const getSearchExitY = () => {
-    if (navSource === "button") return "100%"; // Exit down if button
-    if (navSource === "input") return "-100%"; // Exit up if input
-    return "-100%"; // Default
-  };
+  
 
-  const getDashboardInitialY = () => {
-    if (navSource === "button") return "-100%"; // Enter from top if button
-    if (navSource === "input") return "100%"; // Enter from bottom if input
-    return "-100%"; // Default
-  };
+ 
 
   // Calculate initialY and exitY based on transitionDirection
   // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
   const initialY = transitionDirection;
 
   // exitY is where the outgoing page goes (opposite of initialY for a "push" effect)
+
   const exitY = "100%"; // transitionDirection === '100%' ? '-100%' : '100%';
 
   return (
-    <div className="min-h-screen">
-      <Header setNavSource={setNavSource} />
+    <div className="relative min-h-screen overflow-hidden">
+      <Header  />
 
       <main
-        className="relative min-h-screen"
+        className="relative h-screen"
         style={{ backgroundColor: "#819077" }}
       >
-        {/* Always render LandingPage as a normal block */}
-        <div style={{ width: "100%", zIndex: 1, position: "relative" }}>
-          <motion.div
-            key={
-              currentView === "search" ? "landing-visible" : "landing-hidden"
-            }
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <LandingPage setNavSource={setNavSource} />
-          </motion.div>
-        </div>
+       
+       <AnimatePresence mode="sync" custom={transitionDirection}>
+          {currentView === "search" && (
+            <motion.div
+              key="search"
+              className="absolute inset-0"
+              custom={transitionDirection}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              {/* We no longer pass setNavSource to the LandingPage */}
+              <LandingPage />
+            </motion.div>
+          )}
 
-        {/* Animate overlays above LandingPage */}
-        <AnimatePresence mode="sync">
           {currentView === "dashboard" && isAuthenticated && (
             <motion.div
               key="dashboard"
-              initial={{ y: "-100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-100%" }}
+              className="absolute inset-0"
+              custom={transitionDirection}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
               transition={pageTransition}
-              style={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-                overflow: "hidden",
-                zIndex: 2,
-              }}
             >
               <UserDashboard />
             </motion.div>
@@ -155,19 +162,13 @@ function App() {
           {currentView === "result" && (
             <motion.div
               key="result"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }} // This will animate the Result page down on exit
+              className="absolute inset-0"
+              custom={transitionDirection}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
               transition={pageTransition}
-              style={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
-                overflow: "hidden",
-                zIndex: 3,
-              }}
             >
               <ResultsPage />
             </motion.div>
