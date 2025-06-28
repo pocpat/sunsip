@@ -133,8 +133,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       selectedCity: undefined,
       weatherData: undefined,
-      cocktailData: undefined,
-      cityImageUrl: undefined,
+      //cocktailData: undefined,
+      //cityImageUrl: undefined,
       loadingStep: '',
     });
   }

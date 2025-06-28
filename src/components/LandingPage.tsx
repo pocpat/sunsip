@@ -7,6 +7,7 @@ import { generateCityImage } from "../services/imageGenerationService";
 import { Search, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "./Footer";
+import Room from "./Room"; // Assuming you have a Room component for the image preview
 
 
 
@@ -233,12 +234,13 @@ const LandingPage: React.FC = () => {
               className="relative w-full overflow-hidden rounded-t-lg shadow-lg"
               style={{ height: "15vh", minHeight: "120px", maxHeight: "200px" }}
             >
-              <img
+              {/* <img
                 src="/images/loadingPrev10.png"
                 alt="Room preview"
                 className="absolute top-0 left-0 w-full h-auto min-h-full"
                 style={{ objectFit: "cover", objectPosition: "top center" }}
-              />
+              /> */}
+              <Room/>
             </div>
           </div>
         </div>

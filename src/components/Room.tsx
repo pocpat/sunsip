@@ -98,7 +98,8 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
   }, [weatherData, isPreview]);
 
   // For preview mode, show the room without requiring data
-  const showRoom = isPreview || (weatherData && cityImageUrl && cocktailData);
+ // const showRoom = isPreview || (weatherData && cityImageUrl && cocktailData);
+ const showRoom = true;
 
   if (!showRoom) {
     return (
