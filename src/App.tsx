@@ -10,8 +10,7 @@ import { useAuthStore } from "./store/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
-
- //--- ANIMATION VARIANTS ---
+//--- ANIMATION VARIANTS ---
 // This defines HOW the pages animate. It uses the 'direction' passed from AnimatePresence.
 const pageVariants = {
   initial: (direction: string) => ({
@@ -21,7 +20,7 @@ const pageVariants = {
     y: 0,
   },
   exit: (direction: string) => ({
-    y: direction === '100%' ? '-100%' : '100%',
+    y: direction === "100%" ? "-100%" : "100%",
   }),
 };
 
@@ -29,7 +28,6 @@ const pageTransition = {
   duration: 0.7,
   ease: "easeInOut",
 };
-
 
 function App() {
   const {
@@ -40,10 +38,6 @@ function App() {
     transitionDirection,
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
-
- 
-
-
 
   // Track previous view
   const prevView = useRef<string | null>(null);
@@ -105,11 +99,6 @@ function App() {
     );
   };
 
-
-  
-
- 
-
   // Calculate initialY and exitY based on transitionDirection
   // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
   const initialY = transitionDirection;
@@ -120,14 +109,16 @@ function App() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <Header  />
+      <Header />
 
       <main
         className="relative h-screen"
         style={{ backgroundColor: "#819077" }}
       >
-       
-       <AnimatePresence mode="sync" custom={transitionDirection}>
+        <AnimatePresence mode="sync" custom={transitionDirection}>
+          {/* THIS IS THE KEY STRUCTURAL FIX: */}
+          {/* Each page is now wrapped in its own conditional block. */}
+
           {currentView === "search" && (
             <motion.div
               key="search"
@@ -136,10 +127,16 @@ function App() {
               variants={pageVariants}
               initial="initial"
               animate="animate"
-              exit="exit"
+              exit={
+                transitionDirection === "100%"
+                  ? { opacity: 0, y: 0, transition: { duration: 0 } } // disappear instantly for search→result
+                  : {
+                      y: transitionDirection === "-100%" ? "100%" : "-100%",
+                      opacity: 0,
+                    }
+              }
               transition={pageTransition}
             >
-              {/* We no longer pass setNavSource to the LandingPage */}
               <LandingPage />
             </motion.div>
           )}
@@ -163,7 +160,11 @@ function App() {
             <motion.div
               key="result"
               className="absolute inset-0"
-              custom={transitionDirection}
+              custom={
+                transitionDirection === "100%"
+                  ? "calc(100% - 40%)"
+                  : transitionDirection
+              }
               variants={pageVariants}
               initial="initial"
               animate="animate"

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import { RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Room from './Room';
 import WeatherDetails from './WeatherDetails';
@@ -10,11 +9,11 @@ import SavedCombinations from './SavedCombinations';
 import Footer from './Footer';
 
 const ResultsPage: React.FC = () => {
-  const { resetApp, changeView } = useAppStore();
+  const { resetApp} = useAppStore();
   const { isAuthenticated } = useAuthStore();
 
   const handleNewSearch = () => {
-    changeView("search"); // Use changeView to go back to search
+   
     resetApp(); // Reset app data
   };
 

@@ -109,7 +109,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     // THIS IS THE CORRECTED MAP for your directions
     // UP: "100%", DOWN: "-100%"
     const transitions = {
-      'search-result':    '75%',  // lo-re: UP
+      'search-result':    '100%',  // lo-re: UP
       'search-dashboard': '-100%', // lo-db: DOWN
       'result-search':    '-100%', // re-lo: DOWN
       'result-dashboard': '-100%', // re-db: DOWN
