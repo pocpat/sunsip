@@ -31,8 +31,7 @@ export type CityOption = {
   longitude: number;
 };
 
-
-export type Page = 'search' | 'result' | 'dashboard';
+export type AppView = 'main' | 'dashboard';
 
 type AppState = {
   isLoading: boolean;
@@ -41,7 +40,8 @@ type AppState = {
   loadingStep: string;
   setLoadingStep: (step: string) => void;
   
-  currentView: Page; //AppView;
+  currentView: AppView;
+  setCurrentView: (view: AppView) => void;
   
   cityOptions: CityOption[];
   setCityOptions: (options: CityOption[]) => void;
@@ -64,9 +64,6 @@ type AppState = {
   isPortfolioMode: boolean;
   setIsPortfolioMode: (mode: boolean) => void;
   
-  transitionDirection: string;
-  
-  changeView: (newView: Page) => void; 
   resetApp: () => void;
 };
 
@@ -77,7 +74,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   loadingStep: '',
   setLoadingStep: (step) => set({ loadingStep: step }),
   
-  currentView: 'search',
+  currentView: 'main',
+  setCurrentView: (view) => set({ currentView: view }),
   
   cityOptions: [],
   setCityOptions: (options) => set({ cityOptions: options }),
@@ -100,42 +98,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   isPortfolioMode: import.meta.env.VITE_PORTFOLIO_MODE_ENABLED === 'true',
   setIsPortfolioMode: (mode) => set({ isPortfolioMode: mode }),
   
-  transitionDirection: "100%", // Default initial direction
-  
-  changeView: (newView) => {
-    const currentView = get().currentView;
-    if (currentView === newView) return;
-
-    // THIS IS THE CORRECTED MAP for your directions
-    // UP: "100%", DOWN: "-100%"
-    const transitions = {
-      'search-result':    '100%',  // lo-re: UP
-      'search-dashboard': '-100%', // lo-db: DOWN
-      'result-search':    '-100%', // re-lo: DOWN
-      'result-dashboard': '-100%', // re-db: DOWN
-      'dashboard-search': '100%',  // db-lo: UP
-      'dashboard-result': '100%',  // db-re: UP
-    };
-    const transitionKey = `${currentView}-${newView}` as keyof typeof transitions;
-    const direction = transitions[transitionKey];
-
-    set({ currentView: newView, transitionDirection: direction });
-  },
-    // THIS IS THE CORRECTED, ATOMIC resetApp FUNCTION
   resetApp: () => {
-    const currentView = get().currentView;
-    if (currentView === 'search') return;
-
-    // Let changeView handle the direction for the reset to 'search'
-    get().changeView('search');
-
-    // Then, reset all application data
     set({
+      currentView: 'main',
       selectedCity: undefined,
       weatherData: undefined,
-      //cocktailData: undefined,
-      //cityImageUrl: undefined,
+      cocktailData: undefined,
+      cityImageUrl: undefined,
       loadingStep: '',
     });
-  }
+  },
 }));

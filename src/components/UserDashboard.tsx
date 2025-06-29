@@ -18,11 +18,9 @@ import {
   Edit3,
   Save,
   X,
-  ArrowLeft, // Import ArrowLeft
-  House as HouseIcon // Import HouseIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore } from '../store/appStore'; // Import useAppStore
+import { useAppStore } from '../store/appStore';
 
 interface TopCombination {
   id: string;
@@ -36,7 +34,7 @@ interface TopCombination {
 
 const UserDashboard: React.FC = () => {
   const { user, savedCombinations, setSavedCombinations, userPreferences, setUserPreferences } = useAuthStore();
-  const { changeView, resetApp } = useAppStore(); // Destructure changeView and resetApp from useAppStore
+  const { setCurrentView } = useAppStore();
   const [topCombinations, setTopCombinations] = useState<TopCombination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditingPreferences, setIsEditingPreferences] = useState(false);
@@ -99,6 +97,10 @@ const UserDashboard: React.FC = () => {
     
     fetchDashboardData();
   }, [user, savedCombinations.length, setSavedCombinations, setUserPreferences]);
+
+  const handleClose = () => {
+    setCurrentView('main');
+  };
 
   const handleSavePreferences = async () => {
     if (!user) return;
@@ -165,14 +167,6 @@ const UserDashboard: React.FC = () => {
     return { totalCombinations, averageRating, totalAccesses, ratedCombinations };
   };
 
-  const handleGoBackToResults = () => {
-    changeView('result');
-  };
-
-  const handleGoBackToLanding = () => {
-    resetApp(); // resetApp handles changing view to 'search'
-  };
-
   if (!user) {
     return null;
   }
@@ -188,32 +182,39 @@ const UserDashboard: React.FC = () => {
   const stats = getStats();
 
   return (
-    <div className=" bg-[#819077] max-w-7xl mx-auto px-4 py-8">
-
+    <div className="max-w-7xl mx-auto  px-4 py-8 max-h-[90vh] overflow-y-auto">
+      {/* Close Button */}
+      <button
+        onClick={handleClose}
+        className="absolute top-4 right-4 p-2 text-white hover:text-gray-200 hover:bg-white/10 rounded-full transition-colors z-10"
+        title="Close Dashboard"
+      >
+        <X size={24} />
+      </button>
 
       {/* Header */}
       <motion.div 
         className="mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.4 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 mt-20">
+        <div className="flex items-center justify-between pr-12">
+          <div className="flex items-center space-x-4">
             <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
               <User size={32} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-display font-bold text-gray-800">
+              <h1 className="text-3xl font-display font-bold text-white">
                 Welcome back!
               </h1>
-              <p className="text-gray-600">{user.email}</p>
+              <p className="text-white/80">{user.email}</p>
             </div>
           </div>
           
           <button
             onClick={() => setIsEditingPreferences(!isEditingPreferences)}
-            className="flex items-center space-x-2 btn-outline"
+            className="flex items-center space-x-2 bg-white text-gray-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors shadow-md"
           >
             {isEditingPreferences ? <X size={18} /> : <Settings size={18} />}
             <span>{isEditingPreferences ? 'Cancel' : 'Preferences'}</span>
@@ -221,14 +222,14 @@ const UserDashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - WHITE BACKGROUND */}
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.4, delay: 0.1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
+        <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Combinations</p>
@@ -238,7 +239,7 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
+        <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Average Rating</p>
@@ -250,7 +251,7 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
+        <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Views</p>
@@ -260,7 +261,7 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg p-6 shadow-md border border-gray-100">
+        <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Rated Combinations</p>
@@ -272,21 +273,21 @@ const UserDashboard: React.FC = () => {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Preferences Panel */}
+        {/* Preferences Panel - WHITE BACKGROUND */}
         <motion.div 
           className="lg:col-span-1"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.4, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-display font-bold text-gray-800">Preferences</h2>
                 {isEditingPreferences && (
                   <button
                     onClick={handleSavePreferences}
-                    className="flex items-center space-x-1 btn-primary text-sm py-1"
+                    className="flex items-center space-x-1 bg-primary-500 hover:bg-primary-600 text-white px-3 py-1 rounded-lg transition-colors text-sm"
                   >
                     <Save size={16} />
                     <span>Save</span>
@@ -371,14 +372,14 @@ const UserDashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Top Combinations */}
+        {/* Top Combinations - WHITE BACKGROUND */}
         <motion.div 
           className="lg:col-span-2"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.4, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <div className="bg-white rounded-lg shadow-md border border-gray-100">
+          <div className="bg-white rounded-lg shadow-lg border border-gray-100">
             <div className="p-6 border-b border-gray-100">
               <h2 className="text-xl font-display font-bold text-gray-800 flex items-center">
                 <TrendingUp size={24} className="mr-2 text-primary-600" />
@@ -395,7 +396,7 @@ const UserDashboard: React.FC = () => {
                       className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
                     >
                       <div className="flex items-center space-x-4">
                         <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
@@ -429,9 +430,9 @@ const UserDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Recent Activity - WHITE BACKGROUND */}
           {savedCombinations.length > 0 && (
-            <div className="mt-8 bg-white rounded-lg shadow-md border border-gray-100">
+            <div className="mt-8 bg-white rounded-lg shadow-lg border border-gray-100">
               <div className="p-6 border-b border-gray-100">
                 <h2 className="text-xl font-display font-bold text-gray-800 flex items-center">
                   <Calendar size={24} className="mr-2 text-primary-600" />
@@ -447,7 +448,7 @@ const UserDashboard: React.FC = () => {
                       className="flex items-center justify-between py-2"
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      transition={{ duration: 0.3, delay: 0.7 + index * 0.05 }}
                     >
                       <div>
                         <h4 className="font-medium text-gray-800">{combination.cocktailName}</h4>
@@ -472,4 +473,3 @@ const UserDashboard: React.FC = () => {
 };
 
 export default UserDashboard;
-

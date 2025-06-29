@@ -1,33 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "./store/appStore";
 import Header from "./components/Header";
-import LandingPage from "./components/LandingPage";
-import ResultsPage from "./components/ResultsPage";
+import MainScroller from "./components/MainScroller";
 import AuthModal from "./components/auth/AuthModal";
 import UserDashboard from "./components/UserDashboard";
 import BoltBadge from "./components/BoltBadge";
 import { useAuthStore } from "./store/authStore";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
-
-//--- ANIMATION VARIANTS ---
-// This defines HOW the pages animate. It uses the 'direction' passed from AnimatePresence.
-const pageVariants = {
-  initial: (direction: string) => ({
-    y: direction,
-  }),
-  animate: {
-    y: 0,
-  },
-  exit: (direction: string) => ({
-    y: direction === "100%" ? "-100%" : "100%",
-  }),
-};
-
-const pageTransition = {
-  duration: 0.7,
-  ease: "easeInOut",
-};
+import Footer from "./components/Footer";
 
 function App() {
   const {
@@ -35,22 +16,9 @@ function App() {
     currentView,
     showAuthModal,
     loadingStep,
-    transitionDirection,
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
-
-  // Track previous view
-  const prevView = useRef<string | null>(null);
-  useEffect(() => {
-    prevView.current = currentView;
-  }, [currentView]);
-
-  useEffect(() => {
-    document.body.classList.add("transitioning");
-    return () => {
-      document.body.classList.remove("transitioning");
-    };
-  }, [currentView, transitionDirection]);
+  const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
 
   // Preload images for better UX
   useEffect(() => {
@@ -99,85 +67,48 @@ function App() {
     );
   };
 
-  // Calculate initialY and exitY based on transitionDirection
-  // initialY is where the incoming page starts (e.g., "100%" for coming from bottom)
-  const initialY = transitionDirection;
-
-  // exitY is where the outgoing page goes (opposite of initialY for a "push" effect)
-
-  const exitY = "100%"; // transitionDirection === '100%' ? '-100%' : '100%';
-
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <Header />
+    <div className="h-screen overflow-hidden flex flex-col">
+      <Header setNavSource={setNavSource} />
 
-      <main
-        className="relative h-screen"
-        style={{ backgroundColor: "#819077" }}
-      >
-        <AnimatePresence mode="sync" custom={transitionDirection}>
-          {/* THIS IS THE KEY STRUCTURAL FIX: */}
-          {/* Each page is now wrapped in its own conditional block. */}
+      {/* Main Scrolling Container - Takes remaining height */}
+      <div className="flex-1 overflow-hidden">
+        <MainScroller setNavSource={setNavSource} />
+      </div>
 
-          {currentView === "search" && (
+      {/* Footer - Always at bottom */}
+      <Footer />
+
+      {/* Dashboard Modal Overlay */}
+      <AnimatePresence>
+        {currentView === 'dashboard' && isAuthenticated && (
+          <>
+            {/* Backdrop with blur effect */}
             <motion.div
-              key="search"
-              className="absolute inset-0"
-              custom={transitionDirection}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit={
-                transitionDirection === "100%"
-                  ? { opacity: 0, y: 0, transition: { duration: 0 } } // disappear instantly for search→result
-                  : {
-                      y: transitionDirection === "-100%" ? "100%" : "-100%",
-                      opacity: 0,
-                    }
-              }
-              transition={pageTransition}
-            >
-              <LandingPage />
-            </motion.div>
-          )}
-
-          {currentView === "dashboard" && isAuthenticated && (
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            />
+            
+            {/* Dashboard Panel - No white background, just the content floating */}
             <motion.div
-              key="dashboard"
-              className="absolute inset-0"
-              custom={transitionDirection}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={pageTransition}
+              className="fixed inset-0 z-50 flex items-start justify-center pt-8 px-4"
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-              <UserDashboard />
+              <div className="w-full max-w-7xl max-h-[90vh] relative">
+                <UserDashboard />
+              </div>
             </motion.div>
-          )}
+          </>
+        )}
+      </AnimatePresence>
 
-          {currentView === "result" && (
-            <motion.div
-              key="result"
-              className="absolute inset-0"
-              custom={
-                transitionDirection === "100%"
-                  ? "calc(100% - 40%)"
-                  : transitionDirection
-              }
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={pageTransition}
-            >
-              <ResultsPage />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Your Loading Overlay, AuthModal, and Badge JSX remain the same */}
+      {/* Loading Overlay */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -261,6 +192,6 @@ function App() {
       <BoltBadge />
     </div>
   );
-}
+};
 
 export default App;
