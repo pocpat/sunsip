@@ -8,7 +8,7 @@ import CocktailDetails from './CocktailDetails';
 import SavedCombinations from './SavedCombinations';
 
 const ResultsPage: React.FC = () => {
-  const { resetApp, weatherData, cocktailData } = useAppStore();
+  const { weatherData, cocktailData } = useAppStore();
   const { isAuthenticated } = useAuthStore();
 
   // Determine if we should show the full room and details
@@ -16,13 +16,13 @@ const ResultsPage: React.FC = () => {
 
   return (
     <div 
-      className="min-h-full overflow-hidden relative"
+      className="min-h-full relative"
       style={{ backgroundColor: '#819077' }}
     >
       <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 py-6 sm:py-8 pt-24 sm:pt-28">
         <div className="flex flex-col items-center">
-          {/* Room Component - Always visible, shows preview when no data */}
-          <div className="w-full max-w-5xl mx-auto mb-4 sm:mb-6">
+          {/* Room Component - Full width, no max-width constraint */}
+          <div className="w-full mb-4 sm:mb-6">
             <div className="w-full aspect-[16/9]">
               <Room isPreview={!showFullRoom} />
             </div>

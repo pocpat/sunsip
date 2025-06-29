@@ -71,14 +71,14 @@ function App() {
     <div className="h-screen overflow-hidden flex flex-col">
       <Header setNavSource={setNavSource} />
 
-      {/* Main Scrolling Container - Takes remaining height */}
+      {/* Main Scrolling Container - Takes remaining height, exactly 100vh total */}
       <div className="flex-1 overflow-hidden relative">
-        {/* Main Content - All scrolling logic is now in MainScroller */}
-        <div className="h-full">
+        {/* Main Content - Constrained to exactly 100vh */}
+        <div className="h-full overflow-hidden">
           <MainScroller setNavSource={setNavSource} />
         </div>
         
-        {/* Dashboard Blur Overlay */}
+        {/* Dashboard Blur Overlay - positioned to cover all content including Room component */}
         <AnimatePresence>
           {currentView === 'dashboard' && isAuthenticated && (
             <motion.div
@@ -96,7 +96,7 @@ function App() {
       {/* Footer - Always at bottom */}
       <Footer />
 
-      {/* Dashboard Modal */}
+      {/* Dashboard Modal - Above the blur overlay */}
       <AnimatePresence>
         {currentView === 'dashboard' && isAuthenticated && (
           <motion.div
