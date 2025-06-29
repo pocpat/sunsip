@@ -5,17 +5,23 @@ import { getWeatherData } from "../services/weatherService";
 import { getCocktailSuggestion } from "../services/cocktailService";
 import { generateCityImage } from "../services/imageGenerationService";
 import { Search, MapPin } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
 interface LandingPageProps {
   setNavSource: React.Dispatch<React.SetStateAction<"button" | "input" | null>>;
+  resetCounter: number;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter }) => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+
+  // Animation controls for each element
+  const titleControls = useAnimation();
+  const subtitleControls = useAnimation();
+  const searchControls = useAnimation();
 
   const {
     cityOptions,
@@ -28,6 +34,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
     setIsLoading,
     setLoadingStep,
   } = useAppStore();
+
+  // Trigger animations whenever resetCounter changes (including initial load)
+  useEffect(() => {
+    const animateElements = async () => {
+      // Reset all elements to initial state
+      titleControls.set({ opacity: 0, y: 50 });
+      subtitleControls.set({ opacity: 0, y: 65 });
+      searchControls.set({ opacity: 0, y: 80 });
+
+      // Animate elements in sequence with original timing and easeInOut
+      titleControls.start({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 1.6, delay: 0.2, ease: "easeInOut" }
+      });
+
+      subtitleControls.start({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 1.6, delay: 0.3, ease: "easeInOut" }
+      });
+
+      searchControls.start({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 1.6, delay: 0.4, ease: "easeInOut" }
+      });
+    };
+
+    animateElements();
+  }, [resetCounter, titleControls, subtitleControls, searchControls]);
 
   // Debounce search query
   useEffect(() => {
@@ -133,18 +170,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
         {/* Titles block, left-aligned */}
         <div className="max-w-3xl text-left mx-0">
           <motion.h1
+            animate={titleControls}
             initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.6, delay: 0.2, ease: "easeInOut" }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap"
           >
             FIND YOUR PERFECT SIP
           </motion.h1>
 
           <motion.p
+            animate={subtitleControls}
             initial={{ opacity: 0, y: 65 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.6, delay: 0.3, ease: "easeInOut" }}
             className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
           >
             Discover a cocktail that matches your city's vibe and weather
@@ -153,9 +188,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource }) => {
 
         {/* Search input */}
         <motion.div
+          animate={searchControls}
           initial={{ opacity: 0, y: 80 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.6, delay: 0.4, ease: "easeInOut" }}
           className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
         >
           <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg">
