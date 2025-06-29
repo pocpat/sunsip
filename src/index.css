@@ -144,6 +144,44 @@
   .input {
     @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
   }
+
+  /* Custom overlay scrollbar styling */
+  .custom-scrollbar {
+    /* Force scrollbar to always be present to prevent layout shifts */
+    scrollbar-gutter: stable;
+  }
+
+  /* WebKit browsers (Chrome, Safari, Edge) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  /* Modern browsers with scrollbar-gutter support */
+  @supports (scrollbar-gutter: stable) {
+    .custom-scrollbar {
+      scrollbar-gutter: stable;
+    }
+  }
 }
 
 /* Weather animations */
