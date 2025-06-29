@@ -64,6 +64,9 @@ type AppState = {
   isPortfolioMode: boolean;
   setIsPortfolioMode: (mode: boolean) => void;
   
+  isResetting: boolean;
+  setIsResetting: (resetting: boolean) => void;
+  
   resetApp: () => void;
 };
 
@@ -98,8 +101,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   isPortfolioMode: import.meta.env.VITE_PORTFOLIO_MODE_ENABLED === 'true',
   setIsPortfolioMode: (mode) => set({ isPortfolioMode: mode }),
   
+  isResetting: false,
+  setIsResetting: (resetting) => set({ isResetting: resetting }),
+  
   resetApp: () => {
     set({
+      isResetting: true, // Signal that a reset is in progress
       currentView: 'main',
       selectedCity: undefined,
       weatherData: undefined,

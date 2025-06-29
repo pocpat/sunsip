@@ -9,7 +9,7 @@ interface MainScrollerProps {
 }
 
 const MainScroller: React.FC<MainScrollerProps> = ({ setNavSource }) => {
-  const { weatherData, cocktailData, isLoading, currentView } = useAppStore();
+  const { weatherData, cocktailData, isLoading, currentView, isResetting, setIsResetting } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -39,11 +39,24 @@ const MainScroller: React.FC<MainScrollerProps> = ({ setNavSource }) => {
         top: 0,
         behavior: 'smooth',
       });
-    }
-  }, [currentView, weatherData, cocktailData]);
 
-  // Scroll lock to prevent unwanted scrolling
+      // If this is a reset operation, set a timeout to clear the resetting flag
+      // This allows the scroll animation to complete before potentially re-applying overflow-hidden
+      if (isResetting) {
+        setTimeout(() => {
+          setIsResetting(false);
+        }, 1000); // Increased from 500ms to 1000ms to give more time for smooth scroll animation
+      }
+    }
+  }, [currentView, weatherData, cocktailData, isResetting, setIsResetting]);
+
+  // Scroll lock to prevent unwanted scrolling - DISABLED during reset operations
   useEffect(() => {
+    // Completely disable scroll lock during reset operations
+    if (isResetting) {
+      return;
+    }
+
     const handleScroll = () => {
       if (!scrollContainerRef.current) return;
       
@@ -77,15 +90,18 @@ const MainScroller: React.FC<MainScrollerProps> = ({ setNavSource }) => {
       container.addEventListener('scroll', handleScroll, { passive: false });
       return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, [weatherData, cocktailData, isLoading]);
+  }, [weatherData, cocktailData, isLoading, isResetting]); // Added isResetting to dependencies
 
   // Determine if results should be visible and scrolling enabled
   const resultsReady = weatherData && cocktailData && !isLoading;
+  
+  // During reset, ensure container is scrollable so scrollTo(0) works properly
+  const shouldBeScrollable = resultsReady || isResetting;
 
   return (
     <div 
       ref={scrollContainerRef}
-      className={`h-full ${resultsReady ? 'overflow-y-auto' : 'overflow-hidden'}`}
+      className={`h-full ${shouldBeScrollable ? 'overflow-y-auto' : 'overflow-hidden'}`}
       style={{ scrollBehavior: 'smooth' }}
     >
       {/* Landing Section - 75vh - This is the initial view */}
