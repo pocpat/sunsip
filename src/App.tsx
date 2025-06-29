@@ -51,11 +51,20 @@ function App() {
     "Almost there... Adding the final touches!",
   ];
 
-  // Function to check if a step is completed
-  const isStepCompleted = (step: string) => {
-    const currentStepIndex = loadingSteps.findIndex(
+  // Calculate progress percentage
+  const getCurrentStepIndex = () => {
+    return loadingSteps.findIndex(
       (s) => loadingStep.includes(s.split("…")[0]) || loadingStep.includes(s)
     );
+  };
+
+  const progressPercentage = isLoading 
+    ? Math.max(0, Math.min(100, ((getCurrentStepIndex() + 1) / loadingSteps.length) * 100))
+    : 0;
+
+  // Function to check if a step is completed
+  const isStepCompleted = (step: string) => {
+    const currentStepIndex = getCurrentStepIndex();
     const stepIndex = loadingSteps.findIndex((s) => s === step);
     return currentStepIndex > stepIndex;
   };
@@ -71,14 +80,14 @@ function App() {
     <div className="h-screen overflow-hidden flex flex-col">
       <Header setNavSource={setNavSource} />
 
-      {/* Main Scrolling Container - Takes remaining height */}
+      {/* Main Scrolling Container - Takes remaining height, exactly 100vh total */}
       <div className="flex-1 overflow-hidden relative">
-        {/* Main Content - All scrolling logic is now in MainScroller */}
-        <div className="h-full">
+        {/* Main Content - Constrained to exactly 100vh */}
+        <div className="h-full overflow-hidden">
           <MainScroller setNavSource={setNavSource} />
         </div>
         
-        {/* Dashboard Blur Overlay */}
+        {/* Dashboard Blur Overlay - positioned to cover all content including Room component */}
         <AnimatePresence>
           {currentView === 'dashboard' && isAuthenticated && (
             <motion.div
@@ -96,7 +105,7 @@ function App() {
       {/* Footer - Always at bottom */}
       <Footer />
 
-      {/* Dashboard Modal */}
+      {/* Dashboard Modal - Above the blur overlay */}
       <AnimatePresence>
         {currentView === 'dashboard' && isAuthenticated && (
           <motion.div
@@ -136,7 +145,7 @@ function App() {
                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center w-full">
                 <h3 className="text-lg font-display font-semibold text-gray-800 mb-4">
                   Creating your SunSip experience
                 </h3>
@@ -186,6 +195,22 @@ function App() {
                       </motion.div>
                     );
                   })}
+                </div>
+
+                {/* Visual Progress Bar */}
+                <div className="mt-6 w-full">
+                  <div className="flex justify-between text-xs text-gray-500 mb-2">
+                    <span>Progress</span>
+                    <span>{Math.round(progressPercentage)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className="bg-primary-500 h-full rounded-full"
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${progressPercentage}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -67,6 +67,8 @@ type AppState = {
   isResetting: boolean;
   setIsResetting: (resetting: boolean) => void;
   
+  resetCounter: number;
+  
   resetApp: () => void;
 };
 
@@ -104,7 +106,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   isResetting: false,
   setIsResetting: (resetting) => set({ isResetting: resetting }),
   
+  resetCounter: 0,
+  
   resetApp: () => {
+    const currentCounter = get().resetCounter;
     set({
       isResetting: true, // Signal that a reset is in progress
       currentView: 'main',
@@ -113,6 +118,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       cocktailData: undefined,
       cityImageUrl: undefined,
       loadingStep: '',
+      resetCounter: currentCounter + 1, // Increment counter to trigger re-animations
     });
   },
 }));

@@ -9,7 +9,7 @@ interface MainScrollerProps {
 }
 
 const MainScroller: React.FC<MainScrollerProps> = ({ setNavSource }) => {
-  const { weatherData, cocktailData, isLoading, currentView, isResetting, setIsResetting } = useAppStore();
+  const { weatherData, cocktailData, isLoading, currentView, isResetting, setIsResetting, resetCounter } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -106,7 +106,7 @@ const MainScroller: React.FC<MainScrollerProps> = ({ setNavSource }) => {
     >
       {/* Landing Section - 75vh - This is the initial view */}
       <div className="h-[75vh]">
-        <LandingPage setNavSource={setNavSource} />
+        <LandingPage setNavSource={setNavSource} resetCounter={resetCounter} />
       </div>
       
       {/* Results Section - Dynamic height based on data availability */}
