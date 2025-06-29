@@ -15,19 +15,20 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
   const isDay = weatherData?.isDay ?? true;
 
   useEffect(() => {
-    // Initial chair animation (the "rocking" rotation)
+    // Always animate chair, regardless of preview mode
     chairControls.start({
       rotate: [0, -4, 0],
       transition: {
-      duration: 4,           // duration of one back-and-forth
-      ease: "easeInOut",
-      repeat: 3,             // 3 repeats + 1 initial = 4 total
-      repeatType: "reverse", // rock back and forth
+        duration: 4,
+        ease: "easeInOut",
+        repeat: 3,
+        repeatType: "reverse",
       }
     });
   }, [chairControls]);
 
   useEffect(() => {
+    // Always track mouse movement for parallax effects
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
         x: (e.clientX - window.innerWidth / 2) / window.innerWidth,
@@ -40,6 +41,7 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
   }, []);
 
   useEffect(() => {
+    // Only show weather animations if not in preview mode and we have weather data
     if (!weatherData || isPreview) return;
 
     const condition = weatherData.condition.toLowerCase();
@@ -97,51 +99,25 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
     setWeatherAnimations(animations);
   }, [weatherData, isPreview]);
 
-  // For preview mode, show the room without requiring data
-  const showRoom = isPreview || (weatherData && cityImageUrl && cocktailData);
-
-  if (!showRoom) {
-    return (
-      <div
-        className="relative w-full aspect-[16/9] overflow-hidden rounded-lg shadow-xl font-inter flex items-center justify-center"
-        style={{ backgroundColor: '#819077' }} // Use the consistent background color
-      >
-        {/* No text or placeholder, just the background */}
-      </div>
-    );
-  }
+  // Enable full parallax effects for all modes
+  const parallaxMultiplier = 1;
 
   return (
-<div className="relative w-full h-full overflow-hidden font-inter"> 
-       <motion.div 
+    <div className="relative w-full h-full overflow-hidden font-inter"> 
+      <motion.div 
         className="absolute inset-0 rounded-lg"
         style={{
-          backgroundColor: "#8B9A7A", // Warm sage green background
-          x: mousePosition.x * 2,
-          y: mousePosition.y * 2
+          backgroundColor: "#8B9A7A",
+          x: mousePosition.x * 2 * parallaxMultiplier,
+          y: mousePosition.y * 2 * parallaxMultiplier
         }}
       />
-
-      {/* Frame/Wall structure - lowest layer */}
-      <motion.div
-        className="absolute inset-0 w-full h-full z-10"
-        style={{
-          x: mousePosition.x * 1,
-          y: mousePosition.y * 1
-        }}
-      >
-        <img
-          src="/images/frame10.png"
-          alt="Room frame and wall"
-          className="w-full h-full object-contain pointer-events-none"
-        />
-      </motion.div>
 
       {/* City view window - positioned within the frame */}
       <div className="absolute top-[36%] left-[47%] w-[32%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-md overflow-hidden z-0">
         <div className="absolute inset-0 w-full h-full overflow-hidden">
-          {isPreview ? (
-            // Blue glass placeholder for preview
+          {isPreview || !cityImageUrl ? (
+            // Blue glass placeholder for preview or when no city image
             <div 
               className="absolute inset-0 w-full h-full"
               style={{
@@ -165,12 +141,27 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
         </div>
       </div>
 
+      {/* Frame/Wall structure - lowest layer */}
+      <motion.div
+        className="absolute inset-0 w-full h-full z-10"
+        style={{
+          x: mousePosition.x * 1 * parallaxMultiplier,
+          y: mousePosition.y * 1 * parallaxMultiplier
+        }}
+      >
+        <img
+          src="/images/frame10.png"
+          alt="Room frame and wall"
+          className="w-full h-full object-contain pointer-events-none"
+        />
+      </motion.div>
+
       {/* Plant decoration - behind table, in front of frame */}
       <motion.div
-        className="absolute inset-0  w-full h-full z-30 -left-9"
+        className="absolute inset-0 w-full h-full z-30 -left-9"
         style={{
-          x: mousePosition.x * 3,
-          y: mousePosition.y * 5
+          x: mousePosition.x * 3 * parallaxMultiplier,
+          y: mousePosition.y * 5 * parallaxMultiplier
         }}
       >
         <img
@@ -184,8 +175,8 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
       <motion.div
         className="absolute inset-0 w-full h-full z-40"
         style={{
-          x: mousePosition.x * 5,
-          y: mousePosition.y * 7
+          x: mousePosition.x * 5 * parallaxMultiplier,
+          y: mousePosition.y * 7 * parallaxMultiplier
         }}
       >
         <img
@@ -211,10 +202,9 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
       <motion.div
         className="absolute inset-0 top-[5%] w-full h-full z-50"
         style={{
-          transformOrigin: "25% 100%", // or "0% 100%"
-          x: mousePosition.x * 7,
-          y: mousePosition.y * 9,
-         
+          transformOrigin: "25% 100%",
+          x: mousePosition.x * 7 * parallaxMultiplier,
+          y: mousePosition.y * 9 * parallaxMultiplier,
         }}
         animate={chairControls}
       >
