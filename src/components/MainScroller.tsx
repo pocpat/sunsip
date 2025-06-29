@@ -101,7 +101,7 @@ const MainScroller: React.FC<MainScrollerProps> = ({ setNavSource }) => {
   return (
     <div 
       ref={scrollContainerRef}
-      className={`h-full ${shouldBeScrollable ? 'overflow-y-auto' : 'overflow-hidden'}`}
+      className={`h-full custom-scrollbar ${shouldBeScrollable ? 'overflow-y-scroll' : 'overflow-hidden'}`}
       style={{ scrollBehavior: 'smooth' }}
     >
       {/* Landing Section - 75vh - This is the initial view */}
