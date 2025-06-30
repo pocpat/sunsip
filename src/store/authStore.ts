@@ -45,7 +45,7 @@ type AuthState = {
   isAdmin: boolean;
   setIsAdmin: (isAdmin: boolean) => void;
   globalRequestsEnabled: boolean;
-  setGlobalRequestsEnabled: () => void;
+  setGlobalRequestsEnabled: () => Promise<void>;
   
   setUser: (user: User | null) => void;
   setSavedCombinations: (combinations: SavedCombination[]) => void;
@@ -59,7 +59,7 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -68,7 +68,35 @@ export const useAuthStore = create<AuthState>()(
       isAdmin: false,
       setIsAdmin: (isAdmin) => set({ isAdmin }),
       globalRequestsEnabled: true,
-      setGlobalRequestsEnabled: () => set((state) => ({ globalRequestsEnabled: !state.globalRequestsEnabled })),
+      setGlobalRequestsEnabled: async () => {
+        try {
+          const state = get();
+          const newEnabledState = !state.globalRequestsEnabled;
+          
+          // Only proceed if user is authenticated and is admin
+          if (!state.user || !state.isAdmin) {
+            console.error('Only authenticated admin users can toggle global requests');
+            return;
+          }
+          
+          // Call the Supabase RPC to toggle global requests
+          const { data, error } = await supabase.rpc('toggle_global_requests', {
+            enabled: newEnabledState,
+            admin_user_id: state.user.id
+          });
+          
+          if (error) {
+            console.error('Error toggling global requests:', error);
+            return;
+          }
+          
+          // Update local state after successful database update
+          set({ globalRequestsEnabled: newEnabledState });
+          console.log(`Global requests ${newEnabledState ? 'enabled' : 'disabled'} successfully`);
+        } catch (error) {
+          console.error('Error in setGlobalRequestsEnabled:', error);
+        }
+      },
       
       setUser: (user) => {
         // Set Sentry user context when user logs in/out
