@@ -42,6 +42,7 @@ const UserDashboard: React.FC = () => {
     userPreferences, 
     setUserPreferences,
     isAdmin,
+    setIsAdmin,
     globalRequestsEnabled,
     setGlobalRequestsEnabled
   } = useAuthStore();
@@ -54,6 +55,7 @@ const UserDashboard: React.FC = () => {
     dietaryRestrictions: [] as string[],
     favoriteWeatherMoods: {} as Record<string, any>
   });
+  const [isTogglingGlobalRequests, setIsTogglingGlobalRequests] = useState(false);
 
   const spiritOptions = [
     'Gin', 'Vodka', 'Rum', 'Whiskey', 'Bourbon', 'Tequila', 'Mezcal', 
@@ -151,6 +153,17 @@ const UserDashboard: React.FC = () => {
         [mood]: !prev.favoriteWeatherMoods[mood]
       }
     }));
+  };
+
+  const handleToggleGlobalRequests = async () => {
+    setIsTogglingGlobalRequests(true);
+    try {
+      await setGlobalRequestsEnabled();
+    } catch (error) {
+      console.error('Error toggling global requests:', error);
+    } finally {
+      setIsTogglingGlobalRequests(false);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -333,16 +346,23 @@ const UserDashboard: React.FC = () => {
                         <span className="text-sm font-medium text-gray-800">Global Requests</span>
                       </div>
                       <button
-                        onClick={() => setGlobalRequestsEnabled()}
+                        onClick={handleToggleGlobalRequests}
+                        disabled={isTogglingGlobalRequests}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                           globalRequestsEnabled ? 'bg-green-500' : 'bg-red-500'
-                        }`}
+                        } ${isTogglingGlobalRequests ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            globalRequestsEnabled ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
+                        {isTogglingGlobalRequests ? (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                          </span>
+                        ) : (
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              globalRequestsEnabled ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                          />
+                        )}
                       </button>
                     </div>
                     <p className="text-xs text-gray-600">
