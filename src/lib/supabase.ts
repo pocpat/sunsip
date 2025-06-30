@@ -155,6 +155,8 @@ export async function getUserPreferences(userId: string) {
     preferredSpirits: data.preferred_spirits || [],
     dietaryRestrictions: data.dietary_restrictions || [],
     favoriteWeatherMoods: data.favorite_weather_moods || {},
+    dailyRequestCount: data.daily_request_count || 0,
+    lastRequestDate: data.last_request_date,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   } : null;
@@ -164,6 +166,8 @@ export async function saveUserPreferences(userId: string, preferences: {
   preferredSpirits: string[];
   dietaryRestrictions: string[];
   favoriteWeatherMoods: Record<string, any>;
+  dailyRequestCount?: number;
+  lastRequestDate?: string;
 }) {
   const { data, error } = await supabase
     .from('user_preferences')
@@ -173,6 +177,8 @@ export async function saveUserPreferences(userId: string, preferences: {
         preferred_spirits: preferences.preferredSpirits,
         dietary_restrictions: preferences.dietaryRestrictions,
         favorite_weather_moods: preferences.favoriteWeatherMoods,
+        daily_request_count: preferences.dailyRequestCount,
+        last_request_date: preferences.lastRequestDate,
         updated_at: new Date().toISOString(),
       }
     ], {
@@ -190,7 +196,47 @@ export async function saveUserPreferences(userId: string, preferences: {
     preferredSpirits: data.preferred_spirits,
     dietaryRestrictions: data.dietary_restrictions,
     favoriteWeatherMoods: data.favorite_weather_moods,
+    dailyRequestCount: data.daily_request_count || 0,
+    lastRequestDate: data.last_request_date,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
+}
+
+// Function to check and update daily request limit
+export async function checkAndUpdateRequestLimit(userId: string | null, clientId?: string | null) {
+  try {
+    // Call the appropriate RPC function based on whether we have a userId or clientId
+    const { data, error } = await supabase.rpc(
+      userId ? 'check_and_update_request_limit' : 'check_and_update_anonymous_request_limit',
+      userId ? { user_uuid: userId } : { client_id: clientId }
+    );
+
+    if (error) {
+      console.error('Error checking request limit:', error);
+      // Default to allowing the request if there's an error
+      return {
+        canProceed: true,
+        count: 0,
+        remaining: 10,
+        resetDate: null
+      };
+    }
+
+    return {
+      canProceed: data.can_proceed,
+      count: data.count,
+      remaining: data.remaining,
+      resetDate: data.reset_date
+    };
+  } catch (error) {
+    console.error('Error in checkAndUpdateRequestLimit:', error);
+    // Default to allowing the request if there's an exception
+    return {
+      canProceed: true,
+      count: 0,
+      remaining: 10,
+      resetDate: null
+    };
+  }
 }

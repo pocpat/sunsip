@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAppStore, type CityOption } from "../store/appStore";
+import { useAuthStore } from "../store/authStore";
 import { searchCities } from "../services/geocodingService";
 import { getWeatherData } from "../services/weatherService";
 import { getCocktailSuggestion } from "../services/cocktailService";
 import { generateCityImage } from "../services/imageGenerationService";
-import { Search, MapPin } from "lucide-react";
+import { checkAndUpdateRequestLimit } from "../lib/supabase";
+import { Search, MapPin, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
 interface LandingPageProps {
@@ -33,7 +35,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
     setCurrentView,
     setIsLoading,
     setLoadingStep,
+    dailyLimitReached,
+    setDailyLimitReached,
+    dailyRequestMessage,
+    setDailyRequestMessage,
+    isPortfolioMode
   } = useAppStore();
+
+  const { 
+    user, 
+    isAuthenticated, 
+    isAdmin, 
+    globalRequestsEnabled 
+  } = useAuthStore();
 
   // Trigger animations whenever resetCounter changes (including initial load)
   useEffect(() => {
@@ -100,6 +114,74 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
   }, [debouncedQuery, setCityOptions]);
 
   const handleCitySelect = async (city: CityOption) => {
+    // Skip limit check for admin users or in portfolio mode
+    if (!isAdmin && !isPortfolioMode) {
+      // Check if global requests are enabled
+      if (!globalRequestsEnabled) {
+        setDailyLimitReached(true);
+        setDailyRequestMessage("The system administrator has temporarily disabled requests for all users. Please try again later.");
+        return;
+      }
+      
+      // Check daily limit for authenticated users
+      if (isAuthenticated && user) {
+        try {
+          const limitResult = await checkAndUpdateRequestLimit(user.id);
+          
+          if (!limitResult.canProceed) {
+            setDailyLimitReached(true);
+            
+            // Format reset date if available
+            let resetMessage = "Please try again tomorrow.";
+            if (limitResult.resetDate) {
+              const resetDate = new Date(limitResult.resetDate);
+              resetMessage = `Limit resets on ${resetDate.toLocaleDateString()}.`;
+            }
+            
+            setDailyRequestMessage(`You've reached your daily limit of 10 requests. ${resetMessage}`);
+            return; // Stop execution if limit reached
+          } else {
+            // Update message with remaining requests
+            setDailyRequestMessage(`You have ${limitResult.remaining} request${limitResult.remaining !== 1 ? 's' : ''} remaining today.`);
+          }
+        } catch (error) {
+          console.error("Error checking request limit:", error);
+          // Continue execution if there's an error checking the limit
+        }
+      } else if (!isAuthenticated) {
+        // Handle anonymous users
+        try {
+          const clientId = localStorage.getItem('sunsip_client_id');
+          if (clientId) {
+            const limitResult = await checkAndUpdateRequestLimit(null, clientId);
+            
+            if (!limitResult.canProceed) {
+              setDailyLimitReached(true);
+              
+              // Format reset date if available
+              let resetMessage = "Please try again tomorrow.";
+              if (limitResult.resetDate) {
+                const resetDate = new Date(limitResult.resetDate);
+                resetMessage = `Limit resets on ${resetDate.toLocaleDateString()}.`;
+              }
+              
+              setDailyRequestMessage(`You've reached your daily limit of 10 requests. ${resetMessage} Sign in to get your own quota.`);
+              return; // Stop execution if limit reached
+            } else {
+              // Update message with remaining requests
+              setDailyRequestMessage(`You have ${limitResult.remaining} anonymous request${limitResult.remaining !== 1 ? 's' : ''} remaining today. Sign in for your own quota.`);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking anonymous request limit:", error);
+          // Continue execution if there's an error checking the limit
+        }
+      }
+    } else if (isAdmin) {
+      // Admin users get a special message
+      setDailyRequestMessage("Admin mode: Unlimited requests available.");
+    }
+
     setIsLoading(true);
     setSelectedCity(city);
     setCityOptions([]);
@@ -208,6 +290,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                   onFocus={handleInputFocus}
                   placeholder="Enter a city name..."
                   className="w-full p-3 sm:p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400 text-sm sm:text-base"
+                  disabled={dailyLimitReached}
                 />
                 {isSearching && (
                   <div className="pr-3 sm:pr-4">
@@ -215,6 +298,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                   </div>
                 )}
               </div>
+              
+              {/* Daily request limit message */}
+              {dailyRequestMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`mt-2 p-2 rounded-md text-sm ${
+                    dailyLimitReached 
+                      ? 'bg-red-100 text-red-700 border border-red-200' 
+                      : isAdmin
+                        ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                        : 'bg-blue-50 text-blue-700 border border-blue-100'
+                  }`}
+                >
+                  <div className="flex items-start">
+                    <AlertCircle size={16} className="mr-2 mt-0.5 flex-shrink-0" />
+                    <span>{dailyRequestMessage}</span>
+                  </div>
+                </motion.div>
+              )}
+              
               <AnimatePresence>
                 {cityOptions.length > 0 && (
                   <motion.div

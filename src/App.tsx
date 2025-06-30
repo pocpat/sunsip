@@ -7,7 +7,7 @@ import UserDashboard from "./components/UserDashboard";
 import BoltBadge from "./components/BoltBadge";
 import { useAuthStore } from "./store/authStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, AlertCircle } from "lucide-react";
 import Footer from "./components/Footer";
 
 function App() {
@@ -16,9 +16,25 @@ function App() {
     currentView,
     showAuthModal,
     loadingStep,
+    dailyLimitReached,
+    dailyRequestMessage
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
+
+  // Generate and store anonymous client ID for unauthenticated users
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Check if client ID already exists in localStorage
+      let clientId = localStorage.getItem('sunsip_client_id');
+      
+      // If not, generate a new UUID and store it
+      if (!clientId) {
+        clientId = crypto.randomUUID();
+        localStorage.setItem('sunsip_client_id', clientId);
+      }
+    }
+  }, [isAuthenticated]);
 
   // Preload images for better UX
   useEffect(() => {
@@ -218,10 +234,31 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* Daily Limit Reached Toast */}
+      <AnimatePresence>
+        {dailyLimitReached && (
+          <motion.div
+            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-xl p-4 max-w-md w-full mx-4 border-l-4 border-red-500"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-start">
+              <AlertCircle className="text-red-500 mr-3 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <h3 className="font-medium text-gray-900">Daily Limit Reached</h3>
+                <p className="text-sm text-gray-600 mt-1">{dailyRequestMessage}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {showAuthModal && <AuthModal />}
       <BoltBadge />
     </div>
   );
-};
+}
 
 export default App;

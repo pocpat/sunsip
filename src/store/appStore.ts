@@ -69,6 +69,12 @@ type AppState = {
   
   resetCounter: number;
   
+  dailyLimitReached: boolean;
+  setDailyLimitReached: (reached: boolean) => void;
+  
+  dailyRequestMessage: string;
+  setDailyRequestMessage: (message: string) => void;
+  
   resetApp: () => void;
 };
 
@@ -108,6 +114,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   
   resetCounter: 0,
   
+  dailyLimitReached: false,
+  setDailyLimitReached: (reached) => set({ dailyLimitReached: reached }),
+  
+  dailyRequestMessage: '',
+  setDailyRequestMessage: (message) => set({ dailyRequestMessage: message }),
+  
   resetApp: () => {
     const currentCounter = get().resetCounter;
     set({
@@ -118,6 +130,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       cocktailData: undefined,
       cityImageUrl: undefined,
       loadingStep: '',
+      dailyLimitReached: false,
+      dailyRequestMessage: '',
       resetCounter: currentCounter + 1, // Increment counter to trigger re-animations
     });
   },

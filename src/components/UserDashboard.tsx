@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuthStore, type SavedCombination } from '../store/authStore';
 import { getUserSavedCombinations, getUserTopCombinations, getUserPreferences, saveUserPreferences } from '../lib/supabase';
 import { 
@@ -18,6 +18,8 @@ import {
   Edit3,
   Save,
   X,
+  AlertCircle,
+  Shield,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/appStore';
@@ -33,7 +35,16 @@ interface TopCombination {
 }
 
 const UserDashboard: React.FC = () => {
-  const { user, savedCombinations, setSavedCombinations, userPreferences, setUserPreferences } = useAuthStore();
+  const { 
+    user, 
+    savedCombinations, 
+    setSavedCombinations, 
+    userPreferences, 
+    setUserPreferences,
+    isAdmin,
+    globalRequestsEnabled,
+    setGlobalRequestsEnabled
+  } = useAuthStore();
   const { setCurrentView } = useAppStore();
   const [topCombinations, setTopCombinations] = useState<TopCombination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,6 +178,12 @@ const UserDashboard: React.FC = () => {
     return { totalCombinations, averageRating, totalAccesses, ratedCombinations };
   };
 
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
   if (!user) {
     return null;
   }
@@ -182,7 +199,7 @@ const UserDashboard: React.FC = () => {
   const stats = getStats();
 
   return (
-    <div className="max-w-7xl mx-auto  px-4 py-8 max-h-[90vh] overflow-y-auto">
+    <div className="max-w-7xl mx-auto px-4 py-8 max-h-[90vh] overflow-y-auto">
       {/* Close Button */}
       <button
         onClick={handleClose}
@@ -209,6 +226,12 @@ const UserDashboard: React.FC = () => {
                 Welcome back!
               </h1>
               <p className="text-white/80">{user.email}</p>
+              {isAdmin && (
+                <div className="flex items-center mt-1">
+                  <Shield size={14} className="text-yellow-300 mr-1" />
+                  <span className="text-yellow-300 text-sm">Admin Mode</span>
+                </div>
+              )}
             </div>
           </div>
           
@@ -297,6 +320,85 @@ const UserDashboard: React.FC = () => {
             </div>
             
             <div className="p-6 space-y-6">
+              {/* Admin Controls - Only visible for admin users */}
+              {isAdmin && (
+                <div className="mb-6">
+                  <h3 className="font-medium text-gray-800 mb-3 flex items-center">
+                    <Shield size={18} className="mr-2 text-yellow-500" />
+                    Admin Controls
+                  </h3>
+                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-800">Global Requests</span>
+                      </div>
+                      <button
+                        onClick={() => setGlobalRequestsEnabled()}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                          globalRequestsEnabled ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            globalRequestsEnabled ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {globalRequestsEnabled 
+                        ? "All users can make requests (subject to their daily limits)." 
+                        : "All requests are currently disabled for non-admin users."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Daily Request Limit Information */}
+              <div className="mb-4">
+                <h3 className="font-medium text-gray-800 mb-3 flex items-center">
+                  <TrendingUp size={18} className="mr-2 text-primary-600" />
+                  API Request Limit
+                </h3>
+                <div className={`rounded-lg p-4 border ${
+                  isAdmin 
+                    ? 'bg-yellow-50 border-yellow-100' 
+                    : 'bg-blue-50 border-blue-100'
+                }`}>
+                  <div className="flex items-start">
+                    {isAdmin ? (
+                      <Shield size={18} className="text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <AlertCircle size={18} className="text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
+                    )}
+                    <div>
+                      {isAdmin ? (
+                        <p className="text-sm text-yellow-700 font-medium">
+                          Admin Mode: Unlimited requests
+                        </p>
+                      ) : (
+                        <>
+                          <p className="text-sm text-blue-700 font-medium">
+                            Daily Limit: 10 requests
+                          </p>
+                          <p className="text-sm text-blue-600 mt-1">
+                            Used today: {userPreferences?.dailyRequestCount || 0} / 10
+                          </p>
+                          {userPreferences?.lastRequestDate && (
+                            <p className="text-xs text-blue-500 mt-1">
+                              Last request: {formatDate(userPreferences.lastRequestDate)}
+                            </p>
+                          )}
+                        </>
+                      )}
+                      <p className="text-xs text-blue-500 mt-2">
+                        Limit resets at midnight in your local timezone.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Preferred Spirits */}
               <div>
                 <h3 className="font-medium text-gray-800 mb-3 flex items-center">

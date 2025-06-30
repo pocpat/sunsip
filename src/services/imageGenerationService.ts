@@ -13,6 +13,71 @@ const IMAGE_GENERATION_MODELS = [
   'black-forest-labs/FLUX-1-schnell:free'
 ];
 
+// Retry configuration for individual models
+const MAX_MODEL_RETRIES = 5; // Increased from 3 to 5
+const MODEL_RETRY_BASE_DELAY = 2000; // Increased from 1000ms to 2000ms
+
+// Sleep utility function for delays
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Helper function to retry image generation with a single model
+async function tryGenerateImageWithRetries(
+  model: string,
+  prompt: string,
+  retryCount = 0
+): Promise<string | null> {
+  try {
+    addBreadcrumb(`Attempting image generation with model: ${model} (attempt ${retryCount + 1}/${MAX_MODEL_RETRIES + 1})`, 'image-generation');
+    
+    const response = await axios.post(
+      IMAGEROUTER_BASE_URL,
+      {
+        model: model,
+        prompt: prompt,
+        n: 1,
+        size: '1024x1024'
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${IMAGEROUTER_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 second timeout for image generation
+      }
+    );
+
+    if (response.data?.data?.[0]?.url) {
+      const generatedImageUrl = response.data.data[0].url;
+      
+      addBreadcrumb(`Successfully generated AI image with ${model}: ${generatedImageUrl}`, 'image-generation', {
+        model,
+        attemptNumber: retryCount + 1
+      });
+      
+      return generatedImageUrl;
+    }
+
+    addBreadcrumb(`No image URL in response from ${model}`, 'image-generation');
+    return null;
+    
+  } catch (modelError: any) {
+    // Check if it's a 503 or 429 error and we haven't exceeded max retries for this model
+    if ((modelError.response?.status === 503 || modelError.response?.status === 429) && retryCount < MAX_MODEL_RETRIES) {
+      const delay = MODEL_RETRY_BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
+      
+      addBreadcrumb(`Model ${model} returned ${modelError.response?.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_MODEL_RETRIES})`, 'image-generation');
+      
+      await sleep(delay);
+      return tryGenerateImageWithRetries(model, prompt, retryCount + 1);
+    }
+    
+    // If it's not a 503/429 error or we've exceeded max retries for this model, throw the error
+    throw modelError;
+  }
+}
+
 export async function generateCityImage(
   city: string,
   country: string,
@@ -56,72 +121,53 @@ export async function generateCityImage(
 
     addBreadcrumb(`Using prompt: ${prompt}`, 'image-generation');
 
-    // Step 3: Try each model in sequence until one succeeds
+    // Step 3: Try each model in sequence with retries until one succeeds
     for (let i = 0; i < IMAGE_GENERATION_MODELS.length; i++) {
       const model = IMAGE_GENERATION_MODELS[i];
       
       try {
-        addBreadcrumb(`Attempting image generation with model: ${model}`, 'image-generation');
+        const generatedImageUrl = await tryGenerateImageWithRetries(model, prompt);
         
-        const response = await axios.post(
-          IMAGEROUTER_BASE_URL,
-          {
-            model: model,
-            prompt: prompt,
-            n: 1,
-            size: '1024x1024'
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${IMAGEROUTER_API_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            timeout: 30000 // 30 second timeout for image generation
-          }
-        );
-
-        if (response.data?.data?.[0]?.url) {
-          const generatedImageUrl = response.data.data[0].url;
-          
-          addBreadcrumb(`Successfully generated AI image with ${model}: ${generatedImageUrl}`, 'image-generation', {
+        if (generatedImageUrl) {
+          addBreadcrumb(`Successfully generated AI image with ${model}`, 'image-generation', {
             city,
             country,
             landmark,
             weatherCondition,
             isDay,
             model,
-            attemptNumber: i + 1
+            modelIndex: i + 1
           });
           
           return generatedImageUrl;
         }
-
-        addBreadcrumb(`No image URL in response from ${model}`, 'image-generation');
         
-      } catch (modelError) {
+        addBreadcrumb(`Model ${model} returned no image URL, trying next model`, 'image-generation');
+        
+      } catch (modelError: any) {
         captureError(modelError as Error, {
           service: 'imagerouter',
-          action: 'generate_image_attempt',
+          action: 'generate_image_model_failed',
           model,
-          attemptNumber: i + 1,
+          modelIndex: i + 1,
           city,
           country,
           weatherCondition,
           isDay
         });
 
-        console.error(`Error with model ${model} (attempt ${i + 1}/${IMAGE_GENERATION_MODELS.length}):`, modelError);
+        console.error(`Error with model ${model} after all retries (model ${i + 1}/${IMAGE_GENERATION_MODELS.length}):`, modelError);
         
         // If this is not the last model, continue to the next one
         if (i < IMAGE_GENERATION_MODELS.length - 1) {
-          addBreadcrumb(`Model ${model} failed, trying next model`, 'image-generation');
+          addBreadcrumb(`Model ${model} failed after all retries, trying next model`, 'image-generation');
           continue;
         }
       }
     }
 
     // If we reach here, all models failed
-    addBreadcrumb('All image generation models failed', 'image-generation');
+    addBreadcrumb('All image generation models failed after retries', 'image-generation');
     throw new Error('All image generation models failed');
 
   } catch (error) {
@@ -210,5 +256,3 @@ function getFallbackCityImage(
 
   return defaultImages[weatherType][timeOfDay];
 }
-
-;

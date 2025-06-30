@@ -30,6 +30,8 @@ export type UserPreferences = {
   preferredSpirits: string[];
   dietaryRestrictions: string[];
   favoriteWeatherMoods: Record<string, any>;
+  dailyRequestCount: number;
+  lastRequestDate?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -40,6 +42,10 @@ type AuthState = {
   isLoading: boolean;
   savedCombinations: SavedCombination[];
   userPreferences: UserPreferences | null;
+  isAdmin: boolean;
+  setIsAdmin: (isAdmin: boolean) => void;
+  globalRequestsEnabled: boolean;
+  setGlobalRequestsEnabled: () => void;
   
   setUser: (user: User | null) => void;
   setSavedCombinations: (combinations: SavedCombination[]) => void;
@@ -59,6 +65,10 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       savedCombinations: [],
       userPreferences: null,
+      isAdmin: false,
+      setIsAdmin: (isAdmin) => set({ isAdmin }),
+      globalRequestsEnabled: true,
+      setGlobalRequestsEnabled: () => set((state) => ({ globalRequestsEnabled: !state.globalRequestsEnabled })),
       
       setUser: (user) => {
         // Set Sentry user context when user logs in/out
@@ -114,6 +124,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             savedCombinations: [],
             userPreferences: null,
+            isAdmin: false,
           });
         } catch (error) {
           console.error('Error signing out:', error);
@@ -124,6 +135,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             savedCombinations: [],
             userPreferences: null,
+            isAdmin: false,
           });
         }
       },
