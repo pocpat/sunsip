@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { setUserContext, clearUserContext } from '../lib/sentry';
+import { supabase } from '../lib/supabase';
 
 export type User = {
   id: string;
@@ -24,11 +25,13 @@ export type SavedCombination = {
   savedAt: string;
 };
 
-type UserPreferences = {
+export type UserPreferences = {
   id: string;
   preferredSpirits: string[];
   dietaryRestrictions: string[];
   favoriteWeatherMoods: Record<string, any>;
+  dailyRequestCount: number;
+  lastRequestDate?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -39,6 +42,10 @@ type AuthState = {
   isLoading: boolean;
   savedCombinations: SavedCombination[];
   userPreferences: UserPreferences | null;
+  isAdmin: boolean;
+  setIsAdmin: (isAdmin: boolean) => void;
+  globalRequestsEnabled: boolean;
+  setGlobalRequestsEnabled: () => void;
   
   setUser: (user: User | null) => void;
   setSavedCombinations: (combinations: SavedCombination[]) => void;
@@ -47,7 +54,7 @@ type AuthState = {
   removeSavedCombination: (id: string) => void;
   setUserPreferences: (preferences: UserPreferences | null) => void;
   setIsLoading: (isLoading: boolean) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -58,6 +65,10 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       savedCombinations: [],
       userPreferences: null,
+      isAdmin: false,
+      setIsAdmin: (isAdmin) => set({ isAdmin }),
+      globalRequestsEnabled: true,
+      setGlobalRequestsEnabled: () => set((state) => ({ globalRequestsEnabled: !state.globalRequestsEnabled })),
       
       setUser: (user) => {
         // Set Sentry user context when user logs in/out
@@ -99,14 +110,34 @@ export const useAuthStore = create<AuthState>()(
       
       setIsLoading: (isLoading) => set({ isLoading }),
       
-      logout: () => {
-        clearUserContext();
-        set({
-          user: null,
-          isAuthenticated: false,
-          savedCombinations: [],
-          userPreferences: null,
-        });
+      logout: async () => {
+        try {
+          // Sign out from Supabase
+          await supabase.auth.signOut();
+          
+          // Clear Sentry user context
+          clearUserContext();
+          
+          // Reset auth state
+          set({
+            user: null,
+            isAuthenticated: false,
+            savedCombinations: [],
+            userPreferences: null,
+            isAdmin: false,
+          });
+        } catch (error) {
+          console.error('Error signing out:', error);
+          // Still reset local state even if Supabase call fails
+          clearUserContext();
+          set({
+            user: null,
+            isAuthenticated: false,
+            savedCombinations: [],
+            userPreferences: null,
+            isAdmin: false,
+          });
+        }
       },
     }),
     {

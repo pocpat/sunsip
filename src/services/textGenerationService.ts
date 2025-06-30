@@ -3,12 +3,12 @@ import { captureError, addBreadcrumb } from '../lib/sentry';
 import { useAppStore } from '../store/appStore';
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL ;
+const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL;
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-// Retry configuration
-const MAX_RETRIES = 3;
-const BASE_DELAY = 1000; // 1 second
+// Retry configuration - increased for better rate limit handling
+const MAX_RETRIES = 10; // Increased from 5 to 10
+const BASE_DELAY = 3000; // Increased from 2000ms to 3000ms
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -35,26 +35,24 @@ async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<an
         headers: {
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          //'HTTP-Referer': window.location.origin,
-          //'X-Title': 'SunSip - Weather & Cocktails'
         },
-        timeout: 60000 // Increased timeout to 30 seconds
+        timeout: 60000 // Increased timeout to 60 seconds
       }
     );
 
     return response;
   } catch (error: any) {
-    // Check if it's a 503 error and we haven't exceeded max retries
-    if (error.response?.status === 503 && retryCount < MAX_RETRIES) {
+    // Check if it's a 503 or 429 error and we haven't exceeded max retries
+    if ((error.response?.status === 503 || error.response?.status === 429) && retryCount < MAX_RETRIES) {
       const delay = BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
       
-      addBreadcrumb(`OpenRouter API returned 503, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`, 'text-generation');
+      addBreadcrumb(`OpenRouter API returned ${error.response?.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`, 'text-generation');
       
       await sleep(delay);
       return makeOpenRouterRequest(prompt, retryCount + 1);
     }
     
-    // If it's not a 503 error or we've exceeded max retries, throw the error
+    // If it's not a 503/429 error or we've exceeded max retries, throw the error
     throw error;
   }
 }

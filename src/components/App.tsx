@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { useAppStore } from "./store/appStore";
-import Header from "./components/Header";
-import MainScroller from "./components/MainScroller";
-import AuthModal from "./components/auth/AuthModal";
-import UserDashboard from "./components/UserDashboard";
-import BoltBadge from "./components/BoltBadge";
-import { useAuthStore } from "./store/authStore";
+import { useAppStore } from "../store/appStore";
+import Header from "./Header";
+import MainScroller from "./MainScroller";
+import AuthModal from "./auth/AuthModal";
+import UserDashboard from "./UserDashboard";
+import BoltBadge from "./BoltBadge";
+import { useAuthStore } from "../store/authStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
-import Footer from "./components/Footer";
+import { CheckCircle, AlertCircle } from "lucide-react";
+import Footer from "./Footer";
 
 function App() {
   const {
@@ -16,6 +16,8 @@ function App() {
     currentView,
     showAuthModal,
     loadingStep,
+    dailyLimitReached,
+    dailyRequestMessage
   } = useAppStore();
   const { isAuthenticated } = useAuthStore();
   const [navSource, setNavSource] = useState<"button" | "input" | null>(null);
@@ -51,11 +53,20 @@ function App() {
     "Almost there... Adding the final touches!",
   ];
 
-  // Function to check if a step is completed
-  const isStepCompleted = (step: string) => {
-    const currentStepIndex = loadingSteps.findIndex(
+  // Calculate progress percentage
+  const getCurrentStepIndex = () => {
+    return loadingSteps.findIndex(
       (s) => loadingStep.includes(s.split("…")[0]) || loadingStep.includes(s)
     );
+  };
+
+  const progressPercentage = isLoading 
+    ? Math.max(0, Math.min(100, ((getCurrentStepIndex() + 1) / loadingSteps.length) * 100))
+    : 0;
+
+  // Function to check if a step is completed
+  const isStepCompleted = (step: string) => {
+    const currentStepIndex = getCurrentStepIndex();
     const stepIndex = loadingSteps.findIndex((s) => s === step);
     return currentStepIndex > stepIndex;
   };
@@ -136,7 +147,7 @@ function App() {
                 <div className="absolute top-0 left-0 w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center w-full">
                 <h3 className="text-lg font-display font-semibold text-gray-800 mb-4">
                   Creating your SunSip experience
                 </h3>
@@ -187,8 +198,45 @@ function App() {
                     );
                   })}
                 </div>
+
+                {/* Visual Progress Bar */}
+                <div className="mt-6 w-full">
+                  <div className="flex justify-between text-xs text-gray-500 mb-2">
+                    <span>Progress</span>
+                    <span>{Math.round(progressPercentage)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <motion.div
+                      className="bg-primary-500 h-full rounded-full"
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${progressPercentage}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Daily Limit Reached Toast */}
+      <AnimatePresence>
+        {dailyLimitReached && (
+          <motion.div
+            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-xl p-4 max-w-md w-full mx-4 border-l-4 border-red-500"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-start">
+              <AlertCircle className="text-red-500 mr-3 mt-0.5 flex-shrink-0" size={20} />
+              <div>
+                <h3 className="font-medium text-gray-900">Daily Limit Reached</h3>
+                <p className="text-sm text-gray-600 mt-1">{dailyRequestMessage}</p>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -197,6 +245,6 @@ function App() {
       <BoltBadge />
     </div>
   );
-};
+}
 
 export default App;

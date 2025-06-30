@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
 import { 
-  Sunset, MoreVertical, BarChart3, User, LogOut, CloudOff, Cloud, House as HouseIcon
+  Sunset, MoreVertical, BarChart3, User, LogOut, CloudOff, Cloud, House as HouseIcon,
+  Shield, ShieldAlert, ShieldCheck, Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,23 +23,39 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
     cocktailData
   } = useAppStore();
   
-  const { isAuthenticated, logout } = useAuthStore();
+  const { 
+    isAuthenticated, 
+    logout, 
+    user, 
+    isAdmin, 
+    setIsAdmin,
+    globalRequestsEnabled,
+    setGlobalRequestsEnabled
+  } = useAuthStore();
+  
   const [showMenu, setShowMenu] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const adminMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
+      if (adminMenuRef.current && !adminMenuRef.current.contains(event.target as Node)) {
+        setShowAdminMenu(false);
+      }
     };
-    if (showMenu) {
+    
+    if (showMenu || showAdminMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMenu]);
+  }, [showMenu, showAdminMenu]);
 
   const handleDashboardClick = () => {
     setCurrentView('dashboard');
@@ -65,6 +82,16 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
     setShowMenu(false);
   };
 
+  const handleToggleAdmin = () => {
+    setIsAdmin(!isAdmin);
+    setShowMenu(false);
+  };
+
+  const handleToggleGlobalRequests = () => {
+    setGlobalRequestsEnabled();
+    setShowAdminMenu(false);
+  };
+
   // Show start over button if we have results data
   const showStartOverButton = weatherData && cocktailData;
 
@@ -87,6 +114,18 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
                 <CloudOff size={16} className="text-white/70 sm:w-5 sm:h-5" />
               </motion.div>
             )}
+            {isAdmin && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                exit={{ opacity: 0, scale: 0.8 }} 
+                transition={{ duration: 0.2 }} 
+                className="flex items-center" 
+                title="Admin Mode - Unlimited requests"
+              >
+                <Shield size={16} className="text-yellow-300 sm:w-5 sm:h-5" />
+              </motion.div>
+            )}
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -104,6 +143,56 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
               </motion.button>
             )}
             
+            {/* Admin Settings Button - Only visible when isAdmin is true */}
+            {isAdmin && (
+              <div className="relative" ref={adminMenuRef}>
+                <button 
+                  onClick={() => setShowAdminMenu(!showAdminMenu)} 
+                  className="p-2 text-white hover:bg-white/10 rounded-full transition-colors"
+                  title="Admin Settings"
+                >
+                  <Settings size={20} className="text-yellow-300 sm:w-6 sm:h-6" />
+                </button>
+                
+                <AnimatePresence>
+                  {showAdminMenu && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }} 
+                      animate={{ opacity: 1, scale: 1, y: 0 }} 
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }} 
+                      transition={{ duration: 0.2 }} 
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                    >
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-700">Admin Controls</h3>
+                      </div>
+                      
+                      <button 
+                        onClick={handleToggleGlobalRequests} 
+                        className="w-full flex items-center justify-between px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <div className="flex items-center space-x-2">
+                          {globalRequestsEnabled ? (
+                            <ShieldCheck size={16} className="text-green-500" />
+                          ) : (
+                            <ShieldAlert size={16} className="text-red-500" />
+                          )}
+                          <span>Global Requests</span>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          globalRequestsEnabled 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {globalRequestsEnabled ? 'Enabled' : 'Disabled'}
+                        </span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+            
             <div className="relative" ref={menuRef}>
               <button 
                 onClick={() => setShowMenu(!showMenu)} 
@@ -119,7 +208,7 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
                     animate={{ opacity: 1, scale: 1, y: 0 }} 
                     exit={{ opacity: 0, scale: 0.95, y: -10 }} 
                     transition={{ duration: 0.2 }} 
-                    className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2"
+                    className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                   >
                     {isAuthenticated && (
                       <button 
@@ -162,6 +251,17 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
                         </>
                       )}
                     </button>
+                    
+                    {/* Admin toggle - only visible for specific users */}
+                    {isAuthenticated && user?.email === 'admin@sunsip.com' && (
+                      <button 
+                        onClick={handleToggleAdmin} 
+                        className="w-full flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors text-sm sm:text-base"
+                      >
+                        <Shield size={16} className={`sm:w-[18px] sm:h-[18px] ${isAdmin ? 'text-yellow-500' : 'text-gray-400'}`} />
+                        <span>{isAdmin ? 'Disable Admin Mode' : 'Enable Admin Mode'}</span>
+                      </button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
