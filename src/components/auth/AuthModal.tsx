@@ -104,7 +104,7 @@ const AuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50">
       <motion.div 
         className="bg-white rounded-lg shadow-xl w-full max-w-md relative overflow-hidden"
         initial={{ opacity: 0, scale: 0.9 }}
