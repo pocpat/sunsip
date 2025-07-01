@@ -2,6 +2,7 @@
 
 A beautiful web application that suggests cocktails based on your city's weather and local culture. Discover the perfect drink that matches your location's vibe and current weather conditions.
 
+**[🎥 Demo Video: ](https://www.youtube.com/watch?v=1sULUH36Eow)**
 ## ✨ Features
 
 - **Weather-Based Recommendations**: Get cocktail suggestions that match your city's current weather
