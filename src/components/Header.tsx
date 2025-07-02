@@ -96,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
   const showStartOverButton = weatherData && cocktailData;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6 bg-transparent">
+    <header className="fixed top-0 left-0 right-0 z-modal p-4 sm:p-6 bg-transparent">
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={handleReset}>
