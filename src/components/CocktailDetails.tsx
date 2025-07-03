@@ -90,12 +90,12 @@ const CocktailDetails: React.FC = () => {
   return (
     <>
       <motion.div 
-        className="glass rounded-lg p-4 sm:p-6 shadow-lg"
+        className="glass rounded-lg p-4 sm:p-6 shadow-lg z-modal"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row  sm:justify-between sm:items-start mb-4 space-y-2 sm:space-y-0">
           <h3 className="text-lg sm:text-xl font-display font-bold">Cocktail Match</h3>
           {isAuthenticated && (
             <button 
@@ -154,7 +154,7 @@ const CocktailDetails: React.FC = () => {
 
       {/* Rating Modal */}
       {showRatingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-modal flex items-center justify-center bg-black/50 p-4">
           <motion.div 
             className="bg-white rounded-lg shadow-xl w-full max-w-md"
             initial={{ opacity: 0, scale: 0.9 }}
