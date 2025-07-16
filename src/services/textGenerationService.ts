@@ -7,14 +7,39 @@ const OPENROUTER_TEXT_MODEL = import.meta.env.VITE_OPENROUTER_TEXT_MODEL;
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Retry configuration - increased for better rate limit handling
-const MAX_RETRIES = 10; // Increased from 5 to 10
-const BASE_DELAY = 3000; // Increased from 2000ms to 3000ms
+const MAX_RETRIES = 15; // Increased for better rate limit handling
+const BASE_DELAY = 10000; // Increased for better rate limit handling
+
+// Queue for requests and processing flag
+const requestQueue: { prompt: string; resolve: (value: any) => void; reject: (reason?: any) => void; }[] = [];
+let processing = false;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<any> {
+async function processQueue(): Promise<void> {
+  if (processing || requestQueue.length === 0) {
+    return;
+  }
+
+  processing = true;
+  const { prompt, resolve, reject } = requestQueue.shift()!;
+
+  try {
+    const response = await makeOpenRouterRequestInternal(prompt);
+    resolve(response);
+  } catch (error) {
+    reject(error);
+  } finally {
+    processing = false;
+    // Add a delay before processing the next item in the queue
+    await sleep(BASE_DELAY); 
+    processQueue(); // Process the next item
+  }
+}
+
+async function makeOpenRouterRequestInternal(prompt: string, retryCount = 0): Promise<any> {
   try {
     const response = await axios.post(
       OPENROUTER_BASE_URL,
@@ -44,17 +69,24 @@ async function makeOpenRouterRequest(prompt: string, retryCount = 0): Promise<an
   } catch (error: any) {
     // Check if it's a 503 or 429 error and we haven't exceeded max retries
     if ((error.response?.status === 503 || error.response?.status === 429) && retryCount < MAX_RETRIES) {
-      const delay = BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
+      const delay = BASE_DELAY * Math.pow(2, retryCount); 
       
       addBreadcrumb(`OpenRouter API returned ${error.response?.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`, 'text-generation');
       
       await sleep(delay);
-      return makeOpenRouterRequest(prompt, retryCount + 1);
+      return makeOpenRouterRequestInternal(prompt, retryCount + 1);
     }
     
     // If it's not a 503/429 error or we've exceeded max retries, throw the error
     throw error;
   }
+}
+
+async function makeOpenRouterRequest(prompt: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    requestQueue.push({ prompt, resolve, reject });
+    processQueue();
+  });
 }
 
 export async function getLandmarkSuggestion(city: string, country: string): Promise<string | null> {
