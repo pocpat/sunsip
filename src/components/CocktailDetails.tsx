@@ -90,7 +90,7 @@ const CocktailDetails: React.FC = () => {
   return (
     <>
       <motion.div 
-        className="glass rounded-lg p-4 sm:p-6 shadow-lg z-modal"
+        className="glass rounded-lg p-4 sm:p-6 shadow-lg"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
