@@ -1,0 +1,38 @@
+Failed to load resource: the server responded with a status of 404 (Not Found)
+rror fetching landmark from backend: AxiosError
+POST http://localhost:5173/api/generate-landmark 404 (Not Found)
+getLandmarkSuggestionFromBackend	@	LandmarkService.ts:8
+getLandmarkSuggestion	@	LandmarkService.ts:32
+generateCityImage	@	imageGenerationService.ts:118
+handleCitySelect	@	LandingPage.tsx:208
+await in handleCitySelect		
+onClick	@	LandingPage.tsx:335
+Error fetching landmark from backend: 
+AxiosError {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_BAD_REQUEST"
+config
+: 
+{transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 0, …}
+message
+: 
+"Request failed with status code 404"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {__sentry_xhr_v3__: {…}, onreadystatechange: null, readyState: 4, timeout: 0, setRequestHeader: ƒ, …}
+response
+: 
+{data: '', status: 404, statusText: 'Not Found', headers: AxiosHeaders, config: {…}, …}
+status
+: 
+404
+stack
+: 
+"AxiosError: Request failed with status code 404\n    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=28ccbd9b:1229:12)\n    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=28ccbd9b:1561:7)\n    at Axios.request (http://localhost:5173/node_modules/.vite/deps/axios.js?v=28ccbd9b:2119:41)\n    at async getLandmarkSuggestionFromBackend (http://localhost:5173/src/services/LandmarkService.ts:6:22)\n    at async getLandmarkSuggestion (http://localhost:5173/src/services/LandmarkService.ts:26:20)\n    at async generateCityImage (http://localhost:5173/src/services/imageGenerationService.ts:77:18)\n    at async Promise.all (index 0)\n    at async handleCitySelect (http://localhost:5173/src/components/LandingPage.tsx:179:44)"
+__sentry_captured__
+: 
+true

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useAppStore } from '../store/appStore';
-import { getLandmarkSuggestion } from './textGenerationService';
+import { getLandmarkSuggestion } from './LandmarkService';
 import { captureError, addBreadcrumb } from '../lib/sentry';
 
 const IMAGEROUTER_API_KEY = import.meta.env.VITE_IMAGEROUTER_API_KEY;
