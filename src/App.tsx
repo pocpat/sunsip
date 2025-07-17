@@ -42,7 +42,7 @@ function App() {
       const imagesToPreload = [
         "/images/room-day.png",
         "/images/room-night.png",
-        "/images/table.png",
+        "/images/table10.png",
         "/images/loadingPrev10.png",
       ];
 

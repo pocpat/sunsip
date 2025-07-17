@@ -1,10 +1,13 @@
 import axios from 'axios';
 import { useAppStore } from '../store/appStore';
-import { getLandmarkSuggestion } from './textGenerationService';
+import { getLandmarkSuggestion } from './LandmarkService';
 import { captureError, addBreadcrumb } from '../lib/sentry';
 
 const IMAGEROUTER_API_KEY = import.meta.env.VITE_IMAGEROUTER_API_KEY;
 const IMAGEROUTER_BASE_URL = 'https://api.imagerouter.io/v1/openai/images/generations';
+
+// Cache for landmark suggestions to reduce OpenRouter API calls
+const landmarkCache = new Map<string, { value: string, expiry: number }>();
 
 // Array of image generation models to try in order
 const IMAGE_GENERATION_MODELS = [
@@ -102,8 +105,22 @@ export async function generateCityImage(
   try {
     addBreadcrumb(`Generating AI image for ${city}, ${country} with ${weatherCondition} weather`, 'image-generation');
 
-    // Step 1: Get landmark suggestion from text model
-    const landmark = await getLandmarkSuggestion(city, country);
+    // Step 1: Get landmark suggestion from text model with caching
+    const cacheKey = `${city}-${country}`;
+    const cached = landmarkCache.get(cacheKey);
+
+    let landmark: string | null = null;
+
+    if (cached && Date.now() < cached.expiry) {
+      landmark = cached.value;
+      addBreadcrumb(`Using cached landmark suggestion for ${city}, ${country}`, 'image-generation');
+    } else {
+      landmark = await getLandmarkSuggestion(city, country);
+      if (landmark) {
+        // Cache for 24 hours
+        landmarkCache.set(cacheKey, { value: landmark, expiry: Date.now() + 24 * 60 * 60 * 1000 });
+      }
+    }
     
     // Step 2: Construct the image generation prompt
     const timeOfDay = isDay ? 'daytime' : 'nighttime';

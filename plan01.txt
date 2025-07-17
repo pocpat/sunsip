@@ -1,0 +1,277 @@
+How to Fix Your App (Prioritized List)
+Here are the steps to solve this problem, starting with the most important one.
+1. CRITICAL: Secure Your API Key on a Backend
+Your code is running on the frontend (in the user's browser). This line is a major security vulnerability:
+Generated javascript
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+Use code with caution.
+JavaScript
+This embeds your secret API key directly into the JavaScript code sent to the browser. Anyone can open their browser's developer tools, inspect the network requests, and steal your API key. They could then use your key and run up a bill on your account if you ever add credits.
+Solution:
+Create a simple backend endpoint (e.g., a Serverless Function on Vercel/Netlify, or a small Node.js/Express server).
+Frontend (your-app.js): Your React/Vue/Svelte code should call your own backend, not OpenRouter directly.
+Generated javascript
+async function getLandmarkFromMyBackend(city, country) {
+  const response = await axios.post('/api/generate-landmark', { city, country });
+  return response.data.landmark;
+}
+Use code with caution.
+JavaScript
+Backend (/api/generate-landmark.js): This is where your secret key lives. This code runs on your server, not in the user's browser. It is the only place that communicates with OpenRouter.
+Generated javascript
+// This code runs on your server (e.g., a Vercel function)
+import axios from 'axios';
+
+export default async function handler(req, res) {
+  const { city, country } = req.body;
+  const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY; // Loaded securely on the server
+
+  // The prompt logic remains the same
+  const prompt = `Your task is... for: ${city}, ${country}`;
+
+  try {
+    const openRouterResponse = await axios.post(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        model: 'moonshotai/kimi-dev-72b:free', // Or your paid model
+        messages: [{ role: 'user', content: prompt }],
+        // ... other params
+      },
+      {
+        headers: { 'Authorization': `Bearer ${OPENROUTER_API_KEY}` }
+      }
+    );
+
+    const landmark = openRouterResponse.data?.choices?.[0]?.message?.content.trim();
+    res.status(200).json({ landmark: landmark });
+
+  } catch (error) {
+    console.error("Error calling OpenRouter:", error);
+    res.status(500).json({ error: "Failed to generate landmark." });
+  }
+}
+Use code with caution.
+JavaScript
+2. The Real Fix: Upgrade from the Free Tier
+The fundamental reason you're getting rate-limited is because you are using the :free model. This is intended for very light testing, not for a deployed application, even one with low traffic.
+Solution:
+Go to your OpenRouter Account and add a small amount of credits (e.g., $5).
+In your environment variables (on your new backend server), change the model name to the paid version:
+Generated code
+# From
+VITE_OPENROUTER_TEXT_MODEL="moonshotai/kimi-dev-72b:free"
+
+# To
+VITE_OPENROUTER_TEXT_MODEL="moonshotai/kimi-dev-72b"
+Use code with caution.
+Paid models have significantly higher rate limits and will immediately solve your 429 errors for normal traffic levels.
+3. Implement Caching (Drastically Reduce API Calls)
+The landmark suggestion for "Paris, France" will always be "Eiffel Tower". There is no reason to ask the AI for this same information over and over again. Caching is your best friend here.
+Solution:
+On your new backend, store the results of successful API calls. When a new request comes in, check your cache first.
+Here is a simple example of adding an in-memory cache to your backend endpoint.
+Generated javascript
+// On your backend server (`/api/generate-landmark.js`)
+
+import axios from 'axios';
+
+// Simple in-memory cache. For production, consider Redis or a similar service.
+const cache = new Map();
+
+export default async function handler(req, res) {
+  const { city, country } = req.body;
+  const cacheKey = `${city.toLowerCase()}-${country.toLowerCase()}`;
+
+  // 1. Check the cache first
+  if (cache.has(cacheKey)) {
+    console.log(`Serving from cache for: ${cacheKey}`);
+    return res.status(200).json({ landmark: cache.get(cacheKey) });
+  }
+
+  // 2. If not in cache, call the API
+  console.log(`Cache miss. Calling API for: ${cacheKey}`);
+  const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
+  const prompt = `...`; // your prompt
+
+  try {
+    const openRouterResponse = await axios.post(/* ... */);
+    const landmark = openRouterResponse.data?.choices?.[0]?.message?.content.trim();
+
+    // 3. Store the successful result in the cache
+    if (landmark) {
+      cache.set(cacheKey, landmark);
+    }
+
+    res.status(200).json({ landmark: landmark });
+  } catch (error) {
+    // ... error handling
+  }
+}
+Use code with caution.
+JavaScript
+This change alone will reduce your API calls by 99% if users frequently ask for the same cities.
+Summary of Actions to Take:
+(Highest Priority) Move API Logic to a Backend: Stop exposing your API key on the frontend immediately. Create a serverless function to handle the call to OpenRouter.
+(Most Effective) Use the Paid Model: Add credits to your OpenRouter account and remove :free from the model name. This is the intended way to use the API in a real application and directly addresses the rate limit problem.
+(Most Efficient) Implement Caching: On your new backend, cache the results. This will save you money and prevent you from ever hitting rate limits for popular locations.
+Your existing queueing and retry logic is well-intentioned, but it's a complex solution for a problem that can be solved more effectively by addressing the root causes: the free tier's limitations and redundant API calls.
+
+You can and should still update your app with the core suggestions, and you can make it work reliably on the free tier.
+Here is the revised, no-spend plan. We will focus on being smart and efficient to stay within the free limits.
+Your No-Spend Action Plan
+Priority #1: Secure Your API Key on a Backend (Non-Negotiable)
+This is the most important step, not for cost, but for professionalism. A portfolio that leaks API keys is a major red flag for any potential employer. You can do this for free.
+Why: To demonstrate you know how to handle secrets securely.
+How: Use a free serverless function from a provider like Vercel or Netlify (they are perfect for this).
+Step-by-step:
+If your project is not already on Vercel or Netlify, deploy it. It's usually as simple as connecting your GitHub repository.
+Create a file in your project at this path: api/generate-landmark.js (or .ts for TypeScript).
+Add your VITE_OPENROUTER_API_KEY to your Vercel/Netlify project's "Environment Variables" settings. Do not commit it to GitHub.
+Your frontend code will now call /api/generate-landmark instead of OpenRouter directly.
+This is the single most professional improvement you can make.
+Priority #2: Implement Caching on the Backend (The Magic Bullet)
+This is the trick that will solve your 429 (Too Many Requests) error. The free tier rate limit is very low (e.g., maybe 2-5 requests per minute). Caching ensures you only call the API once for any given city.
+Why: To avoid hitting the rate limit and make your app feel instantaneous for repeated searches.
+How: Use a simple in-memory cache in your new serverless function.
+A serverless function might "go to sleep" and lose its memory, but for a portfolio, that's perfectly fine. It will just re-fetch the first time it's used again.
+Putting It All Together: The New Code
+Here is what your new, improved, and free-to-run code will look like.
+1. Your Frontend Code (e.g., LandmarkService.ts)
+This file becomes much simpler. Its only job is to call your own backend. All the complex queueing and retry logic is no longer needed here.
+Generated typescript
+// src/services/LandmarkService.ts
+
+import axios from 'axios';
+import { useAppStore } from '../store/appStore';
+import { captureError, addBreadcrumb } from '../lib/sentry';
+
+// This function now calls YOUR backend, not OpenRouter's.
+async function getLandmarkSuggestionFromBackend(city: string, country: string): Promise<string | null> {
+  try {
+    const response = await axios.post('/api/generate-landmark', { city, country });
+    return response.data.landmark;
+  } catch (error) {
+    // The backend will handle the errors, but we can log it here too.
+    console.error('Error fetching landmark from backend:', error);
+    captureError(error as Error, {
+      service: 'frontend-landmark-service',
+      action: 'get_landmark_suggestion',
+      city,
+      country,
+    });
+    return null;
+  }
+}
+
+export async function getLandmarkSuggestion(city: string, country: string): Promise<string | null> {
+  const isPortfolioMode = useAppStore.getState().isPortfolioMode;
+  if (isPortfolioMode) {
+    addBreadcrumb(`Demo mode enabled, skipping landmark suggestion for ${city}, ${country}`, 'text-generation');
+    return null;
+  }
+  
+  addBreadcrumb(`Getting landmark suggestion for ${city}, ${country}`, 'text-generation');
+
+  const landmark = await getLandmarkSuggestionFromBackend(city, country);
+
+  if (landmark) {
+    addBreadcrumb(`Successfully got landmark suggestion: ${landmark}`, 'text-generation');
+  } else {
+    addBreadcrumb('No landmark suggestion returned from backend', 'text-generation');
+  }
+  
+  return landmark;
+}
+Use code with caution.
+TypeScript
+2. Your NEW Backend Code (The Brains)
+Create this file. This is where the magic happens.
+Generated javascript
+// /api/generate-landmark.js
+// (This file lives in the `api` folder in the root of your project for Vercel/Netlify)
+
+import axios from 'axios';
+
+// 1. THE CACHE: A simple in-memory map. It's free!
+const cache = new Map();
+
+const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
+const OPENROUTER_TEXT_MODEL = "moonshotai/kimi-dev-72b:free"; // Keep the :free model
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+// This is the function Vercel/Netlify will run
+export default async function handler(req, res) {
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method Not Allowed' });
+  }
+
+  const { city, country } = req.body;
+
+  if (!city || !country) {
+    return res.status(400).json({ error: 'City and country are required.' });
+  }
+
+  const cacheKey = `${city.toLowerCase()}-${country.toLowerCase()}`;
+
+  // 2. CHECK THE CACHE FIRST
+  if (cache.has(cacheKey)) {
+    console.log(`Serving "${cacheKey}" from CACHE`);
+    const cachedLandmark = cache.get(cacheKey);
+    return res.status(200).json({ landmark: cachedLandmark });
+  }
+
+  // 3. IF NOT IN CACHE, CALL THE API
+  // This part will run very infrequently thanks to the cache!
+  console.log(`Cache miss for "${cacheKey}". Calling OpenRouter API.`);
+
+  // If no key is configured, stop here.
+  if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'test-openrouter-key') {
+      return res.status(200).json({ landmark: null });
+  }
+
+  const prompt = `Your task is to create a short, visual phrase for an image generation prompt about the city: "${city}, ${country}". ... (rest of your prompt)`;
+
+  try {
+    const response = await axios.post(
+      OPENROUTER_BASE_URL,
+      {
+        model: OPENROUTER_TEXT_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 20,
+        temperature: 0.3,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 20000 // 20-second timeout
+      }
+    );
+
+    const landmark = response.data?.choices?.[0]?.message?.content.trim() || null;
+
+    // 4. STORE THE RESULT IN THE CACHE before sending it back
+    if (landmark) {
+        cache.set(cacheKey, landmark);
+    }
+
+    return res.status(200).json({ landmark });
+
+  } catch (error) {
+    // If the API call fails (e.g., even with caching you hit a rate limit),
+    // we just return null gracefully. The app won't crash.
+    console.error(`Error calling OpenRouter for "${cacheKey}":`, error.response?.data || error.message);
+    return res.status(500).json({ landmark: null, error: "Failed to contact the AI service." });
+  }
+}
+Use code with caution.
+JavaScript
+The Result
+By making these changes:
+You fix the security hole. This looks very professional.
+You fix the 429 error. The cache will absorb 99% of requests, meaning you will almost never hit the rate limit.
+Your app becomes faster. After a city is looked up once, it will be instantaneous for every subsequent user until the serverless function sleeps.
+You spend $0. Both Vercel/Netlify's serverless functions and the in-memory cache are free.
+This is the perfect solution for a high-quality, functional, and impressive portfolio piece.

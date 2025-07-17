@@ -1,0 +1,13 @@
+Request URL
+https://openrouter.ai/api/v1/chat/completions
+Request Method
+POST
+Status Code
+429 Too Many Requests
+Remote Address
+104.18.3.115:443
+Referrer Policy
+strict-origin-when-cross-origin
+Failed to load resource: the server responded with a status of 429 ()
+POST https://openrouter.ai/api/v1/chat/completions 429 (Too Many Requests)
+POST https://openrouter.ai/api/v1/chat/completions 429 (Too Many Requests)
