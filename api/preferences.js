@@ -1,10 +1,11 @@
 import { getDb } from './lib/mongo.js';
 import { getAuthUserFromHeaders } from './lib/auth.js';
 import { randomUUID } from 'crypto';
+import { compatHandler } from './lib/compat.js';
 
 // GET -> get user preferences
 // PUT -> update user preferences
-export default async function handler(req, res) {
+async function handler(req, res) {
   const headers = req.headers || {};
   const authUser = getAuthUserFromHeaders(headers);
 
@@ -77,3 +78,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to handle preferences request.' });
   }
 }
+
+export default compatHandler(handler);

@@ -1,8 +1,9 @@
 import { getDb } from './lib/mongo.js';
 import { getAuthUserFromHeaders } from './lib/auth.js';
+import { compatHandler } from './lib/compat.js';
 
 // GET -> returns global request settings (e.g. {global_enabled: true})
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -35,3 +36,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to fetch system settings.' });
   }
 }
+
+export default compatHandler(handler);

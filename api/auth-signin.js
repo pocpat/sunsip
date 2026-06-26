@@ -4,9 +4,10 @@ import {
   comparePassword,
   setAuthCookie,
 } from './lib/auth.js';
+import { compatHandler } from './lib/compat.js';
 
 // POST {email, password} -> verifies against MongoDB, returns JWT in cookie
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -48,3 +49,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to sign in.' });
   }
 }
+
+export default compatHandler(handler);

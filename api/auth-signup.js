@@ -5,9 +5,10 @@ import {
   setAuthCookie,
 } from './lib/auth.js';
 import { randomUUID } from 'crypto';
+import { compatHandler } from './lib/compat.js';
 
 // POST {email, password} -> creates user in MongoDB users collection, returns JWT in cookie
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -70,3 +71,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to create user.' });
   }
 }
+
+export default compatHandler(handler);

@@ -1,5 +1,6 @@
 import { getDb } from './lib/mongo.js';
 import { getAuthUserFromHeaders } from './lib/auth.js';
+import { compatHandler } from './lib/compat.js';
 
 const DAILY_LIMIT = 10;
 
@@ -17,7 +18,7 @@ function getUTCDateKey(date) {
 
 // POST {userId} or {clientId} -> check and update daily request limit (10/day)
 // Returns {canProceed, count, remaining, resetDate}
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -145,3 +146,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to check request limit.' });
   }
 }
+
+export default compatHandler(handler);

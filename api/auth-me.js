@@ -1,8 +1,9 @@
 import { getAuthUserFromHeaders } from './lib/auth.js';
 import { getDb } from './lib/mongo.js';
+import { compatHandler } from './lib/compat.js';
 
 // GET -> returns current user from JWT in cookie
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -35,3 +36,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to fetch user.' });
   }
 }
+
+export default compatHandler(handler);

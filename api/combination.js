@@ -1,9 +1,10 @@
 import { getDb } from './lib/mongo.js';
 import { getAuthUserFromHeaders } from './lib/auth.js';
+import { compatHandler } from './lib/compat.js';
 
 // DELETE -> delete combination by id (query param ?id=)
 // PATCH  -> update rating/notes for combination by id (query param ?id=)
-export default async function handler(req, res) {
+async function handler(req, res) {
   const headers = req.headers || {};
   const authUser = getAuthUserFromHeaders(headers);
 
@@ -59,3 +60,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to handle combination request.' });
   }
 }
+
+export default compatHandler(handler);

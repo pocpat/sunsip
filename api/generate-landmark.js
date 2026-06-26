@@ -1,7 +1,8 @@
 
 import axios from 'axios';
+import { compatHandler } from './lib/compat.js';
 
-// 1. THE CACHE: A simple in-memory map. It's free!
+// 1. THE CACHE
 const cache = new Map();
 
 const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
@@ -9,7 +10,7 @@ const OPENROUTER_TEXT_MODEL = "moonshotai/kimi-dev-72b:free"; // Keep the :free 
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // This is the function Vercel/Netlify will run
-export default async function handler(req, res) {
+async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
@@ -75,3 +76,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ landmark: null, error: "Failed to contact the AI service." });
   }
 }
+
+export default compatHandler(handler);
