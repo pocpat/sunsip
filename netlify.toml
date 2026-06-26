@@ -3,9 +3,6 @@
   publish = "dist"
   functions = "api"
 
-[functions]
-  node_bundler = "esbuild"
-
 # API functions take priority - don't redirect these to SPA
 [[redirects]]
   from = "/api/*"
