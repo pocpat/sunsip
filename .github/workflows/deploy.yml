@@ -30,6 +30,10 @@ jobs:
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
         VITE_GEOCODING_API_KEY: ${{ secrets.VITE_GEOCODING_API_KEY }}
+        VITE_IMAGEROUTER_API_KEY: ${{ secrets.VITE_IMAGEROUTER_API_KEY }}
+        VITE_OPENROUTER_API_KEY: ${{ secrets.VITE_OPENROUTER_API_KEY }}
+        VITE_OPENROUTER_TEXT_MODEL: ${{ secrets.VITE_OPENROUTER_TEXT_MODEL }}
+        VITE_PORTFOLIO_MODE_ENABLED: ${{ secrets.VITE_PORTFOLIO_MODE_ENABLED }}
         
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v3.0

@@ -207,7 +207,14 @@ export async function generateCityImage(
 
     console.error('Error generating AI image with all models, falling back to Pexels:', error);
     
-    // Fallback to Pexels images on error
+    // Try to get a city-specific image from Pexels API first
+    const pexelsImage = await getPexelsCityImage(city, weatherCondition, isDay);
+    if (pexelsImage) {
+      addBreadcrumb(`Using Pexels city-specific image for ${city}`, 'image-generation');
+      return pexelsImage;
+    }
+    
+    // Final fallback to generic weather-based Pexels images
     return getFallbackCityImage(weatherCondition, isDay);
   }
 }
@@ -279,4 +286,33 @@ function getFallbackCityImage(
   const timeOfDay: TimeOfDay = isDay ? 'day' : 'night';
 
   return defaultImages[weatherType][timeOfDay];
+}
+
+// Try to get a city-specific image from Pexels API (free, no key required for curated photos)
+async function getPexelsCityImage(city: string, weatherCondition: string, isDay: boolean): Promise<string | null> {
+  try {
+    const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY;
+    
+    // If no Pexels API key, return null to use generic fallback
+    if (!PEXELS_API_KEY || PEXELS_API_KEY === 'test-pexels-key') {
+      return null;
+    }
+    
+    const query = `${city} city ${weatherCondition} ${isDay ? 'day' : 'night'}`;
+    const response = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=landscape`, {
+      headers: {
+        'Authorization': PEXELS_API_KEY,
+      },
+      timeout: 10000,
+    });
+    
+    if (response.data?.photos?.[0]?.src?.large) {
+      return response.data.photos[0].src.large;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching Pexels city image:', error);
+    return null;
+  }
 }

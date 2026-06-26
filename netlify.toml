@@ -6,6 +6,13 @@
 [functions]
   node_bundler = "esbuild"
 
+# API functions take priority - don't redirect these to SPA
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback - all other routes go to index.html
 [[redirects]]
   from = "/*"
   to = "/index.html"
