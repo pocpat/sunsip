@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { setUserContext, clearUserContext } from '../lib/sentry';
-import { supabase } from '../lib/supabase';
+import { signOut as apiSignOut, getSystemSettings } from '../lib/api';
 
 export type User = {
   id: string;
@@ -73,24 +73,12 @@ export const useAuthStore = create<AuthState>()(
           const state = get();
           const newEnabledState = !state.globalRequestsEnabled;
           
-          // Only proceed if user is authenticated and is admin
           if (!state.user || !state.isAdmin) {
             console.error('Only authenticated admin users can toggle global requests');
             return;
           }
           
-          // Call the Supabase RPC to toggle global requests
-          const { data, error } = await supabase.rpc('toggle_global_requests', {
-            enabled: newEnabledState,
-            admin_user_id: state.user.id
-          });
-          
-          if (error) {
-            console.error('Error toggling global requests:', error);
-            return;
-          }
-          
-          // Update local state after successful database update
+          // For now, just toggle locally. A dedicated admin API endpoint can be added later.
           set({ globalRequestsEnabled: newEnabledState });
           console.log(`Global requests ${newEnabledState ? 'enabled' : 'disabled'} successfully`);
         } catch (error) {
@@ -99,7 +87,6 @@ export const useAuthStore = create<AuthState>()(
       },
       
       setUser: (user) => {
-        // Set Sentry user context when user logs in/out
         if (user) {
           setUserContext(user);
         } else {
@@ -117,7 +104,6 @@ export const useAuthStore = create<AuthState>()(
       }),
       
       addSavedCombination: (combination) => set((state) => {
-        // Keep only the last 20 combinations
         const newCombinations = [combination, ...state.savedCombinations].slice(0, 20);
         return { savedCombinations: newCombinations };
       }),
@@ -140,13 +126,10 @@ export const useAuthStore = create<AuthState>()(
       
       logout: async () => {
         try {
-          // Sign out from Supabase
-          await supabase.auth.signOut();
+          await apiSignOut();
           
-          // Clear Sentry user context
           clearUserContext();
           
-          // Reset auth state
           set({
             user: null,
             isAuthenticated: false,
@@ -156,7 +139,6 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           console.error('Error signing out:', error);
-          // Still reset local state even if Supabase call fails
           clearUserContext();
           set({
             user: null,

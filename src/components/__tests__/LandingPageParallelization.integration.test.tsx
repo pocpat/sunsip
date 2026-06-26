@@ -23,6 +23,11 @@ vi.mock('framer-motion', () => ({
     p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
   },
   AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({
+    set: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+  }),
 }));
 
 // Mock auth store to avoid authentication dependencies

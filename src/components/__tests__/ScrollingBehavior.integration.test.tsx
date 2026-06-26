@@ -79,6 +79,11 @@ vi.mock('framer-motion', () => ({
     h2: ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
   },
   AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({
+    set: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+  }),
 }));
 
 describe('Scrolling Behavior Integration Tests', () => {

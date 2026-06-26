@@ -144,7 +144,8 @@ const SavedCombinations: React.FC = () => {
     );
   };
 
-  if (savedCombinations.length === 0 && !isLoading) {
+  const combos = savedCombinations || [];
+  if (combos.length === 0 && !isLoading) {
     return null;
   }
 

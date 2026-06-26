@@ -26,6 +26,11 @@ vi.mock('framer-motion', () => ({
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   },
   AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({
+    set: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+  }),
 }));
 
 const mockWeatherData: WeatherData = {

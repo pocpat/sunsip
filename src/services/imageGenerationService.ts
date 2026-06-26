@@ -17,8 +17,8 @@ const IMAGE_GENERATION_MODELS = [
 ];
 
 // Retry configuration for individual models
-const MAX_MODEL_RETRIES = 5; // Increased from 3 to 5
-const MODEL_RETRY_BASE_DELAY = 2000; // Increased from 1000ms to 2000ms
+const MAX_MODEL_RETRIES = 3; // Reduced: too many retries on free tier just wastes time
+const MODEL_RETRY_BASE_DELAY = 3000; // Increased base delay for rate limit cooldown
 
 // Sleep utility function for delays
 async function sleep(ms: number): Promise<void> {
@@ -66,8 +66,15 @@ async function tryGenerateImageWithRetries(
     return null;
     
   } catch (modelError: any) {
-    // Check if it's a 503 or 429 error and we haven't exceeded max retries for this model
-    if ((modelError.response?.status === 503 || modelError.response?.status === 429) && retryCount < MAX_MODEL_RETRIES) {
+    // On 429 (rate limit), skip to the next model immediately instead of retrying
+    // Free tier models are often rate-limited and retrying just wastes time
+    if (modelError.response?.status === 429) {
+      addBreadcrumb(`Model ${model} returned 429 (rate limited), skipping to next model`, 'image-generation');
+      throw modelError;
+    }
+    
+    // Check if it's a 503 error and we haven't exceeded max retries for this model
+    if (modelError.response?.status === 503 && retryCount < MAX_MODEL_RETRIES) {
       const delay = MODEL_RETRY_BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
       
       addBreadcrumb(`Model ${model} returned ${modelError.response?.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_MODEL_RETRIES})`, 'image-generation');
