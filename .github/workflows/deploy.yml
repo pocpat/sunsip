@@ -33,6 +33,7 @@ jobs:
         VITE_IMAGEROUTER_API_KEY: ${{ secrets.VITE_IMAGEROUTER_API_KEY }}
         VITE_OPENROUTER_API_KEY: ${{ secrets.VITE_OPENROUTER_API_KEY }}
         VITE_OPENROUTER_TEXT_MODEL: ${{ secrets.VITE_OPENROUTER_TEXT_MODEL }}
+        VITE_PEXELS_API_KEY: ${{ secrets.VITE_PEXELS_API_KEY }}
         VITE_PORTFOLIO_MODE_ENABLED: ${{ secrets.VITE_PORTFOLIO_MODE_ENABLED }}
         
     - name: Deploy to Netlify

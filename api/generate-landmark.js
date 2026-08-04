@@ -6,7 +6,8 @@ import { compatHandler } from './lib/compat.js';
 const cache = new Map();
 
 const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
-const OPENROUTER_TEXT_MODEL = "moonshotai/kimi-dev-72b:free"; // Keep the :free model
+const OPENROUTER_TEXT_MODEL = process.env.VITE_OPENROUTER_TEXT_MODEL
+       || "nvidia/nemotron-3-super-120b-a12b:free";
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // This is the function Vercel/Netlify will run

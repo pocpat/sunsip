@@ -12,7 +12,8 @@ const landmarkCache = new Map<string, { value: string, expiry: number }>();
 // Array of image generation models to try in order
 const IMAGE_GENERATION_MODELS = [
   'stabilityai/sdxl-turbo:free',
-  'google/gemini-2.0-flash-exp:free',
+  'google/nano-banana-2-lite:free',
+  'qwen/qwen-image:free',
   'black-forest-labs/FLUX-1-schnell:free'
 ];
 

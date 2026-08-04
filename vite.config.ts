@@ -14,6 +14,12 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
 
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8888'  // netlify dev port
+    }
+  },
+
   build: {
     sourcemap: true
   }
