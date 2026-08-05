@@ -106,7 +106,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   showAuthModal: false,
   setShowAuthModal: (show) => set({ showAuthModal: show }),
   
-  isPortfolioMode: import.meta.env.VITE_PORTFOLIO_MODE_ENABLED === 'true',
+  // Demo mode: AI image generation disabled, using sample images
+  isPortfolioMode: true,
   setIsPortfolioMode: (mode) => set({ isPortfolioMode: mode }),
   
   isResetting: false,
