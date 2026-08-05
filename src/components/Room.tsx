@@ -8,7 +8,7 @@ interface RoomProps {
 }
 
 const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
-  const { weatherData, cityImageUrl, cocktailData } = useAppStore();
+  const { weatherData, cityImageUrl, cocktailData, isPortfolioMode } = useAppStore();
   const [weatherAnimations, setWeatherAnimations] = useState<JSX.Element[]>([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [showImageModal, setShowImageModal] = useState(false);
@@ -167,6 +167,15 @@ const Room: React.FC<RoomProps> = ({ isPreview = false }) => {
                   {weatherAnimations}
                 </div>
               </>
+            )}
+
+            {/* Demo mode toast — shown when portfolio/demo mode is active */}
+            {isPortfolioMode && !isPreview && cityImageUrl && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm px-3 py-2 text-center pointer-events-none">
+                <p className="text-white/90 text-xs leading-tight">
+                  Demo mode — showing sample images. AI-generated city images are disabled.
+                </p>
+              </div>
             )}
           </div>
         </div>
