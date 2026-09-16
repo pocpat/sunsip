@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import { 
-  Sunset, MoreVertical, BarChart3, User, LogOut, CloudOff, Cloud, House as HouseIcon,
+import {
+  Sunset, MoreVertical, BarChart3, User, LogOut, CloudOff, Cloud,
   Shield, ShieldAlert, ShieldCheck, Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,6 +63,7 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
   };
 
   const handleStartOver = () => {
+    setNavSource("button");
     resetApp();
   };
   
@@ -97,7 +98,26 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-modal p-4 sm:p-6 bg-transparent">
-      <div className="container mx-auto px-2 sm:px-4">
+      <div className="container mx-auto px-2 sm:px-4 relative">
+        {/* "Somewhere else?" — gentle top-center reset. Replaces the old
+            icon-only Start Over house button (same handler + title). */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-0 hidden sm:block">
+          <AnimatePresence>
+            {showStartOverButton && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.25 }}
+                onClick={handleStartOver}
+                className="text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-full border border-white/15 hover:border-white/40 bg-transparent transition-colors whitespace-nowrap"
+                title="Start Over"
+              >
+                Somewhere else?
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={handleReset}>
             <Sunset size={24} className="text-accent-300 sm:w-7 sm:h-7" />
@@ -129,20 +149,6 @@ const Header: React.FC<HeaderProps> = ({ setNavSource }) => {
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {showStartOverButton && (
-              <motion.button 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                exit={{ opacity: 0, scale: 0.8 }} 
-                transition={{ duration: 0.2 }} 
-                onClick={handleStartOver} 
-                className="p-2 rounded-full hover:bg-white/10 transition-colors" 
-                title="Start Over"
-              >
-                <HouseIcon size={18} className="text-white sm:w-5 sm:h-5" />
-              </motion.button>
-            )}
-            
             {/* Admin Settings Button - Only visible when isAdmin is true */}
             {isAdmin && (
               <div className="relative" ref={adminMenuRef}>
