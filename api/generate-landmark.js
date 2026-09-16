@@ -5,9 +5,11 @@ import { compatHandler } from './lib/compat.js';
 // 1. THE CACHE
 const cache = new Map();
 
-const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+// Verified against OpenRouter's live catalog 2026-09-17 (kimi-dev-72b:free was
+// retired; this one answered a landmark probe with a clean short answer).
 const OPENROUTER_TEXT_MODEL = process.env.VITE_OPENROUTER_TEXT_MODEL
-       || "nvidia/nemotron-3-super-120b-a12b:free";
+       || "inclusionai/ling-3.0-flash-sante:free";
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // This is the function Vercel/Netlify will run
