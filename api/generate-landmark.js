@@ -43,7 +43,7 @@ async function handler(req, res) {
       return res.status(200).json({ landmark: null });
   }
 
-  const prompt = `Your task is to create a short, visual phrase for an image generation prompt about the city: "${city}, ${country}". ... (rest of your prompt)`;
+  const prompt = `Your task is to create a short, visual phrase for an image generation prompt about the city: "${city}, ${country}". Name ONE famous, visually distinctive landmark or iconic feature of that city. Answer with the landmark phrase ONLY, at most 5 words, no punctuation, no explanation.`;
 
   try {
     const response = await axios.post(
@@ -51,7 +51,7 @@ async function handler(req, res) {
       {
         model: OPENROUTER_TEXT_MODEL,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 20,
+        max_tokens: 300,
         temperature: 0.3,
       },
       {
@@ -63,7 +63,17 @@ async function handler(req, res) {
       }
     );
 
-    const landmark = response.data?.choices?.[0]?.message?.content.trim() || null;
+    const rawContent = response.data?.choices?.[0]?.message?.content;
+    // Null-safe: some models return null content (or reasoning only) — never
+    // crash on that, just degrade to no landmark.
+    let landmark = null;
+    if (typeof rawContent === 'string' && rawContent.trim()) {
+      landmark = rawContent
+        .replace(/<think>[\s\S]*?<\/think>/g, '') // strip reasoning blocks if present
+        .trim()
+        .split('\n')[0]
+        .slice(0, 60) || null;
+    }
 
     // 4. STORE THE RESULT IN THE CACHE before sending it back
     if (landmark) {
