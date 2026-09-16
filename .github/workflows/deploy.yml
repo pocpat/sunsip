@@ -36,17 +36,12 @@ jobs:
         VITE_PEXELS_API_KEY: ${{ secrets.VITE_PEXELS_API_KEY }}
         VITE_PORTFOLIO_MODE_ENABLED: ${{ secrets.VITE_PORTFOLIO_MODE_ENABLED }}
         
-    - name: Deploy to Netlify
-      uses: nwtgck/actions-netlify@v3.0
-      with:
-        publish-dir: './dist'
-        production-branch: main
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        deploy-message: "Deploy from GitHub Actions"
-        enable-pull-request-comment: false
-        enable-commit-comment: true
-        overwrites-pull-request-comment: true
+    - name: Deploy to Netlify (site + functions)
+      # The previous nwtgck/actions-netlify step deployed only dist/. Netlify's
+      # own git integration ships functions, but this workflow's deploys must
+      # too — netlify-cli deploys dist/ AND api/ functions per netlify.toml.
+      run: npx --yes netlify-cli@latest deploy --prod --dir dist
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      timeout-minutes: 1
+      timeout-minutes: 10

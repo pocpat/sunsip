@@ -3,91 +3,15 @@ import { useAppStore } from '../store/appStore';
 import { getLandmarkSuggestion } from './LandmarkService';
 import { captureError, addBreadcrumb } from '../lib/sentry';
 
-const IMAGEROUTER_API_KEY = import.meta.env.VITE_IMAGEROUTER_API_KEY;
-const IMAGEROUTER_BASE_URL = 'https://api.imagerouter.io/v1/openai/images/generations';
+// Image generation moved server-side (Dipsy-style, 2026-09): the prompt is
+// POSTed to the /api/generate-image Netlify function, which holds the
+// ImageRouter key and a provider chain (ImageRouter -> Cloudflare
+// flux-1-schnell -> Pollinations turbo). The browser never touches provider
+// keys, and there are no more retry storms on ImageRouter's 3/day free pool.
+const GENERATE_IMAGE_TIMEOUT_MS = 45000;
 
 // Cache for landmark suggestions to reduce OpenRouter API calls
 const landmarkCache = new Map<string, { value: string, expiry: number }>();
-
-// Array of image generation models to try in order
-const IMAGE_GENERATION_MODELS = [
-  'stabilityai/sdxl-turbo:free',
-  'google/nano-banana-2-lite:free',
-  'qwen/qwen-image:free',
-  'black-forest-labs/FLUX-1-schnell:free'
-];
-
-// Retry configuration for individual models
-const MAX_MODEL_RETRIES = 3; // Reduced: too many retries on free tier just wastes time
-const MODEL_RETRY_BASE_DELAY = 3000; // Increased base delay for rate limit cooldown
-
-// Sleep utility function for delays
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Helper function to retry image generation with a single model
-async function tryGenerateImageWithRetries(
-  model: string,
-  prompt: string,
-  retryCount = 0
-): Promise<string | null> {
-  try {
-    addBreadcrumb(`Attempting image generation with model: ${model} (attempt ${retryCount + 1}/${MAX_MODEL_RETRIES + 1})`, 'image-generation');
-    
-    const response = await axios.post(
-      IMAGEROUTER_BASE_URL,
-      {
-        model: model,
-        prompt: prompt,
-        n: 1,
-        size: '1024x1024'
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${IMAGEROUTER_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000 // 30 second timeout for image generation
-      }
-    );
-
-    if (response.data?.data?.[0]?.url) {
-      const generatedImageUrl = response.data.data[0].url;
-      
-      addBreadcrumb(`Successfully generated AI image with ${model}: ${generatedImageUrl}`, 'image-generation', {
-        model,
-        attemptNumber: retryCount + 1
-      });
-      
-      return generatedImageUrl;
-    }
-
-    addBreadcrumb(`No image URL in response from ${model}`, 'image-generation');
-    return null;
-    
-  } catch (modelError: any) {
-    // On 429 (rate limit), skip to the next model immediately instead of retrying
-    // Free tier models are often rate-limited and retrying just wastes time
-    if (modelError.response?.status === 429) {
-      addBreadcrumb(`Model ${model} returned 429 (rate limited), skipping to next model`, 'image-generation');
-      throw modelError;
-    }
-    
-    // Check if it's a 503 error and we haven't exceeded max retries for this model
-    if (modelError.response?.status === 503 && retryCount < MAX_MODEL_RETRIES) {
-      const delay = MODEL_RETRY_BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
-      
-      addBreadcrumb(`Model ${model} returned ${modelError.response?.status}, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_MODEL_RETRIES})`, 'image-generation');
-      
-      await sleep(delay);
-      return tryGenerateImageWithRetries(model, prompt, retryCount + 1);
-    }
-    
-    // If it's not a 503/429 error or we've exceeded max retries for this model, throw the error
-    throw modelError;
-  }
-}
 
 export async function generateCityImage(
   city: string,
@@ -97,16 +21,10 @@ export async function generateCityImage(
 ): Promise<string> {
   // Get portfolio mode state
   const isPortfolioMode = useAppStore.getState().isPortfolioMode;
-  
+
   // If in portfolio mode, immediately return fallback Pexels images
   if (isPortfolioMode) {
     addBreadcrumb(`Portfolio mode enabled, using fallback images for ${city}, ${country}`, 'image-generation');
-    return getFallbackCityImage(weatherCondition, isDay);
-  }
-
-  // If no API key is provided, use fallback images
-  if (!IMAGEROUTER_API_KEY || IMAGEROUTER_API_KEY === 'test-imagerouter-key' || IMAGEROUTER_API_KEY === 'your-imagerouter-api-key') {
-    addBreadcrumb(`No valid ImageRouter API key found, using fallback images for ${city}, ${country}`, 'image-generation');
     return getFallbackCityImage(weatherCondition, isDay);
   }
 
@@ -146,67 +64,47 @@ export async function generateCityImage(
 
     addBreadcrumb(`Using prompt: ${prompt}`, 'image-generation');
 
-    // Step 3: Try each model in sequence with retries until one succeeds
-    for (let i = 0; i < IMAGE_GENERATION_MODELS.length; i++) {
-      const model = IMAGE_GENERATION_MODELS[i];
-      
-      try {
-        const generatedImageUrl = await tryGenerateImageWithRetries(model, prompt);
-        
-        if (generatedImageUrl) {
-          addBreadcrumb(`Successfully generated AI image with ${model}`, 'image-generation', {
-            city,
-            country,
-            landmark,
-            weatherCondition,
-            isDay,
-            model,
-            modelIndex: i + 1
-          });
-          
-          return generatedImageUrl;
-        }
-        
-        addBreadcrumb(`Model ${model} returned no image URL, trying next model`, 'image-generation');
-        
-      } catch (modelError: any) {
-        captureError(modelError as Error, {
-          service: 'imagerouter',
-          action: 'generate_image_model_failed',
-          model,
-          modelIndex: i + 1,
-          city,
-          country,
-          weatherCondition,
-          isDay
-        });
+    // Step 3: Ask the backend function to generate the image
+    const response = await axios.post(
+      '/api/generate-image',
+      { prompt },
+      { timeout: GENERATE_IMAGE_TIMEOUT_MS }
+    );
+    const imageUrl = response.data?.imageUrl;
+    const provider = response.data?.provider;
 
-        console.error(`Error with model ${model} after all retries (model ${i + 1}/${IMAGE_GENERATION_MODELS.length}):`, modelError);
-        
-        // If this is not the last model, continue to the next one
-        if (i < IMAGE_GENERATION_MODELS.length - 1) {
-          addBreadcrumb(`Model ${model} failed after all retries, trying next model`, 'image-generation');
-          continue;
-        }
-      }
+    if (imageUrl) {
+      addBreadcrumb(`Image served by ${provider ?? 'unknown provider'}`, 'image-generation', {
+        city,
+        country,
+        landmark,
+        weatherCondition,
+        isDay,
+        provider,
+      });
+      return imageUrl;
     }
 
-    // If we reach here, all models failed
-    addBreadcrumb('All image generation models failed after retries', 'image-generation');
-    throw new Error('All image generation models failed');
+    // Backend answered but has no image → Pexels fallback chain
+    addBreadcrumb('Backend returned no image, using Pexels fallback', 'image-generation');
+    const pexelsImage = await getPexelsCityImage(city, weatherCondition, isDay);
+    if (pexelsImage) {
+      addBreadcrumb(`Using Pexels city-specific image for ${city}`, 'image-generation');
+      return pexelsImage;
+    }
+    return getFallbackCityImage(weatherCondition, isDay);
 
   } catch (error) {
     captureError(error as Error, {
-      service: 'imagerouter',
-      action: 'generate_image_all_models_failed',
+      service: 'backend-image-generation',
+      action: 'generate_image_failed',
       city,
       country,
       weatherCondition,
-      isDay,
-      modelsAttempted: IMAGE_GENERATION_MODELS
+      isDay
     });
 
-    console.error('Error generating AI image with all models, falling back to Pexels:', error);
+    console.error('Error generating AI image via backend, falling back to Pexels:', error);
     
     // Try to get a city-specific image from Pexels API first
     const pexelsImage = await getPexelsCityImage(city, weatherCondition, isDay);
@@ -289,7 +187,8 @@ function getFallbackCityImage(
   return defaultImages[weatherType][timeOfDay];
 }
 
-// Try to get a city-specific image from Pexels API (free, no key required for curated photos)
+// Try to get a city-specific image from Pexels API (kept from the previous
+// frontend flow — uses VITE_PEXELS_API_KEY, a public-CDN key)
 async function getPexelsCityImage(city: string, weatherCondition: string, isDay: boolean): Promise<string | null> {
   try {
     const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY;

@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// DOM-dependent mocks: only when a DOM is present (jsdom). Node-environment
+// suites (e.g. serverless function tests) share this setup file and have no
+// window/Element, so these mocks must be skipped there.
+if (typeof window !== 'undefined' && typeof Element !== 'undefined') {
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
@@ -46,6 +50,7 @@ Object.defineProperty(window, 'innerWidth', {
   configurable: true,
   value: 1200,
 });
+}
 
 // Mock console methods to reduce noise in tests
 global.console = {
@@ -64,7 +69,6 @@ vi.mock('import.meta', () => ({
     VITE_SUPABASE_ANON_KEY: 'test-anon-key',
     VITE_OPENROUTER_API_KEY: 'test-openrouter-key',
     VITE_OPENROUTER_TEXT_MODEL: 'test-model',
-    VITE_IMAGEROUTER_API_KEY: 'test-imagerouter-key',
     VITE_PORTFOLIO_MODE_ENABLED: 'true',
   },
 }));
