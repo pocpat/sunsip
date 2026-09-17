@@ -77,6 +77,47 @@ export async function getCurrentUser(): Promise<{ id: string; email: string; isA
 
 // ============ SAVED COMBINATIONS ============
 
+export interface ApiSavedCombination {
+  id: string;
+  userId: string;
+  cityName: string;
+  countryName: string;
+  cityImageUrl: string;
+  weatherDetails: string;
+  cocktailName: string;
+  cocktailImageUrl: string;
+  cocktailIngredients: string[];
+  cocktailRecipe: string[];
+  rating?: number;
+  notes: string;
+  timesAccessed: number;
+  lastAccessedAt?: string;
+  createdAt: string;
+}
+
+/** Mongo returns `_id`; the whole FE works with `id`. Normalize at the edge:
+ *  `id` from `_id`, `savedAt` mirrors createdAt, nullable DB fields get
+ *  FE-friendly defaults. */
+function normalizeCombination(raw: any): ApiSavedCombination & { savedAt: string } {
+  const { _id, ...rest } = raw ?? {};
+  return {
+    id: raw?.id ?? _id,
+    cityName: raw?.cityName ?? '',
+    countryName: raw?.countryName ?? '',
+    cityImageUrl: raw?.cityImageUrl ?? '',
+    weatherDetails: raw?.weatherDetails ?? '',
+    cocktailName: raw?.cocktailName ?? '',
+    cocktailImageUrl: raw?.cocktailImageUrl ?? '',
+    cocktailIngredients: Array.isArray(raw?.cocktailIngredients) ? raw.cocktailIngredients : [],
+    cocktailRecipe: Array.isArray(raw?.cocktailRecipe) ? raw.cocktailRecipe : [],
+    notes: raw?.notes ?? '',
+    rating: typeof raw?.rating === 'number' ? raw.rating : undefined,
+    lastAccessedAt: raw?.lastAccessedAt ?? undefined,
+    savedAt: raw?.savedAt ?? raw?.createdAt,
+    ...rest,
+  } as unknown as ApiSavedCombination & { savedAt: string };
+}
+
 export async function saveCombination(userId: string, data: {
   cityName: string;
   countryName: string;
@@ -90,12 +131,13 @@ export async function saveCombination(userId: string, data: {
   notes?: string;
 }) {
   const response = await axios.post(`${API_BASE}/combinations`, data);
-  return response.data;
+  return normalizeCombination(response.data.combination ?? response.data);
 }
 
 export async function getUserSavedCombinations(userId: string) {
   const response = await axios.get(`${API_BASE}/combinations`);
-  return response.data;
+  const list = response.data.combinations ?? response.data ?? [];
+  return (Array.isArray(list) ? list : []).map(normalizeCombination);
 }
 
 export async function updateCombinationRating(id: string, rating: number, notes?: string) {

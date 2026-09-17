@@ -142,7 +142,7 @@ describe('Scrolling Behavior Integration Tests', () => {
 
       // Should show landing page content
       expect(screen.getByText('FIND YOUR PERFECT SIP')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Enter a city name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('e.g. Wellington, New York, Bali...')).toBeInTheDocument();
       
       // Landing section should be 75vh
       const landingSection = document.querySelector('.h-\\[75vh\\]');
@@ -178,7 +178,7 @@ describe('Scrolling Behavior Integration Tests', () => {
       render(<App />);
 
       // Perform search
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Wait for search results
@@ -202,7 +202,7 @@ describe('Scrolling Behavior Integration Tests', () => {
     it('should show full results content after search completion', async () => {
       render(<App />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -227,7 +227,7 @@ describe('Scrolling Behavior Integration Tests', () => {
     it('should not auto-scroll during loading state', async () => {
       render(<App />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -261,7 +261,7 @@ describe('Scrolling Behavior Integration Tests', () => {
       render(<App />);
 
       // Complete search
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -359,7 +359,7 @@ describe('Scrolling Behavior Integration Tests', () => {
       render(<App />);
 
       // First complete a search
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -393,7 +393,7 @@ describe('Scrolling Behavior Integration Tests', () => {
       render(<App />);
 
       // Complete search first
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -437,7 +437,7 @@ describe('Scrolling Behavior Integration Tests', () => {
 
         const { unmount } = render(<App />);
 
-        const searchInput = screen.getByPlaceholderText('Enter a city name...');
+        const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
         await user.type(searchInput, 'paris');
 
         await waitFor(() => {
@@ -471,7 +471,7 @@ describe('Scrolling Behavior Integration Tests', () => {
 
       render(<App />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -533,7 +533,7 @@ describe('Scrolling Behavior Integration Tests', () => {
       render(<App />);
 
       // Start search
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {

@@ -1,0 +1,42 @@
+
+URL: https://api.imagerouter.io/v1/openai/images/generations
+Model: stabilityai/sdxl-turbo:free
+API Key (last 4 chars): e027
+N: undefined
+Size: undefined
+ImageRouter API Axios Error: 429 {
+  error: {
+    message: 'Daily limit of 50 free requests reached. There is no limit on paid models.',
+    type: 'rate_limit_error'
+  }
+}
+Error in /api/generate: Error: ImageRouter API Error: 429 - Request failed with status code 429
+    at y (.next/server/app/api/generate/route.js:1:2891)
+    at async B (.next/server/app/api/generate/route.js:1:3636)
+    at async k (.next/server/app/api/generate/route.js:1:6536)
+    at async g (.next/server/app/api/generate/route.js:1:7539)
+    at async H (.next/server/app/api/generate/route.js:1:8661)
+
+POST
+
+/api/generate
+
+500
+Request started
+Jul 24 11:50:02.13GMT+12
+
+
+
+Function Invocation
+
+500
+Internal Server Error
+
+
+
+FE terminal 
+Android Bundled 1087ms index.js (1111 modules)
+ LOG  fetchWithAuth: auth.currentUser: {"_redirectEventId": undefined, "apiKey": "AIzaSyC27zo-bSA7JFrIErC1-0CmdniVDiP6q6I", "appName": "[DEFAULT]", "createdAt": "1752810086172", "displayName": undefined, "email": "test3@gmail.com", "emailVerified": false, "isAnonymous": false, "lastLoginAt": "1753247220286", "phoneNumber": undefined, "photoURL": undefined, "providerData": [[Object]], "stsTokenManager": {"accessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjZkZTQwZjA0ODgxYzZhMDE2MTFlYjI4NGE0Yzk1YTI1MWU5MTEyNTAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbmV3bmFpbHMtZmlyZWJhc2UiLCJhdWQiOiJuZXduYWlscy1maXJlYmFzZSIsImF1dGhfdGltZSI6MTc1MzI0NzIyMCwidXNlcl9pZCI6IjY5bFpFSDJuT3lSakZBVXN6RVVMRFRIZEs4cDIiLCJzdWIiOiI2OWxaRUgybk95UmpGQVVzekVVTERUSGRLOHAyIiwiaWF0IjoxNzUzMzEzODg4LCJleHAiOjE3NTMzMTc0ODgsImVtYWlsIjoidGVzdDNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRlc3QzQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.jzW9snB7JkWYM5iVJgxzk9DYX20xX-5nFim2smDYdmdUOfAZ0_TdNZCyNxLuaMsHVWtI4FgqDyBbDVw43_q3mJvrLcq3LPe8qNUczvwfYLzo_1Zye-IT4eE7aassDsS2w7xIK2hvAtLpfHldKro9h0uGn_wEdNKlr2T8GnbH1_f-KZxgHDV4eX7lIhdsULMd_DUsVYIGj6TvTf54xEdvut8iVUiOSWbu6xsaUFqeEo7rPvmHS6kVWnsHvJyps6ZF3C8Nn0FEM4ZcyMW5WaLSsZyyIskGw8fVvlGj-FlLa0WnonIV09bgjM3lU9zqYvLr2kcwHIU8TJVmlt6hsdCcEQ", "expirationTime": 1753317489968, "refreshToken": "AMf-vBzI0QAzvMxO5qX02MJws6l61BLvk_yTEjO0tfrue2SwApRl0M2h3uuMsSS3niPVHcWN_1Rt0ks2dwnIP25IArEp8iC_Gkn8QeOp7Z0vZpgyACir3ciwxIFn41WHKiodRdDXg7HkK8C-31MJ1gptd7kPF04SqR69k8Oii0T9Aa9apmabkdkPAlc4erhWoLqNrL0dD1xDpLP13gUrBjYby-XCHauU0w"}, "tenantId": undefined, "uid": "69lZEH2nOyRjFAUszEULDTHdK8p2"}
+ LOG  Firebase Token Status: Token successfully retrieved
+ LOG  fetchWithAuth: Headers being sent: {"Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjZkZTQwZjA0ODgxYzZhMDE2MTFlYjI4NGE0Yzk1YTI1MWU5MTEyNTAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbmV3bmFpbHMtZmlyZWJhc2UiLCJhdWQiOiJuZXduYWlscy1maXJlYmFzZSIsImF1dGhfdGltZSI6MTc1MzI0NzIyMCwidXNlcl9pZCI6IjY5bFpFSDJuT3lSakZBVXN6RVVMRFRIZEs4cDIiLCJzdWIiOiI2OWxaRUgybk95UmpGQVVzekVVTERUSGRLOHAyIiwiaWF0IjoxNzUzMzE0NjAxLCJleHAiOjE3NTMzMTgyMDEsImVtYWlsIjoidGVzdDNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRlc3QzQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.eqOPyGrJytC5doohGQBIBeFEWcTbLNRBuEsOgD_zokLrbC-mATtas-PeIH2yxvYUSZhpWl5OKBS8reZRQ4QNDgWaoUaCXclTK9BMWBuknor3IOoh1ovlksL0kACZwZlYA9r97S-n3s0R3Qp2x8XJU-Mn0pAJkppaGQSqQw7rtEUrNzVizl9dFvLnMytU1_zx75NsxFpfIzkt-OYtvr1g8DqbfrPBUpzOy1DH_GTNu4zaUhA4BlQ7Bp8TS-U4dufedR7-AuOUyl15qSluPQgpBmaSVPe_iSBrqRTyWlT-Co-acPjmF1a6k4iqZUf46_TE_kHxYnbLIUWk2LoIzw7xOg", "Content-Type": "application/json"}
+ ERROR  Error generating designs: [Error: Image generation failed: ImageRouter API Error: 429 - Request failed with status code 429]

@@ -151,7 +151,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Wait for debounced search
@@ -256,7 +256,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -281,7 +281,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Should show loading indicator
@@ -362,7 +362,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // First search (should fail)
       await user.type(searchInput, 'test1');
@@ -391,7 +391,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // Multiple rapid searches
       await user.type(searchInput, 'a');
@@ -416,7 +416,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -461,7 +461,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Should handle geocoding failure gracefully
@@ -509,7 +509,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -581,7 +581,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Network recovers
@@ -607,7 +607,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Should handle error gracefully without crashing
@@ -625,7 +625,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // User should be able to type normally
       await user.type(searchInput, 'slow');
@@ -645,7 +645,7 @@ describe('Network Outage Simulation Tests', () => {
 
       render(<CitySearch />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // Rapid typing and clearing
       await user.type(searchInput, 'a');

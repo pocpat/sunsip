@@ -25,6 +25,10 @@ export type SavedCombination = {
   savedAt: string;
 };
 
+// The API layer returns ApiSavedCombination (also `id`-keyed) — it is
+// assignable to the store type everywhere the optional fields are filled.
+export type { ApiSavedCombination } from '../lib/api';
+
 export type UserPreferences = {
   id: string;
   preferredSpirits: string[];

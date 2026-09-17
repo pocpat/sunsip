@@ -47,6 +47,8 @@ export default {
       fontFamily: {
         display: ['Ranade', 'Ranade Variable', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         body: ['Ranade', 'Ranade Variable', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        script: ['Caveat', 'Segoe Script', 'cursive'],
+        round: ['Nunito', 'Ranade', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',

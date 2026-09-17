@@ -1,0 +1,44 @@
+
+
+LandmarkService.ts:8 
+ POST http://localhost:5173/api/generate-landmark 500 (Internal Server Error)
+LandmarkService.ts:12 Error fetching landmark from backend: 
+AxiosError {message: 'Request failed with status code 500', name: 'AxiosError', code: 'ERR_BAD_RESPONSE', config: {…}, request: XMLHttpRequest, …}
+
+imageGenerationService.ts:49 
+ POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+imageGenerationService.ts:49 
+ POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+Error with model stabilityai/sdxl-turbo:free after all retries (model 1/3): AxiosError {message: 'Request failed with status code 429', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+imageGenerationService.ts:49 
+ POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+tryGenerateImageWithRetries	@	imageGenerationService.ts:49
+tryGenerateImageWithRetries	@	imageGenerationService.ts:88
+await in tryGenerateImageWithRetries		
+tryGenerateImageWithRetries	@	imageGenerationService.ts:88
+await in tryGenerateImageWithRetries		
+tryGenerateImageWithRetries	@	imageGenerationService.ts:88
+await in tryGenerateImageWithRetries		
+tryGenerateImageWithRetries	@	imageGenerationService.ts:88
+await in tryGenerateImageWithRetries		
+generateCityImage	@	imageGenerationService.ts:158
+await in generateCityImage		
+handleCitySelect	@	LandingPage.tsx:208
+
+terminal errors:
+VITE v5.4.8  ready in 522 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+10:08:22 am [vite] http proxy error: /api/generate-landmark
+AggregateError [ENOBUFS]: 
+    at internalConnectMultiple (node:net:1139:18)
+    at internalConnectMultiple (node:net:1215:5)
+    at internalConnectMultiple (node:net:1215:5)
+    at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+    at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1549:7)
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8)

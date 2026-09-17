@@ -1,0 +1,513 @@
+New issue
+We notified recently active members in the sunsip project of this issue
+Issue
+AxiosError
+Request failed with status code 404
+ID: c2d141e480ba48d6b6bdd40447cb85d0
+July 23, 2025, 9:24:50 a.m. UTC
+Project	sunsip
+environment	production
+Level	error
+Exception
+AxiosError: Request failed with status code 404
+  at settle (../../node_modules/axios/lib/core/settle.js:19:16)
+  at onloadend (../../node_modules/axios/lib/adapters/xhr.js:59:7)
+  at Axios.request (../../node_modules/axios/lib/core/Axios.js:45:41)
+Request
+URL	https://sunsip.netlify.app/
+User
+IP Address:	118.148.74.75
+Tags
+action = get_landmark_suggestion browser = Chrome Mobile iOS 138.0.7204 browser.name = Chrome Mobile iOS city = Auckland country = New Zealand device = iPhone device.family = iPhone environment = production handled = yes level = error mechanism = generic os = iOS 18.5.0 os.name = iOS replayId = 6fb090dfd93f405ab2b6401079b3f695 release = f62692075f83d46d5fcb43fdeaa327365b2c8161 user = ip:118.148.74.75 service = frontend-landmark-service url = https://sunsip.netlify.app/
+Mute this alertThis email was triggered by Send a notification for high priority issues
+
+
+console errors 
+Failed to load resource: the server responded with a status of 404 ()Understand this error
+hook.js:608 Error fetching landmark from backend: ne
+overrideMethod @ hook.js:608Understand this error
+api.imagerouter.io/v1/openai/images/generations:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+api.imagerouter.io/v1/openai/images/generations:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+api.imagerouter.io/v1/openai/images/generations:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+api.imagerouter.io/v1/openai/images/generations:1  Failed to load resource: the server responded with a status of 429 ()Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:176 Error with model stabilityai/sdxl-turbo:free after all retries (model 1/3): ne {message: 'Request failed with status code 429', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+overrideMethod @ hook.js:608
+(anonymous) @ console.js:36
+_V @ imageGenerationService.ts:176
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:176 Error with model google/gemini-2.0-flash-exp:free after all retries (model 2/3): ne {message: 'Request failed with status code 429', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+overrideMethod @ hook.js:608
+(anonymous) @ console.js:36
+_V @ imageGenerationService.ts:176
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:37  POST https://api.imagerouter.io/v1/openai/images/generations 429 (Too Many Requests)
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76
+await in _C
+_V @ imageGenerationService.ts:146
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:176 Error with model black-forest-labs/FLUX-1-schnell:free after all retries (model 3/3): ne {message: 'Request failed with status code 429', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+overrideMethod @ hook.js:608
+(anonymous) @ console.js:36
+_V @ imageGenerationService.ts:176
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+imageGenerationService.ts:201 Error generating AI image with all models, falling back to Pexels: Error: All image generation models failed
+    at _V (imageGenerationService.ts:188:11)
+    at async Promise.all (/index 0)
+    at async te (LandingPage.tsx:207:44)
+overrideMethod @ hook.js:608
+(anonymous) @ console.js:36
+_V @ imageGenerationService.ts:201
+XMLHttpRequest.send
+(anonymous) @ trycatch.js:164
+(anonymous) @ xhr.js:135
+(anonymous) @ xhr.js:195
+xhr @ xhr.js:15
+Vw @ dispatchRequest.js:49
+_request @ Axios.js:187
+request @ Axios.js:40
+(anonymous) @ Axios.js:226
+(anonymous) @ bind.js:5
+_C @ imageGenerationService.ts:37
+_C @ imageGenerationService.ts:76
+await in _C
+_C @ imageGenerationService.ts:76Understand this error
+when running on localhost , terminal error
+ ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+

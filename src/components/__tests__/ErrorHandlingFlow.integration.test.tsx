@@ -106,7 +106,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Wait for debounced search
@@ -132,7 +132,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'nonexistentcity');
 
       await waitFor(() => {
@@ -154,7 +154,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'slowcity');
 
       await waitFor(() => {
@@ -167,7 +167,7 @@ describe('Error Handling Flow Integration Tests', () => {
       });
 
       // App should remain functional
-      expect(screen.getByPlaceholderText('Enter a city name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('e.g. Wellington, New York, Bali...')).toBeInTheDocument();
     });
   });
 
@@ -216,7 +216,7 @@ describe('Error Handling Flow Integration Tests', () => {
       render(<ErrorHandlingTestApp />);
 
       // Search for city
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -280,7 +280,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'london');
 
       await waitFor(() => {
@@ -341,7 +341,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'tokyo');
 
       await waitFor(() => {
@@ -400,7 +400,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'berlin');
 
       await waitFor(() => {
@@ -670,7 +670,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'errorcity');
 
       await waitFor(() => {
@@ -697,7 +697,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // Try multiple searches that fail
       await user.type(searchInput, 'fail1');
@@ -708,7 +708,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       // App should remain stable
       expect(screen.getByText('Find Your Perfect Sip')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Enter a city name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('e.g. Wellington, New York, Bali...')).toBeInTheDocument();
       
       // Should be able to continue using the app
       expect(useAppStore.getState().currentView).toBe('search');
@@ -758,7 +758,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'partialcity');
 
       await waitFor(() => {
@@ -801,7 +801,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // First attempt
       await user.type(searchInput, 'retrycity');
@@ -832,7 +832,7 @@ describe('Error Handling Flow Integration Tests', () => {
 
       render(<ErrorHandlingTestApp />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'persistentcity');
 
       await waitFor(() => {

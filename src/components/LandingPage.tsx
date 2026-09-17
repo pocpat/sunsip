@@ -6,7 +6,7 @@ import { getWeatherData } from "../services/weatherService";
 import { getCocktailSuggestion } from "../services/cocktailService";
 import { generateCityImage } from "../services/imageGenerationService";
 import { checkAndUpdateRequestLimit } from "../lib/supabase";
-import { Search, MapPin, AlertCircle } from "lucide-react";
+import { MapPin, AlertCircle, Sun, Martini, Heart } from "lucide-react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
 interface LandingPageProps {
@@ -244,43 +244,76 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
 
   return (
     <main
-      className="h-full flex flex-col"
-      style={{ backgroundColor: "#819077" }}
+      className="h-full flex flex-col bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/images/landing-bg.png')" }}
     >
+      {/* Soft olive wash on the left so text stays readable over the wall,
+          fading out before the window/illustration zone */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(100deg, rgba(60,72,48,0.88) 0%, rgba(60,72,48,0.72) 34%, rgba(60,72,48,0.25) 52%, rgba(60,72,48,0) 66%)',
+        }}
+      />
+
       {/* Main Content - Takes full height of the viewport container */}
-      <div className="flex flex-col justify-center flex-grow px-4 sm:px-6 md:px-8 lg:px-12 xl:px-24 pt-24 pb-8">
+      <div className="relative flex flex-col justify-center flex-grow px-6 sm:px-10 md:px-14 lg:px-20 pt-24 pb-10">
         {/* Container to match ResultsPage structure */}
         <div className="container mx-auto">
-          {/* Titles block, left-aligned */}
+          {/* Titles block, left-aligned — mockup: script headline 3 lines */}
           <div className="max-w-5xl text-left">
             <motion.h1
               animate={titleControls}
               initial={{ opacity: 0, y: 50 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight lg:whitespace-nowrap"
+              className="font-script font-bold text-[#F4EFE2] mb-5 sm:mb-6 leading-[1.05] text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
             >
-              FIND YOUR PERFECT SIP
+              Your city,
+              <br />
+              its weather,
+              <br />
+              <span className="relative inline-block">
+                its drink.
+                {/* hand-drawn brush underline */}
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-3 sm:h-4"
+                  viewBox="0 0 220 12"
+                  fill="none"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 8 C 40 4, 90 3, 130 6 S 200 9, 217 5"
+                    stroke="#F4EFE2"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    opacity="0.85"
+                  />
+                </svg>
+              </span>
             </motion.h1>
 
             <motion.p
               animate={subtitleControls}
               initial={{ opacity: 0, y: 65 }}
-              className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl lg:whitespace-nowrap"
+              className="font-round text-lg sm:text-xl md:text-2xl text-[#F4EFE2]/90 mb-10 leading-relaxed max-w-2xl"
             >
-              Discover a cocktail that matches your city's vibe and weather
+              Enter a city and let us match you with the perfect cocktail for the day's mood.
             </motion.p>
           </div>
 
-          {/* Search input */}
+          {/* Search input — the hero CTA: big pill, pin icon, round arrow button */}
           <motion.div
             animate={searchControls}
             initial={{ opacity: 0, y: 80 }}
             className="max-w-5xl"
           >
-            <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg">
-              <div className="flex items-center bg-white rounded-lg shadow-lg focus-within:shadow-xl transition-shadow">
-                <div className="pl-3 sm:pl-4">
-                  <Search size={18} className="text-gray-400 sm:w-5 sm:h-5" />
-                </div>
+            <div className="relative w-full max-w-md sm:max-w-lg">
+              <form
+                className="flex items-center bg-[#F4EFE2] rounded-full shadow-lg focus-within:shadow-xl transition-shadow pr-2 py-2 pl-5"
+                onSubmit={(e) => e.preventDefault()}
+              >
+                <MapPin size={22} className="text-[#4C5A3B] mr-3 shrink-0" />
                 <input
                   id="city-search"
                   name="city-search"
@@ -288,28 +321,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                   value={query}
                   onChange={handleInputChange}
                   onFocus={handleInputFocus}
-                  placeholder="Enter a city name..."
-                  className="w-full p-3 sm:p-4 outline-none bg-transparent text-gray-800 placeholder-gray-400 text-sm sm:text-base"
+                  placeholder="e.g. Wellington, New York, Bali..."
+                  className="w-full p-3 outline-none bg-transparent text-[#3B4830] placeholder-[#8B8E7B] font-round text-base sm:text-lg"
                   disabled={dailyLimitReached}
                 />
-                {isSearching && (
-                  <div className="pr-3 sm:pr-4">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                {isSearching ? (
+                  <div className="shrink-0 mr-1">
+                    <div className="w-10 h-10 rounded-full bg-[#3B4830] flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                   </div>
+                ) : (
+                  <button
+                    type="submit"
+                    aria-label="Search city"
+                    className="w-11 h-11 shrink-0 rounded-full bg-[#3B4830] hover:bg-[#2F3A26] flex items-center justify-center transition-colors"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M5 12h14M13 6l6 6-6 6" stroke="#F4EFE2" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
                 )}
-              </div>
-              
+              </form>
+
               {/* Daily request limit message */}
               {dailyRequestMessage && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`mt-2 p-2 rounded-md text-sm ${
-                    dailyLimitReached 
-                      ? 'bg-red-100 text-red-700 border border-red-200' 
+                  className={`mt-3 p-2 rounded-md text-sm ${
+                    dailyLimitReached
+                      ? 'bg-red-100 text-red-700 border border-red-200'
                       : isAdmin
                         ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                        : 'bg-blue-50 text-blue-700 border border-blue-100'
+                        : 'bg-white/90 text-[#3B4830] border border-white'
                   }`}
                 >
                   <div className="flex items-start">
@@ -318,11 +363,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                   </div>
                 </motion.div>
               )}
-              
+
               <AnimatePresence>
                 {cityOptions.length > 0 && (
                   <motion.div
-                    className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-60 sm:max-h-72 overflow-auto"
+                    className="absolute z-20 mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-200 max-h-60 sm:max-h-72 overflow-auto"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
@@ -331,22 +376,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                     {cityOptions.map((city, index) => (
                       <div
                         key={`${city.city}-${city.country}-${index}`}
-                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-0 flex items-center transition-colors"
+                        className="p-3 hover:bg-[#F4EFE2] cursor-pointer border-b border-gray-100 last:border-0 flex items-center transition-colors"
                         onClick={() => handleCitySelect(city)}
                       >
                         <MapPin
-                          size={14}
-                          className="text-primary-500 mr-2 flex-shrink-0 sm:w-4 sm:h-4"
+                          size={16}
+                          className="text-[#4C5A3B] mr-2 flex-shrink-0 sm:w-4 sm:h-4"
                         />
                         <div className="min-w-0 flex-1">
-                          <span className="font-medium text-gray-800 text-sm sm:text-base">
+                          <span className="font-round font-semibold text-[#3B4830] text-sm sm:text-base">
                             {city.city}
                           </span>
                           <span className="text-gray-500 ml-2 text-sm">
                             {city.country}
                           </span>
                           <div className="text-xs text-gray-400 truncate">
-                            {city.latitude.toFixed(4)},{" "}
+                            {city.latitude.toFixed(4)},{ " "}
                             {city.longitude.toFixed(4)}
                           </div>
                         </div>
@@ -356,6 +401,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                 )}
               </AnimatePresence>
             </div>
+          </motion.div>
+
+          {/* Feature footnote row — ☀ Weather + 🍸 Cocktail + ♡ Good vibes */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, delay: 0.7 }}
+            className="mt-12 flex items-center gap-2 text-[#F4EFE2]/85"
+          >
+            <Sun size={18} className="text-[#E7B54B]" />
+            <span className="font-script text-xl">Weather</span>
+            <span className="mx-1 text-sm">+</span>
+            <Martini size={18} className="text-[#E7B54B]" />
+            <span className="font-script text-xl">Cocktail</span>
+            <span className="mx-1 text-sm">+</span>
+            <Heart size={16} className="text-[#E7B54B]" />
+            <span className="font-script text-xl">Good vibes</span>
           </motion.div>
         </div>
       </div>

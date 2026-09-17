@@ -164,7 +164,7 @@ const SavedCombinations: React.FC = () => {
           <div className="flex items-center">
             <Bookmark size={20} className="text-primary-600 mr-2" />
             <h3 className="text-xl font-display font-bold">
-              Saved Combinations ({savedCombinations.length})
+              Saved Combinations{(savedCombinations ?? []).length > 0 ? ` (${(savedCombinations ?? []).length})` : ''}
             </h3>
             <div 
               className={`ml-2 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}

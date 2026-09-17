@@ -135,7 +135,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
       render(<LandingPage />);
 
       // Search for a city
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Wait for debounced search
@@ -199,7 +199,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -231,7 +231,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -264,7 +264,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -306,7 +306,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -335,7 +335,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -395,7 +395,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
 
       // First search
       await user.type(searchInput, 'london');
@@ -444,7 +444,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       const startTime = Date.now();
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -475,7 +475,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
 
       // Trigger multiple rapid selections
       await user.type(searchInput, 'paris');
@@ -515,7 +515,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -557,7 +557,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);
@@ -595,7 +595,7 @@ describe('LandingPage Parallelization Integration Tests', () => {
 
       render(<LandingPage />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await vi.advanceTimersByTimeAsync(500);

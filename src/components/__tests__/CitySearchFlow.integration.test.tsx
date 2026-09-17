@@ -149,10 +149,10 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       // Step 1: Verify initial search view
       expect(screen.getByText('Find Your Perfect Sip')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Enter a city name...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('e.g. Wellington, New York, Bali...')).toBeInTheDocument();
 
       // Step 2: Search for a city
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Wait for debounced search
@@ -250,7 +250,7 @@ describe('City Search to Result Flow Integration Tests', () => {
       render(<CitySearchFlowComponent />);
 
       // Search for paris
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -298,7 +298,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
 
       // Type rapidly
       await user.type(searchInput, 'p');
@@ -331,7 +331,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Should show search loading indicator
@@ -365,7 +365,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -390,7 +390,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -418,7 +418,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -444,7 +444,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -472,7 +472,7 @@ describe('City Search to Result Flow Integration Tests', () => {
       render(<CitySearchFlowComponent />);
 
       // First search
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -523,7 +523,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -551,7 +551,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -584,7 +584,7 @@ describe('City Search to Result Flow Integration Tests', () => {
     it('should handle empty search gracefully', async () => {
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       
       // Type and then clear
       await user.type(searchInput, 'paris');
@@ -599,7 +599,7 @@ describe('City Search to Result Flow Integration Tests', () => {
     it('should handle very short search queries', async () => {
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'p');
 
       // Should not search for single character
@@ -613,7 +613,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -633,7 +633,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -662,7 +662,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       // Should show search loading
@@ -708,7 +708,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -743,7 +743,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'paris');
 
       await waitFor(() => {
@@ -787,7 +787,7 @@ describe('City Search to Result Flow Integration Tests', () => {
 
       render(<CitySearchFlowComponent />);
 
-      const searchInput = screen.getByPlaceholderText('Enter a city name...');
+      const searchInput = screen.getByPlaceholderText('e.g. Wellington, New York, Bali...');
       await user.type(searchInput, 'tokyo');
 
       await waitFor(() => {
