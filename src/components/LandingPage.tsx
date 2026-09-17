@@ -258,15 +258,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
       />
 
       {/* Main Content - Takes full height of the viewport container */}
-      <div className="relative flex flex-col justify-center flex-grow px-6 sm:px-10 md:px-14 lg:px-20 pt-24 pb-10">
-        {/* Container to match ResultsPage structure */}
-        <div className="container mx-auto">
-          {/* Titles block, left-aligned — mockup: script headline 3 lines */}
+      <div className="relative flex flex-col justify-center flex-grow pl-6 sm:pl-10 md:pl-14 lg:pl-20 pr-4 pt-24 pb-10">
+        {/* Content column — no container wrapper: the pill stretches right
+            until the wall's corner, like the mockup */}
+        <div className="w-full">
+          {/* Titles block, left-aligned, tilted -3deg like the mockup */}
           <div className="max-w-5xl text-left">
             <motion.h1
               animate={titleControls}
               initial={{ opacity: 0, y: 50 }}
-              className="font-script font-bold text-[#F4EFE2] mb-5 sm:mb-6 leading-[1.05] text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+              className="font-script font-bold text-[#F4EFE2] mb-5 sm:mb-6 leading-[1.02] text-6xl sm:text-7xl md:text-8xl lg:text-[7rem]"
+              style={{ transform: 'rotate(-3deg)', transformOrigin: 'left bottom' }}
             >
               Your city,
               <br />
@@ -302,18 +304,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
             </motion.p>
           </div>
 
-          {/* Search input — the hero CTA: big pill, pin icon, round arrow button */}
+          {/* Search input — the hero CTA: stretches right until the wall's
+              corner (no max-width cap, like the mockup) */}
           <motion.div
             animate={searchControls}
             initial={{ opacity: 0, y: 80 }}
-            className="max-w-5xl"
+            className="w-full max-w-[62rem]"
           >
-            <div className="relative w-full max-w-md sm:max-w-lg">
+            <div className="relative w-full">
               <form
-                className="flex items-center bg-[#F4EFE2] rounded-full shadow-lg focus-within:shadow-xl transition-shadow pr-2 py-2 pl-5"
+                className="flex items-center bg-[#F4EFE2] rounded-full shadow-lg focus-within:shadow-xl transition-shadow pr-2 py-2.5 pl-6"
                 onSubmit={(e) => e.preventDefault()}
               >
-                <MapPin size={22} className="text-[#4C5A3B] mr-3 shrink-0" />
+                <MapPin size={24} className="text-[#4C5A3B] mr-3 shrink-0" />
                 <input
                   id="city-search"
                   name="city-search"
@@ -322,12 +325,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                   onChange={handleInputChange}
                   onFocus={handleInputFocus}
                   placeholder="e.g. Wellington, New York, Bali..."
-                  className="w-full p-3 outline-none bg-transparent text-[#3B4830] placeholder-[#8B8E7B] font-round text-base sm:text-lg"
+                  className="w-full p-3 outline-none bg-transparent text-[#3B4830] placeholder-[#8B8E7B] font-round text-base sm:text-lg md:text-xl"
                   disabled={dailyLimitReached}
                 />
                 {isSearching ? (
                   <div className="shrink-0 mr-1">
-                    <div className="w-10 h-10 rounded-full bg-[#3B4830] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-[#3B4830] flex items-center justify-center">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   </div>
@@ -335,9 +338,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
                   <button
                     type="submit"
                     aria-label="Search city"
-                    className="w-11 h-11 shrink-0 rounded-full bg-[#3B4830] hover:bg-[#2F3A26] flex items-center justify-center transition-colors"
+                    className="w-12 h-12 shrink-0 rounded-full bg-[#3B4830] hover:bg-[#2F3A26] flex items-center justify-center transition-colors"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M5 12h14M13 6l6 6-6 6" stroke="#F4EFE2" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
@@ -403,21 +406,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ setNavSource, resetCounter })
             </div>
           </motion.div>
 
-          {/* Feature footnote row — ☀ Weather + 🍸 Cocktail + ♡ Good vibes */}
+          {/* Feature row — ☀ Weather + 🍸 Cocktail + ♡ Good vibes, bigger,
+              pushed down to the "table" line like the mockup */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, delay: 0.7 }}
-            className="mt-12 flex items-center gap-2 text-[#F4EFE2]/85"
+            className="mt-20 md:mt-28 flex items-center gap-3 text-[#F4EFE2]/90"
           >
-            <Sun size={18} className="text-[#E7B54B]" />
-            <span className="font-script text-xl">Weather</span>
-            <span className="mx-1 text-sm">+</span>
-            <Martini size={18} className="text-[#E7B54B]" />
-            <span className="font-script text-xl">Cocktail</span>
-            <span className="mx-1 text-sm">+</span>
-            <Heart size={16} className="text-[#E7B54B]" />
-            <span className="font-script text-xl">Good vibes</span>
+            <Sun size={30} className="text-[#E7B54B]" />
+            <span className="font-script text-3xl md:text-4xl">Weather</span>
+            <span className="mx-1 text-xl">+</span>
+            <Martini size={30} className="text-[#E7B54B]" />
+            <span className="font-script text-3xl md:text-4xl">Cocktail</span>
+            <span className="mx-1 text-xl">+</span>
+            <Heart size={26} className="text-[#E7B54B]" />
+            <span className="font-script text-3xl md:text-4xl">Good vibes</span>
           </motion.div>
         </div>
       </div>
