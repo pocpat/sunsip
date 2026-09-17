@@ -1,728 +1,226 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+//
+// Tests for the rebuilt AuthModal (standard 4-view flow):
+//   login / signup / forgot password / set-new-password
+// The modal talks to the MongoDB-backed /api/auth-* endpoints via lib/api,
+// so axios is mocked (repo convention) — no network, no Supabase.
+//
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import AuthModal from '../auth/AuthModal';
 import { useAppStore } from '../../store/appStore';
 import { useAuthStore } from '../../store/authStore';
-import AuthModal from '../auth/AuthModal';
-import { supabase } from '../../lib/supabase';
+import * as api from '../../lib/api';
 
-// Mock Supabase
-vi.mock('../../lib/supabase', () => ({
-  supabase: {
-    auth: {
-      signInWithPassword: vi.fn(),
-      signUp: vi.fn(),
-    },
-  },
-}));
+vi.mock('../../lib/api', async () => {
+  const actual = await vi.importActual<typeof import('../../lib/api')>('../../lib/api');
+  return {
+    ...actual,
+    signIn: vi.fn(),
+    signUp: vi.fn(),
+    forgotPassword: vi.fn(),
+    resetPassword: vi.fn(),
+  };
+});
 
-// Mock Sentry functions
-vi.mock('../../lib/sentry', () => ({
-  setUserContext: vi.fn(),
-  clearUserContext: vi.fn(),
-}));
+const mockedApi = vi.mocked(api, true);
 
-// Mock framer-motion to avoid animation issues in tests
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
+const renderModal = () => {
+  useAppStore.setState({ showAuthModal: true });
+  return render(<AuthModal />);
+};
 
-const mockSupabase = vi.mocked(supabase);
+/** Click a view-switching link and wait for a control that exists only in the
+ *  NEW view — the heading sits outside AnimatePresence and appears instantly,
+ *  while the old form is still exiting and would eat half the typed text. */
+async function switchViewAndWait(buttonName: RegExp, newViewControl: () => HTMLElement) {
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('button', { name: buttonName }));
+  await waitFor(() => expect(newViewControl()).toBeInTheDocument());
+}
 
-describe('Authentication Integration Tests', () => {
+describe('AuthModal (standard auth flows)', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
     user = userEvent.setup();
+    useAppStore.setState({ showAuthModal: true });
+    useAuthStore.setState({ user: null, isAuthenticated: false });
     vi.clearAllMocks();
-    
-    // Reset stores to initial state
-    useAppStore.setState({
-      showAuthModal: true,
-      isLoading: false,
-      currentView: 'search',
-    });
-    
-    useAuthStore.setState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      savedCombinations: [],
-      userPreferences: null,
-    });
+    window.location.hash = '';
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    useAppStore.setState({ showAuthModal: false });
+    useAuthStore.setState({ user: null, isAuthenticated: false });
   });
 
-  describe('Modal Display and Navigation', () => {
-    it('should render login form by default when modal is shown', () => {
-      render(<AuthModal />);
+  it('shows the login view with a Forgot password link by default', () => {
+    renderModal();
+    expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /forgot password\?/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^sign in$/i })).toBeInTheDocument();
+  });
 
-      expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
-      expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
+  it('switches to signup and back with one click', async () => {
+    renderModal();
+    await switchViewAndWait(/sign up/i, () => screen.getByLabelText(/confirm password/i));
+    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+
+    await switchViewAndWait(/^log in$/i, () => screen.getByLabelText(/^email$/i));
+  });
+
+  it('closes via the X button', async () => {
+    renderModal();
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(useAppStore.getState().showAuthModal).toBe(false);
+  });
+
+  it('signs in on submit and updates the auth store', async () => {
+    mockedApi.signIn.mockResolvedValueOnce({
+      user: { id: 'u1', email: 'test@example.com', isAdmin: false },
+      error: null,
     });
+    renderModal();
 
-    it('should switch to signup form when signup link is clicked', async () => {
-      render(<AuthModal />);
+    await user.type(screen.getByLabelText(/^email$/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/^password$/i), 'password123');
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }));
 
-      const signupLink = screen.getByRole('button', { name: /sign up/i });
-      await user.click(signupLink);
-
-      expect(screen.getByText('Create Account')).toBeInTheDocument();
-      expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
-      expect(screen.getByText('Already have an account?')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockedApi.signIn).toHaveBeenCalledWith('test@example.com', 'password123');
+      expect(useAuthStore.getState().user?.email).toBe('test@example.com');
     });
-
-    it('should switch back to login form when login link is clicked', async () => {
-      render(<AuthModal />);
-
-      // Switch to signup
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-      expect(screen.getByText('Create Account')).toBeInTheDocument();
-
-      // Switch back to login
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-      expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-    });
-
-    it('should close modal when close button is clicked', async () => {
-      render(<AuthModal />);
-
-      const closeButton = screen.getByRole('button', { name: '' }); // X button
-      await user.click(closeButton);
-
+    await waitFor(() => {
       expect(useAppStore.getState().showAuthModal).toBe(false);
     });
   });
 
-  describe('Login Process Integration', () => {
-    it('should complete successful login flow and update auth state', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-      };
-
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: {
-          user: mockUser,
-          session: { user: mockUser, access_token: 'token' },
-        },
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      // Fill in login form
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-
-      // Submit form
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      // Wait for API call
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          password: 'password123',
-        });
-      });
-
-      // Verify modal is closed
-      expect(useAppStore.getState().showAuthModal).toBe(false);
+  it('shows a friendly error when credentials are wrong', async () => {
+    mockedApi.signIn.mockResolvedValueOnce({
+      user: null,
+      error: { message: 'Invalid email or password.' },
     });
+    renderModal();
 
-    it('should handle login validation errors', async () => {
-      render(<AuthModal />);
+    await user.type(screen.getByLabelText(/^email$/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/^password$/i), 'wrongpass');
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }));
 
-      // Try to submit without filling fields
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      expect(screen.getByText('Email is required')).toBeInTheDocument();
-      expect(screen.getByText('Password is required')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/incorrect/i)).toBeInTheDocument();
     });
+    expect(useAppStore.getState().showAuthModal).toBe(true);
+  });
 
-    it('should handle invalid email format', async () => {
-      render(<AuthModal />);
+  it('rejects a signup with mismatched passwords without calling the API', async () => {
+    renderModal();
+    await switchViewAndWait(/sign up/i, () => screen.getByLabelText(/confirm password/i));
 
-      await user.type(screen.getByLabelText(/email/i), 'invalid-email');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/^email$/i), 'new@example.com');
+    await user.type(screen.getByLabelText(/^password$/i), 'abcdef');
+    await user.type(screen.getByLabelText(/confirm password/i), 'otherpass');
 
-      expect(screen.getByText('Invalid email address')).toBeInTheDocument();
+    // Submit stays disabled while passwords differ — standard guard.
+    expect(screen.getByRole('button', { name: /create account/i })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /create account/i }));
+    expect(mockedApi.signUp).not.toHaveBeenCalled();
+  });
+
+  it('creates an account, signs the user in, and closes', async () => {
+    mockedApi.signUp.mockResolvedValueOnce({
+      user: { id: 'u2', email: 'new@example.com', isAdmin: false },
+      error: null,
     });
+    renderModal();
+    await switchViewAndWait(/sign up/i, () => screen.getByLabelText(/confirm password/i));
 
-    it('should handle short password validation', async () => {
-      render(<AuthModal />);
+    await user.type(screen.getByLabelText(/^email$/i), 'new@example.com');
+    await user.type(screen.getByLabelText(/^password$/i), 'abcdef');
+    await user.type(screen.getByLabelText(/confirm password/i), 'abcdef');
+    await user.click(screen.getByRole('button', { name: /create account/i }));
 
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), '123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      expect(screen.getByText('Password must be at least 6 characters')).toBeInTheDocument();
-    });
-
-    it('should display API error messages during login', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: { user: null, session: null },
-        error: { message: 'Invalid login credentials' },
-      } as any);
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'wrongpassword');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Invalid login credentials')).toBeInTheDocument();
-      });
-
-      // Modal should remain open
-      expect(useAppStore.getState().showAuthModal).toBe(true);
-    });
-
-    it('should show loading state during login', async () => {
-      // Mock a delayed response
-      mockSupabase.auth.signInWithPassword.mockImplementationOnce(
-        () => new Promise(resolve => setTimeout(() => resolve({
-          data: { user: null, session: null },
-          error: null,
-        } as any), 100))
-      );
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      // Should show loading state
-      expect(screen.getByText('Logging in...')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /logging in/i })).toBeDisabled();
-
-      await waitFor(() => {
-        expect(screen.queryByText('Logging in...')).not.toBeInTheDocument();
-      });
+    await waitFor(() => {
+      expect(mockedApi.signUp).toHaveBeenCalledWith('new@example.com', 'abcdef');
+      expect(useAuthStore.getState().user?.email).toBe('new@example.com');
     });
   });
 
-  describe('Signup Process Integration', () => {
-    it('should complete successful signup flow', async () => {
-      mockSupabase.auth.signUp.mockResolvedValueOnce({
-        data: {
-          user: { id: 'user-123', email: 'newuser@example.com' },
-          session: null,
-        },
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      // Fill in signup form
-      await user.type(screen.getByLabelText(/email/i), 'newuser@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText(/confirm password/i), 'password123');
-
-      // Submit form
-      await user.click(screen.getByRole('button', { name: /create account/i }));
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
-          email: 'newuser@example.com',
-          password: 'password123',
-        });
-      });
-
-      // Should switch back to login view after successful signup
-      expect(screen.getByText('Welcome Back')).toBeInTheDocument();
+  it('forgot password: requests a link and shows the demo link when email is unconfigured', async () => {
+    mockedApi.forgotPassword.mockResolvedValueOnce({
+      message: 'Email service is not set up yet — use this link to reset your password:',
+      resetUrl: 'https://sunsip.netlify.app/#reset-token=abc123',
     });
+    renderModal();
+    await switchViewAndWait(/forgot password\?/i, () => screen.getByRole('button', { name: /send reset link/i }));
 
-    it('should handle signup validation errors', async () => {
-      render(<AuthModal />);
+    await user.type(screen.getByLabelText(/^email$/i), 'me@example.com');
+    await user.click(screen.getByRole('button', { name: /send reset link/i }));
 
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      // Try to submit without filling fields
-      await user.click(screen.getByRole('button', { name: /create account/i }));
-
-      expect(screen.getByText('Email is required')).toBeInTheDocument();
-      expect(screen.getByText('Password is required')).toBeInTheDocument();
-      expect(screen.getByText('Please confirm your password')).toBeInTheDocument();
-    });
-
-    it('should handle password mismatch validation', async () => {
-      render(<AuthModal />);
-
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText(/confirm password/i), 'differentpassword');
-      await user.click(screen.getByRole('button', { name: /create account/i }));
-
-      expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
-    });
-
-    it('should display API error messages during signup', async () => {
-      mockSupabase.auth.signUp.mockResolvedValueOnce({
-        data: { user: null, session: null },
-        error: { message: 'Email already registered' },
-      } as any);
-
-      render(<AuthModal />);
-
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      await user.type(screen.getByLabelText(/email/i), 'existing@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText(/confirm password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /create account/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Email already registered')).toBeInTheDocument();
-      });
-    });
-
-    it('should show loading state during signup', async () => {
-      // Mock a delayed response
-      mockSupabase.auth.signUp.mockImplementationOnce(
-        () => new Promise(resolve => setTimeout(() => resolve({
-          data: { user: null, session: null },
-          error: null,
-        } as any), 100))
+    await waitFor(() => {
+      expect(mockedApi.forgotPassword).toHaveBeenCalledWith('me@example.com');
+      expect(screen.getByRole('link', { name: /open your reset link/i })).toHaveAttribute(
+        'href',
+        'https://sunsip.netlify.app/#reset-token=abc123'
       );
-
-      render(<AuthModal />);
-
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
-      await user.type(screen.getByLabelText(/confirm password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /create account/i }));
-
-      // Should show loading state
-      expect(screen.getByText('Creating account...')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled();
-
-      await waitFor(() => {
-        expect(screen.queryByText('Creating account...')).not.toBeInTheDocument();
-      });
     });
   });
 
-  describe('State Management Integration', () => {
-    it('should update auth store state after successful login', async () => {
-      const mockUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-      };
+  it('forgot password: shows the check-your-inbox message when email is configured', async () => {
+    mockedApi.forgotPassword.mockResolvedValueOnce({
+      message: 'Check your inbox — we sent a reset link.',
+    });
+    renderModal();
+    await switchViewAndWait(/forgot password\?/i, () => screen.getByRole('button', { name: /send reset link/i }));
 
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: {
-          user: mockUser,
-          session: { user: mockUser, access_token: 'token' },
-        },
-        error: null,
-      } as any);
+    await user.type(screen.getByLabelText(/^email$/i), 'me@example.com');
+    await user.click(screen.getByRole('button', { name: /send reset link/i }));
 
-      render(<AuthModal />);
+    await waitFor(() => {
+      expect(screen.getByText(/check your inbox/i)).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('link', { name: /open your reset link/i })).not.toBeInTheDocument();
+  });
 
-      // Verify initial auth state
-      expect(useAuthStore.getState().user).toBeNull();
-      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  it('reset view: opens via #reset-token hash and signs the user in with the new password', async () => {
+    window.location.hash = '#reset-token=tok123';
+    mockedApi.resetPassword.mockResolvedValueOnce({
+      user: { id: 'u3', email: 'reset@example.com', isAdmin: false },
+      error: null,
+    });
 
-      // Perform login
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
+    renderModal();
 
-      await waitFor(() => {
+    expect(screen.getByRole('heading', { name: /choose a new password/i })).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/^new password$/i), 'brandnew1');
+    await user.type(screen.getByLabelText(/confirm new password/i), 'brandnew1');
+    await user.click(screen.getByRole('button', { name: /update password/i }));
+
+    await waitFor(() => {
+      expect(mockedApi.resetPassword).toHaveBeenCalledWith('tok123', 'brandnew1');
+      expect(useAuthStore.getState().user?.email).toBe('reset@example.com');
+    });
+    // Modal auto-closes ~1.2s after success.
+    await waitFor(
+      () => {
         expect(useAppStore.getState().showAuthModal).toBe(false);
-      });
-
-      // Note: In a real app, the auth state would be updated by the AuthProvider
-      // listening to Supabase auth state changes, not directly by the modal
-    });
-
-    it('should maintain app store state during authentication', async () => {
-      // Set some app state before authentication
-      useAppStore.setState({
-        currentView: 'result',
-        isLoading: false,
-        showAuthModal: true,
-      });
-
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: {
-          user: { id: 'user-123', email: 'test@example.com' },
-          session: { user: { id: 'user-123', email: 'test@example.com' }, access_token: 'token' },
-        },
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(useAppStore.getState().showAuthModal).toBe(false);
-      });
-
-      // App state should be preserved (except for showAuthModal)
-      expect(useAppStore.getState().currentView).toBe('result');
-      expect(useAppStore.getState().isLoading).toBe(false);
-    });
-
-    it('should handle authentication errors without affecting other state', async () => {
-      useAppStore.setState({
-        currentView: 'result',
-        isLoading: false,
-        showAuthModal: true,
-      });
-
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: { user: null, session: null },
-        error: { message: 'Authentication failed' },
-      } as any);
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'wrongpassword');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Authentication failed')).toBeInTheDocument();
-      });
-
-      // Modal should remain open, other state unchanged
-      expect(useAppStore.getState().showAuthModal).toBe(true);
-      expect(useAppStore.getState().currentView).toBe('result');
-      expect(useAuthStore.getState().user).toBeNull();
-      expect(useAuthStore.getState().isAuthenticated).toBe(false);
-    });
+      },
+      { timeout: 3000 }
+    );
   });
 
-  describe('Form Interaction and UX', () => {
-    it('should handle keyboard navigation correctly', async () => {
-      render(<AuthModal />);
+  it('reset view: rejects mismatched passwords without calling the API', async () => {
+    window.location.hash = '#reset-token=tok123';
+    renderModal();
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
-      const loginButton = screen.getByRole('button', { name: /log in/i });
+    await user.type(screen.getByLabelText(/^new password$/i), 'brandnew1');
+    await user.type(screen.getByLabelText(/confirm new password/i), 'different1');
 
-      // Tab navigation should work
-      emailInput.focus();
-      expect(emailInput).toHaveFocus();
-
-      await user.tab();
-      expect(passwordInput).toHaveFocus();
-
-      await user.tab();
-      expect(loginButton).toHaveFocus();
-    });
-
-    it('should submit form on Enter key press', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: {
-          user: { id: 'user-123', email: 'test@example.com' },
-          session: { user: { id: 'user-123', email: 'test@example.com' }, access_token: 'token' },
-        },
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      
-      // Press Enter to submit
-      await user.keyboard('{Enter}');
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalled();
-      });
-    });
-
-    it('should clear error messages when switching between forms', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: { user: null, session: null },
-        error: { message: 'Login failed' },
-      } as any);
-
-      render(<AuthModal />);
-
-      // Trigger login error
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'wrongpassword');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Login failed')).toBeInTheDocument();
-      });
-
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      // Error should be cleared
-      expect(screen.queryByText('Login failed')).not.toBeInTheDocument();
-    });
-
-    it('should handle rapid form submissions gracefully', async () => {
-      let resolveCount = 0;
-      mockSupabase.auth.signInWithPassword.mockImplementation(
-        () => new Promise(resolve => {
-          setTimeout(() => {
-            resolveCount++;
-            resolve({
-              data: { user: { id: 'user-123', email: 'test@example.com' }, session: null },
-              error: null,
-            } as any);
-          }, 50);
-        })
-      );
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-
-      // Click submit button multiple times rapidly
-      const submitButton = screen.getByRole('button', { name: /log in/i });
-      await user.click(submitButton);
-      await user.click(submitButton);
-      await user.click(submitButton);
-
-      // Should be disabled after first click
-      expect(submitButton).toBeDisabled();
-
-      await waitFor(() => {
-        expect(resolveCount).toBe(1); // Should only call API once
-      });
-    });
-  });
-
-  describe('Error Recovery and Edge Cases', () => {
-    it('should handle network errors gracefully', async () => {
-      mockSupabase.auth.signInWithPassword.mockRejectedValueOnce(
-        new Error('Network error')
-      );
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Network error')).toBeInTheDocument();
-      });
-    });
-
-    it('should handle malformed API responses', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: null,
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        // Should handle gracefully without crashing
-        expect(screen.getByRole('button', { name: /log in/i })).not.toBeDisabled();
-      });
-    });
-
-    it('should handle very long email addresses', async () => {
-      render(<AuthModal />);
-
-      const longEmail = 'a'.repeat(100) + '@example.com';
-      await user.type(screen.getByLabelText(/email/i), longEmail);
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-
-      // Should not crash and should validate properly
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      // Should show invalid email error for malformed long email
-      expect(screen.getByText('Invalid email address')).toBeInTheDocument();
-    });
-
-    it('should handle special characters in passwords', async () => {
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: {
-          user: { id: 'user-123', email: 'test@example.com' },
-          session: { user: { id: 'user-123', email: 'test@example.com' }, access_token: 'token' },
-        },
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      const specialPassword = 'p@ssw0rd!#$%^&*()';
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), specialPassword);
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          password: specialPassword,
-        });
-      });
-    });
-  });
-
-  describe('Accessibility and User Experience', () => {
-    it('should have proper ARIA labels and roles', () => {
-      render(<AuthModal />);
-
-      expect(screen.getByLabelText(/email/i)).toHaveAttribute('type', 'email');
-      expect(screen.getByLabelText(/password/i)).toHaveAttribute('type', 'password');
-      expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
-    });
-
-    it('should show proper focus management', async () => {
-      render(<AuthModal />);
-
-      // Email field should be focusable
-      const emailInput = screen.getByLabelText(/email/i);
-      emailInput.focus();
-      expect(emailInput).toHaveFocus();
-
-      // Should be able to tab to password field
-      await user.tab();
-      expect(screen.getByLabelText(/password/i)).toHaveFocus();
-    });
-
-    it('should provide clear feedback for form validation', async () => {
-      render(<AuthModal />);
-
-      // Submit empty form
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      // Should show validation messages
-      expect(screen.getByText('Email is required')).toBeInTheDocument();
-      expect(screen.getByText('Password is required')).toBeInTheDocument();
-
-      // Messages should be associated with inputs
-      const emailInput = screen.getByLabelText(/email/i);
-      expect(emailInput).toHaveAttribute('aria-invalid');
-    });
-
-    it('should handle screen reader announcements for state changes', async () => {
-      render(<AuthModal />);
-
-      // Switch to signup form
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-      // Should announce the form change
-      expect(screen.getByText('Create Account')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
-    });
-  });
-
-  describe('Integration with App Flow', () => {
-    it('should integrate properly with the overall app authentication flow', async () => {
-      // Simulate a user trying to save a combination without being authenticated
-      useAppStore.setState({
-        showAuthModal: true,
-        currentView: 'result',
-        weatherData: {
-          city: 'Paris',
-          country: 'France',
-          latitude: 48.8566,
-          longitude: 2.3522,
-          temperature: 22,
-          condition: 'Sunny',
-          icon: 'https://openweathermap.org/img/wn/01d@2x.png',
-          humidity: 65,
-          windSpeed: 12,
-          localTime: 'Jun 10, 2025, 2:30 PM',
-          isDay: true,
-        },
-        cocktailData: {
-          name: 'Classic Martini',
-          description: 'A timeless cocktail',
-          ingredients: ['2 oz gin', '1/2 oz dry vermouth'],
-          recipe: ['Stir with ice', 'Strain into glass'],
-          imageUrl: 'https://images.pexels.com/photos/5379228/pexels-photo-5379228.jpeg',
-          mood: 'sophisticated',
-        },
-      });
-
-      mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
-        data: {
-          user: { id: 'user-123', email: 'test@example.com' },
-          session: { user: { id: 'user-123', email: 'test@example.com' }, access_token: 'token' },
-        },
-        error: null,
-      } as any);
-
-      render(<AuthModal />);
-
-      // Complete login
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(useAppStore.getState().showAuthModal).toBe(false);
-      });
-
-      // App state should be preserved
-      expect(useAppStore.getState().currentView).toBe('result');
-      expect(useAppStore.getState().weatherData).toBeDefined();
-      expect(useAppStore.getState().cocktailData).toBeDefined();
-    });
-
-    it('should handle authentication timeout scenarios', async () => {
-      // Mock a very slow response
-      mockSupabase.auth.signInWithPassword.mockImplementationOnce(
-        () => new Promise(resolve => {
-          setTimeout(() => resolve({
-            data: { user: null, session: null },
-            error: { message: 'Request timeout' },
-          } as any), 5000);
-        })
-      );
-
-      render(<AuthModal />);
-
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
-      await user.click(screen.getByRole('button', { name: /log in/i }));
-
-      // Should show loading state
-      expect(screen.getByText('Logging in...')).toBeInTheDocument();
-
-      // User should be able to close modal during loading
-      const closeButton = screen.getByRole('button', { name: '' }); // X button
-      await user.click(closeButton);
-
-      expect(useAppStore.getState().showAuthModal).toBe(false);
-    });
+    // Submit stays disabled while passwords differ — standard guard.
+    expect(screen.getByRole('button', { name: /update password/i })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /update password/i }));
+    expect(mockedApi.resetPassword).not.toHaveBeenCalled();
   });
 });

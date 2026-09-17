@@ -41,6 +41,31 @@ export async function signOut(): Promise<void> {
   }
 }
 
+// ============ PASSWORD RESET ============
+
+export interface ForgotPasswordResult {
+  message: string;
+  /** Present only when the email service is not configured yet (demo fallback). */
+  resetUrl?: string;
+}
+
+export async function forgotPassword(email: string): Promise<ForgotPasswordResult> {
+  const response = await axios.post(`${API_BASE}/auth-forgot`, { email });
+  return {
+    message: response.data.message || 'If that email exists, a reset link is on its way.',
+    resetUrl: response.data.resetUrl,
+  };
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ user: { id: string; email: string; isAdmin: boolean } | null; error: { message: string } | null }> {
+  try {
+    const response = await axios.post(`${API_BASE}/auth-reset`, { token, password });
+    return { user: response.data.user, error: null };
+  } catch (error: any) {
+    return { user: null, error: { message: error.response?.data?.error || 'Password reset failed' } };
+  }
+}
+
 export async function getCurrentUser(): Promise<{ id: string; email: string; isAdmin: boolean } | null> {
   try {
     const response = await axios.get(`${API_BASE}/auth-me`);
