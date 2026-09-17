@@ -601,6 +601,9 @@ const ResetForm: React.FC<ResetFormProps> = ({ onSubmit, isLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} noValidate>
+      {/* Hidden username field: password-manager + a11y best practice for
+          password-reset forms (silences the browser's form warning). */}
+      <input type="text" name="username" autoComplete="username" hidden aria-hidden="true" tabIndex={-1} />
       <div className="mb-4">
         <label htmlFor="reset-password" className="block text-sm font-medium text-gray-700 mb-1">
           New password

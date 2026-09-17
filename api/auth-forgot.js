@@ -1,7 +1,7 @@
 import { getDb } from './lib/mongo.js';
 import { compatHandler } from './lib/compat.js';
 import { createHash } from 'crypto';
-import nodemailer from 'nodemailer';
+import nodemailer, { createTransport } from 'nodemailer';
 
 // POST {email} -> creates a single-use password-reset token (1h expiry) and
 // emails the reset link via the Gmail SMTP account (Google App Password —
@@ -19,7 +19,7 @@ function sha256(value) {
 
 async function sendResetEmail(smtpUser, smtpPass, toEmail, resetUrl) {
   // Gmail SMTP with a Google App Password (NOT the account password).
-  const transporter = nodemailer.createTransport({
+  const transporter = createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,

@@ -15,6 +15,7 @@ function App() {
     isLoading,
     currentView,
     showAuthModal,
+    setShowAuthModal,
     loadingStep,
     dailyLimitReached,
     dailyRequestMessage
@@ -35,6 +36,15 @@ function App() {
       }
     }
   }, [isAuthenticated]);
+
+  // A password-reset email link lands on .../#reset-token=<token>:
+  // open the auth modal so the "Choose a new password" view is visible.
+  useEffect(() => {
+    if (window.location.hash.includes('#reset-token=')) {
+      setShowAuthModal(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Preload images for better UX
   useEffect(() => {
